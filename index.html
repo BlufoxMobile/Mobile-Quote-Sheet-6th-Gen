@@ -5312,6 +5312,7 @@ function rebuildPhoneRows() {
 }
 
 function buildDeviceRow(lineNum, type) {
+  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
   const rowId = `${type}-row-${lineNum}`;
   const row = document.createElement('div');
   row.className = 'df-row';
@@ -5803,7 +5804,7 @@ function updateIntakeSavingsPreview() {
   // Update the floating tally bar
   const fssM = document.getElementById('fssMonthly');
   const fssY = document.getElementById('fssYearly');
-  if (fssM) fssM.textContent = fmtMo(totalMonthly);
+  if (fssM) fssM.textContent = fmtMo(totalMonthly) + (mpdDiscount > 0 ? ' (incl. $10 MPD)' : '');
   if (fssY) fssY.textContent = fmtMo(totalYearly);
   // Show the bar
   const bar = document.getElementById('savingsTallyBar');
