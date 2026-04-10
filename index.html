@@ -3025,12 +3025,12 @@
       <div class="intake-section" id="sec-plan">
         <div class="intake-section-title">Xfinity Plan</div>
         <div class="intake-plan-pills">
-          <button class="intake-plan-pill active" data-plan="premium_promo" onclick="selectIntakePlan(this)">
-            <div class="ipp-name">Unlimited Premium</div>
+          <button class="intake-plan-pill active" data-plan="mobile_plus_promo" onclick="selectIntakePlan(this)">
+            <div class="ipp-name">Mobile Plus</div>
             <div class="ipp-sub">$40/mo Year 1 Discount</div>
           </button>
-          <button class="intake-plan-pill" data-plan="intro_promo" onclick="selectIntakePlan(this)">
-            <div class="ipp-name">Unlimited Intro</div>
+          <button class="intake-plan-pill" data-plan="mobile_select_promo" onclick="selectIntakePlan(this)">
+            <div class="ipp-name">Mobile Select</div>
             <div class="ipp-sub">$40/mo Year 1 Discount</div>
           </button>
           <button class="intake-plan-pill" data-plan="now_mobile" onclick="selectIntakePlan(this)">
@@ -3449,7 +3449,7 @@
 <script>
 // ── GLOBAL STATE (declared early to avoid hoisting issues) ──
 let intakeSelectedTier = '';
-let intakeSelectedPlan = 'premium_promo'; // default
+let intakeSelectedPlan = 'mobile_plus_promo'; // default
 
 // ══════════════════════════════════════════════════════════════
 // EDITABLE DATA — UPDATE MONTHLY AS NEEDED
@@ -4333,81 +4333,79 @@ function promoEndLabel(promo) {
 }
 
 const PLANS = {
-  premium_promo: {
-    name: "Unlimited Premium",
+  mobile_plus_promo: {
+    name: "Mobile Plus",
     badge: "Year 1 Discount",
     color: "#6713D2",
-    maxLines: 10,
-    pricing: [10,40,70,100,130,160,190,220,250,280],
-    yr2Plan: "premium_std",
+    maxLines: 12,
+    pricing: [5,50,95,140,185,230,275,320,365,410,455,500],
+    yr2Plan: "mobile_plus_std",
     features: [
-      "🎬 4K Ultra HD video streaming",
-      "🔥 100 GB premium priority data — then unlimited at full speeds",
-      "📡 30 GB mobile hotspot at full 5G speeds",
-      "🛜 Auto-connects to 20M+ secure Xfinity WiFi hotspots nationwide",
-      "🌎 Mexico & Canada Unlimited Plus Pass — talk, text & roaming data",
-      "📞 Xfinity Call Guard — blocks spam & robocalls automatically",
-      "📶 Nation's most reliable 5G network",
-      "♾️ Unlimited talk, text & data — no long-term contract",
-      "🚫 No phone line access fees, ever",
-    ],
-    phones: []
+      "📺 4K Ultra HD video streaming",
+      "🔋 Unlimited premium data at home and abroad — never deprioritized",
+      "📶 50 GB mobile hotspot at 5G speeds, then unlimited at 3G speeds",
+      "🛡️ XMC Plus device protection included (covers phone, all watches & tablets)",
+      "📱 Upgrade anytime — 60-day waiting period between upgrades",
+      "🌎 Unlimited data in 215+ countries (10 GB high-speed per cycle)",
+      "📞 Unlimited international calls & texts in 250+ destinations",
+      "🔒 Xfinity Call Guard included",
+      "🔐 Advanced Security on the go",
+      "📡 WiFi PowerBoost — WiFi speeds up to a gig at home and on the go"
+    ]
   },
-  intro_promo: {
-    name: "Unlimited Intro",
+  mobile_select_promo: {
+    name: "Mobile Select",
     badge: "Year 1 Discount",
     color: "#4A0F96",
-    maxLines: 10,
-    pricing: [0,20,40,60,80,100,120,140,160,180],
-    yr2Plan: null,
+    maxLines: 12,
+    pricing: [0,20,50,80,110,140,170,200,230,260,290,320],
+    yr2Plan: "mobile_select_std",
     features: [
-      "🚀 30 GB high-speed priority data — then unlimited at reduced speeds (1.5 Mbps down / 750 Kbps up)",
-      "📺 480p SD video streaming included",
-      "📡 Unlimited mobile hotspot data (speeds may reduce after 30 GB threshold)",
-      "🛜 Auto-connects to 20M+ secure Xfinity WiFi hotspots nationwide",
-      "🌎 Mexico & Canada Unlimited Pass — talk, text & data",
-      "📶 Nation's most reliable 5G network",
-      "♾️ Unlimited talk, text & data — no long-term contract",
-      "💰 Multi-line discounts — $30/mo per additional line",
-      "🚫 No phone line access fees, ever",
-    ],
-    phones: []
+      "📺 HD video (720p) — defaults to 480p, customer can enable HD",
+      "🔋 50 GB premium data — speeds may slow during congestion after 50 GB",
+      "📶 15 GB mobile hotspot at 5G speeds, then unlimited at 3G speeds",
+      "🌎 Unlimited data in 215+ countries (10 GB high-speed per cycle)",
+      "📞 Unlimited international calls & texts in 250+ destinations",
+      "🔐 Advanced Security on the go",
+      "📡 WiFi PowerBoost — WiFi speeds up to a gig at home and on the go"
+    ]
   },
-  premium_std: {
-    name: "Unlimited Premium",
+  mobile_plus_std: {
+    name: "Mobile Plus",
     badge: "Standard (Year 2)",
     color: "#9B59F5",
-    maxLines: 10,
-    pricing: [50,80,110,140,170,200,230,260,290,320],
+    maxLines: 12,
+    pricing: [45,90,135,180,225,270,315,360,405,450,495,540],
     yr2Plan: null,
     features: [
-      "🎬 4K Ultra HD video streaming",
-      "🔥 100 GB premium priority data — then unlimited at full speeds",
-      "📡 30 GB mobile hotspot at full 5G speeds",
-      "🛜 Auto-connects to 20M+ secure Xfinity WiFi hotspots nationwide",
-      "🌎 Mexico & Canada Unlimited Plus Pass — talk, text & roaming data",
-      "📞 Xfinity Call Guard — blocks spam & robocalls automatically",
-      "📶 Nation's most reliable 5G network",
-      "♾️ Unlimited talk, text & data — no long-term contract",
-      "🚫 No phone line access fees, ever",
-    ],
-    phones: []
+      "📺 4K Ultra HD video streaming",
+      "🔋 Unlimited premium data at home and abroad — never deprioritized",
+      "📶 50 GB mobile hotspot at 5G speeds, then unlimited at 3G speeds",
+      "🛡️ XMC Plus device protection included (covers phone, all watches & tablets)",
+      "📱 Upgrade anytime — 60-day waiting period between upgrades",
+      "🌎 Unlimited data in 215+ countries (10 GB high-speed per cycle)",
+      "📞 Unlimited international calls & texts in 250+ destinations",
+      "🔒 Xfinity Call Guard included",
+      "🔐 Advanced Security on the go",
+      "📡 WiFi PowerBoost — WiFi speeds up to a gig at home and on the go"
+    ]
   },
-  unlimited_std: {
-    name: "Unlimited",
-    badge: "Standard Plan",
-    color: "#5a5a7a",
-    maxLines: 10,
-    pricing: [40,60,80,100,120,140,160,180,200,220],
+  mobile_select_std: {
+    name: "Mobile Select",
+    badge: "Standard (Year 2)",
+    color: "#7B3FF2",
+    maxLines: 12,
+    pricing: [30,60,90,120,150,180,210,240,270,300,330,360],
     yr2Plan: null,
     features: [
-      "📺 HD video streaming",
-      "📡 Unlimited mobile hotspot data",
-      "📶 5G nationwide coverage",
-      "♾️ Unlimited talk, text & data",
-      "🚫 No annual contract",
-    ],
-    phones: []
+      "📺 HD video (720p) — defaults to 480p, customer can enable HD",
+      "🔋 50 GB premium data — speeds may slow during congestion after 50 GB",
+      "📶 15 GB mobile hotspot at 5G speeds, then unlimited at 3G speeds",
+      "🌎 Unlimited data in 215+ countries (10 GB high-speed per cycle)",
+      "📞 Unlimited international calls & texts in 250+ destinations",
+      "🔐 Advanced Security on the go",
+      "📡 WiFi PowerBoost — WiFi speeds up to a gig at home and on the go"
+    ]
   },
   now_mobile: {
     name: "NOW Mobile",
@@ -4428,6 +4426,7 @@ const PLANS = {
     ],
     phones: []
   }
+
 };
 
 // ── STATE ──
@@ -4596,8 +4595,8 @@ function buildFeatures(plan) {
   let hasTabletXmc       = false;
   let hasA11             = false;
 
-  const isPremiumPlan = (intakeSelectedPlan === 'premium_promo' || intakeSelectedPlan === 'premium_std');
-  const isUnlimitedOrHigher = isPremiumPlan || intakeSelectedPlan === 'unlimited';
+  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
+  const isUnlimitedOrHigher = intakeSelectedPlan !== 'now_mobile';
 
   document.querySelectorAll('.df-row').forEach(row => {
     const type       = row.dataset.type;
@@ -4704,7 +4703,7 @@ function buildFeatures(plan) {
     if (promoAmt <= 0) return;
 
     const isSamsungDevice = deviceName.toLowerCase().startsWith('samsung');
-    const isPremiumPlan = (intakeSelectedPlan === 'premium_promo' || intakeSelectedPlan === 'premium_std');
+    const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
 
     let discLabel = '';
     if (type === 'phone') {
@@ -4866,8 +4865,8 @@ function buildDeviceSummary(planMonthly, compBill) {
     let lineFee = type === 'watch' ? 10 : (type === 'tablet' ? 20 : 0);
     // Line label: watch/tablet use type prefix
     const lineLabel = type === 'phone' ? `Line ${lineNum}` : (type === 'watch' ? `Watch ${lineNum}` : `Tablet ${lineNum}`);
-    const xmcDisplay = xmcEnabled ? `<span style="color:var(--xfinity-accent);font-weight:600;">$${xmcRate}/mo</span>` : '—';
-    if (xmcEnabled) totalXmc += xmcRate;
+    const xmcDisplay = xmcEnabled ? (isPremiumPlan ? `<span style="color:var(--xfinity-green);font-weight:600;">✓ Included</span>` : `<span style="color:var(--xfinity-accent);font-weight:600;">$${xmcRate}/mo</span>`) : '—';
+    if (xmcEnabled && !isPremiumPlan) totalXmc += xmcRate;
 
     // Trade-in display
     let tradeDisplay = noTrade ? '<em style="color:var(--text-muted);">None</em>' : (tradeName ? tradeName : '—');
@@ -4936,6 +4935,9 @@ function buildDeviceSummary(planMonthly, compBill) {
   }
 
   table.innerHTML = rows;
+  // All-in Tablet & Watch Plan: cap connected device line fees at $35/mo
+  if (intakeSelectedPlan !== 'now_mobile') totalLineFees = Math.min(totalLineFees, 35);
+
   const grandDeviceTotal = totalDeviceMonthly + totalLineFees + totalXmc;
   totalBar.innerHTML = `
     <span class="dtb-label">Device Total</span>
@@ -5129,6 +5131,27 @@ function selectIntakePlan(btn) {
   intakeSelectedPlan = btn.dataset.plan;
   rebuildPhoneRows(); // refresh promos when plan changes
   updateIntakeSavingsPreview(); // update tally bar live when plan changes
+
+
+  // Update XMC labels/state for plan change (Mobile Plus includes XMC Plus)
+  const planIsPremium = intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std';
+  document.querySelectorAll('.df-row').forEach(row => {
+    const rowId = row.id;
+    const xmcLbl = document.getElementById(rowId + '-xmc-lbl');
+    const devicePrice = parseFloat(row.dataset.devicePrice) || 0;
+    if (planIsPremium) {
+      row.dataset.xmcEnabled = 'true';
+      if (xmcLbl) xmcLbl.textContent = 'XMC Plus Included';
+    } else {
+      const rate = getXmcRate(devicePrice);
+      row.dataset.xmcRate = rate.toFixed(2);
+      if (xmcLbl && devicePrice > 0) {
+        xmcLbl.textContent = 'Add XMC Insurance (' + '$' + rate + '/mo)';
+      } else if (xmcLbl) {
+        xmcLbl.textContent = 'Add XMC Insurance (select device first)';
+      }
+    }
+  });
 }
 
 // ── WATCHES & TABLETS COUNT ──
@@ -5379,7 +5402,7 @@ function buildDeviceRow(lineNum, type) {
             const newXmcRate = getXmcRate(opt.price);
             row.dataset.xmcRate = newXmcRate.toFixed(2);
             const xmcLbl = document.getElementById(`${rowId}-xmc-lbl`);
-            if (xmcLbl) xmcLbl.textContent = `Add XMC Insurance ($${newXmcRate}/mo)`;
+            if (xmcLbl) xmcLbl.textContent = isPremiumPlan ? 'XMC Plus Included' : `Add XMC Insurance ($${newXmcRate}/mo)`;
             recalcRow(row);
           } catch(e) {}
         });
@@ -5399,9 +5422,10 @@ function buildDeviceRow(lineNum, type) {
     // Update XMC checkbox label
     const xmcLbl = document.getElementById(`${rowId}-xmc-lbl`);
     if (xmcLbl) {
-      xmcLbl.textContent = parseFloat(row.dataset.devicePrice) > 0
-        ? `Add XMC Insurance ($${xmcRate}/mo)`
-        : 'Add XMC Insurance (select device first)';
+      xmcLbl.textContent = isPremiumPlan ? 'XMC Plus Included'
+        : (parseFloat(row.dataset.devicePrice) > 0
+          ? `Add XMC Insurance ($${xmcRate}/mo)`
+          : 'Add XMC Insurance (select device first)');
     }
     recalcRow(row);
     // If Line 1 phone changes, note that watch/tablet dropdowns auto-refresh
@@ -5581,7 +5605,7 @@ function recalcRow(row) {
   // BYOD = $0 device cost
   if (deviceName === 'BYOD (Bring Your Own Device)') {
     row.dataset.promoAmount = '0';
-    const xmcAdd = xmcEnabled ? xmcRate : 0;
+    const xmcAdd = (xmcEnabled && !isPremiumPlan) ? xmcRate : 0;
     monthlyEl.innerHTML = `$${xmcAdd.toFixed(2)}/mo${xmcAdd > 0 ? `<span class="df-mo-promo">XMC $${xmcRate}/mo</span>` : '<span style="color:var(--xfinity-green);font-size:10px;display:block;">BYOD — $0.00</span>'}`;
     return;
   }
@@ -5603,7 +5627,7 @@ function recalcRow(row) {
       if (tradeValue > 0 && !noTrade) {
         promoApplied = tradeValue;
       } else if (noTrade || tradeValue === 0) {
-        if (intakeSelectedPlan === 'premium_promo' || intakeSelectedPlan === 'premium_std') {
+        if (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std') {
           promoApplied = 400;
         }
         // Intro or NOW plans: no automatic discount without a trade-in
@@ -5706,6 +5730,7 @@ function updateIntakeSavingsPreview() {
 
   // Device costs: phones, watches, tablets
   let deviceMonthly = 0;
+  let previewLineFees = 0;
   document.querySelectorAll('.df-row').forEach(row => {
     const type = row.dataset.type;
     const devicePrice = parseFloat(row.dataset.devicePrice) || 0;
@@ -5717,9 +5742,13 @@ function updateIntakeSavingsPreview() {
     if (!isByod && devicePrice > 0) {
       deviceMonthly += Math.max(0, devicePrice - promoAmt) / 36;
     }
-    deviceMonthly += lineFee;
-    if (xmcEnabled) deviceMonthly += xmcRate;
+    previewLineFees += lineFee;
+    if (xmcEnabled && !isPremiumPlan) deviceMonthly += xmcRate;
   });
+
+  // All-in Tablet & Watch Plan: cap connected device line fees at $35/mo
+  if (intakeSelectedPlan !== 'now_mobile') previewLineFees = Math.min(previewLineFees, 35);
+  deviceMonthly += previewLineFees;
 
   // Core savings (internet/TV rebundle)
   const coreCurrent  = parseFloat(document.getElementById('i_coreCurrent')?.value)  || 0;
@@ -6139,17 +6168,17 @@ function buildComparison() {
   // Set plan key into hidden input and update plan display
   document.getElementById('xfinityPlan').value = intakeSelectedPlan;
   const planNames = {
-    premium_promo: 'Unlimited Premium',
-    intro_promo:   'Unlimited Intro',
+    mobile_plus_promo: 'Mobile Plus',
+    mobile_select_promo:   'Mobile Select',
     now_mobile:    'NOW Mobile',
-    premium_std:   'Unlimited Premium',
+    mobile_plus_std:   'Mobile Plus',
     unlimited_std: 'Unlimited',
   };
   const planDiscounts = {
-    premium_promo: '$40/mo Year 1 discount applied',
-    intro_promo:   '$40/mo Year 1 discount applied',
+    mobile_plus_promo: '$40/mo Year 1 discount applied',
+    mobile_select_promo:   '$40/mo Year 1 discount applied',
     now_mobile:    'Prepaid · No contract',
-    premium_std:   'Standard pricing',
+    mobile_plus_std:   'Standard pricing',
     unlimited_std: 'Standard pricing',
   };
   document.getElementById('planDisplayName').textContent = planNames[intakeSelectedPlan] || intakeSelectedPlan;
@@ -6159,8 +6188,8 @@ function buildComparison() {
   // Update banner + xfinity side color based on plan
   const planColor = PLANS[intakeSelectedPlan] ? PLANS[intakeSelectedPlan].color : '#6713D2';
   const planColorDark = intakeSelectedPlan === 'now_mobile' ? '#007a8f' :
-                        intakeSelectedPlan === 'intro_promo' ? '#3a0a78' :
-                        intakeSelectedPlan === 'premium_std' ? '#7a40c8' : '#4A0F96';
+                        intakeSelectedPlan === 'mobile_select_promo' ? '#3a0a78' :
+                        intakeSelectedPlan === 'mobile_plus_std' ? '#7a40c8' : '#4A0F96';
 
   // Tint xfinity side header, total bar, and savings stack to match plan
   const xfinitySideHeader = document.querySelector('.xfinity-side .side-header');
@@ -6218,9 +6247,9 @@ function resetToIntake() {
 
   // Reset plan pills to default
   document.querySelectorAll('.intake-plan-pill').forEach(b => b.classList.remove('active'));
-  const defaultPlan = document.querySelector('.intake-plan-pill[data-plan="premium_promo"]');
+  const defaultPlan = document.querySelector('.intake-plan-pill[data-plan="mobile_plus_promo"]');
   if (defaultPlan) defaultPlan.classList.add('active');
-  intakeSelectedPlan = 'premium_promo';
+  intakeSelectedPlan = 'mobile_plus_promo';
 
   // Clear core savings display
   const resultEl = document.getElementById('coreSavingsResult');
