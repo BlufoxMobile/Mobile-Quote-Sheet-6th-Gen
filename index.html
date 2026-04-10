@@ -2949,7 +2949,7 @@
             </div>
             <div class="rep-info-field">
               <label>Phone Number</label>
-              <input type="tel" id="i_customerPhone" name="customer-tel" autocomplete="off" placeholder="(XXX) XXX-XXXX">
+              <input type="tel" id="i_customerPhone" name="customer-tel" autocomplete="off" placeholder="(XXX)XXX-XXXX">
             </div>
           </div>
         </div>
@@ -6050,9 +6050,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (digits.length <= 3) {
         formatted = '(' + digits;
       } else if (digits.length <= 6) {
-        formatted = '(' + digits.slice(0,3) + ') ' + digits.slice(3);
+        formatted = '(' + digits.slice(0,3) + ')' + digits.slice(3);
       } else {
-        formatted = '(' + digits.slice(0,3) + ') ' + digits.slice(3,6) + '-' + digits.slice(6);
+        formatted = '(' + digits.slice(0,3) + ')' + digits.slice(3,6) + '-' + digits.slice(6);
       }
       this.value = formatted;
     });
@@ -6120,6 +6120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── BUILD COMPARISON ──
 function buildComparison() {
+try {
   const name    = document.getElementById('i_customerName').value.trim();
   const carrier = document.getElementById('i_carrier').value;
   const lines   = document.getElementById('i_lines').value;
@@ -6135,6 +6136,7 @@ function buildComparison() {
   else            document.getElementById('i_lines').style.border = '';
   if (!bill)    { errors.push('Current Monthly Bill'); document.getElementById('i_bill').style.border = '2px solid #e53935'; }
   else            document.getElementById('i_bill').style.border = '';
+  if (!intakeSelectedPlan) { errors.push('Xfinity Plan'); }
 
   if (errors.length > 0) {
     alert('Please fill in the following required fields:\n\n• ' + errors.join('\n• '));
@@ -6249,6 +6251,7 @@ function buildComparison() {
   if (tallyBar) tallyBar.classList.remove('visible');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
+} catch(e) { alert('Build Comparison Error: ' + e.message); console.error(e); }
 }
 
 // ── GO BACK ──
