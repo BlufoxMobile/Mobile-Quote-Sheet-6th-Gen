@@ -4596,7 +4596,7 @@ function buildFeatures(plan) {
   let hasA11             = false;
 
   const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
-  const isUnlimitedOrHigher = intakeSelectedPlan !== 'now_mobile';
+  const isUnlimitedOrHigher = isPremiumPlan; // Only Mobile Plus gets device promos
 
   document.querySelectorAll('.df-row').forEach(row => {
     const type       = row.dataset.type;
@@ -5239,14 +5239,20 @@ function makeAutocomplete(inputEl, listEl, datasetOrFn, onSelect, maxInitial) {
       div.innerHTML = `<span>${displayName}</span><span class="item-price">${priceStr}</span>`;
 
       // Use both mousedown AND touchstart so it works on iOS
+      let itemSelected = false;
       const selectItem = (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        if (itemSelected) return; // guard against double-fire (touch + synthetic click)
+        itemSelected = true;
         suppressBlur = true;
-        onSelect(item);
+        try { onSelect(item); } catch(err) { console.error('Autocomplete onSelect error:', err); }
         listEl.classList.remove('open');
+        inputEl.blur();
         setTimeout(() => { suppressBlur = false; }, 200);
       };
       div.addEventListener('mousedown', selectItem);
+      div.addEventListener('click', selectItem);
       // Touch: only select on tap — finger movement (scroll) cancels selection
       div.addEventListener('touchstart', (e) => { div._tsY = e.touches[0].clientY; div._tsMoved = false; }, { passive: true });
       div.addEventListener('touchmove',  () => { div._tsMoved = true; }, { passive: true });
@@ -5255,6 +5261,10 @@ function makeAutocomplete(inputEl, listEl, datasetOrFn, onSelect, maxInitial) {
     });
     listEl.classList.add('open');
   }
+
+  // Prevent input blur when clicking anywhere in dropdown (fixes click-to-select)
+  listEl.addEventListener('mousedown', (e) => { e.preventDefault(); });
+  listEl.addEventListener('pointerdown', (e) => { e.preventDefault(); });
 
   inputEl.addEventListener('input', () => { try { renderList(inputEl.value); } catch(e) {} });
 
@@ -5615,7 +5625,7 @@ function recalcRow(row) {
 
   if (type === 'phone') {
     const isSamsungEligible = SAMSUNG_TIPS_PHONES.some(s => deviceName.toLowerCase().includes(s.toLowerCase()));
-    if (isSamsungEligible) {
+    if (isSamsungEligible && isPremiumPlan) {
       // Samsung devices: any trade-in → $1,100 off; no trade-in → $500 off
       if (tradeValue > 0 && !noTrade) {
         promoApplied = 1100;
@@ -5644,7 +5654,7 @@ function recalcRow(row) {
     // Build a clear promo description label
     let promoDesc = '';
     if (promoApplied > 0) {
-      if (isSamsungEligible) {
+      if (isSamsungEligible && isPremiumPlan) {
         if (tradeValue > 0 && !noTrade) {
           promoDesc = `Samsung TIPS -$1,100 (trade-in)`;
         } else {
