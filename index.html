@@ -3091,7 +3091,7 @@
       </div>
 
       <!-- ⌚🗒️ WATCHES + TABLETS — side by side -->
-      <div class="wt-side-by-side">
+      <div class="wt-side-by-side" id="wt-section">
         <div class="intake-section wt-standalone-section" id="sec-watches">
           <div class="wt-standalone-header">
             <div class="wt-standalone-title-row">
@@ -5133,16 +5133,26 @@ function selectIntakePlan(btn) {
   updateIntakeSavingsPreview(); // update tally bar live when plan changes
 
 
-  // Update XMC labels/state for plan change (Mobile Plus includes XMC Plus)
+  // Update XMC visibility/state for plan change
   const planIsPremium = intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std';
+  const planIsNow = intakeSelectedPlan === 'now_mobile';
   document.querySelectorAll('.df-row').forEach(row => {
     const rowId = row.id;
+    const xmcGroup = document.getElementById(rowId + '-xmc-group');
     const xmcLbl = document.getElementById(rowId + '-xmc-lbl');
+    const xmcChk = document.getElementById(rowId + '-xmc');
     const devicePrice = parseFloat(row.dataset.devicePrice) || 0;
-    if (planIsPremium) {
-      row.dataset.xmcEnabled = 'true';
-      if (xmcLbl) xmcLbl.textContent = 'XMC Plus Included';
+    // Hide XMC entirely for Mobile Plus (included) and NOW Mobile (not available)
+    if (planIsPremium || planIsNow) {
+      if (xmcGroup) xmcGroup.style.display = 'none';
+      if (planIsPremium) {
+        row.dataset.xmcEnabled = 'true';
+      } else {
+        row.dataset.xmcEnabled = 'false';
+        if (xmcChk) xmcChk.checked = false;
+      }
     } else {
+      if (xmcGroup) xmcGroup.style.display = '';
       const rate = getXmcRate(devicePrice);
       row.dataset.xmcRate = rate.toFixed(2);
       if (xmcLbl && devicePrice > 0) {
@@ -5152,6 +5162,10 @@ function selectIntakePlan(btn) {
       }
     }
   });
+
+  // Hide watches & tablets section for NOW Mobile
+  const wtSection = document.getElementById('wt-section');
+  if (wtSection) wtSection.style.display = planIsNow ? 'none' : '';
 }
 
 // ── WATCHES & TABLETS COUNT ──
@@ -5562,7 +5576,11 @@ function buildDeviceRow(lineNum, type) {
 
   const xmcGroup = document.createElement('div');
   xmcGroup.className = 'df-no-trade-wrap';
+  xmcGroup.id = `${rowId}-xmc-group`;
   xmcGroup.style.cssText = 'background:var(--surface-3); border-radius:8px; padding:10px 12px; margin-top:2px; border:1.5px solid var(--border);';
+  // Hide XMC for Mobile Plus (included) and NOW Mobile (not available)
+  const hideXmc = isPremiumPlan || intakeSelectedPlan === 'now_mobile';
+  if (hideXmc) xmcGroup.style.display = 'none';
 
   const xmcChk = document.createElement('input');
   xmcChk.type = 'checkbox';
@@ -5764,10 +5782,11 @@ function updateIntakeSavingsPreview() {
   const coreCurrent  = parseFloat(document.getElementById('i_coreCurrent')?.value)  || 0;
   const coreRebundle = parseFloat(document.getElementById('i_coreRebundle')?.value) || 0;
   const coreSavings  = Math.max(0, coreCurrent - coreRebundle);
+  const mpdDiscount   = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std') ? 10 : 0;
 
   const xfinityTotal = planMonthly + deviceMonthly;
   const mobileSavings = competitorBill - xfinityTotal;
-  const totalMonthly  = mobileSavings + coreSavings;
+  const totalMonthly  = mobileSavings + coreSavings + mpdDiscount;
   const totalYearly   = totalMonthly * 12;
 
   if (totalMonthly <= 0 && coreSavings <= 0) {
@@ -5802,6 +5821,7 @@ function updateIntakeSavingsPreview() {
 
   addPill('📱', 'Mobile Savings', mobileSavings);
   if (coreSavings > 0) addPill('🏠', 'Core Rebundle', coreSavings);
+  if (mpdDiscount > 0) addPill(''�', 'Mobile Plus Discount', mpdDiscount);
   if (deviceMonthly > 0) addPill('💳', 'Device Financing', -deviceMonthly);
   addPill('🏢', `Competitor Bill`, competitorBill);
   addPill('💜', `Xfinity Total`, -xfinityTotal);
