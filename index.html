@@ -6330,10 +6330,10 @@ try {
         var bIdx = tierList.indexOf(bVal);
         var aIdx = tierList.indexOf(aVal);
         var isUpgrade = (aIdx > bIdx && bIdx >= 0 && aIdx >= 0);
-        var upgradeTag = isUpgrade ? '<div style="display:inline-block;background:linear-gradient(135deg,#00C853,#00E676);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;margin-top:4px;letter-spacing:.5px;">\u2B06 UPGRADE</div>' : '';
+        var upgradeTag = isUpgrade ? '<span style="display:inline-block;background:linear-gradient(135deg,#00C853,#00E676);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:10px;margin-left:6px;letter-spacing:.5px;vertical-align:middle;">\u2B06 UPGRADE</span>' : '';
 
         leftItems += '<div style="text-align:center;padding:8px 0;"><div style="font-family:Outfit,sans-serif;font-size:28px;font-weight:800;color:var(--text-primary);line-height:1.2;">' + (bVal || '\u2014') + '</div><div style="font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:2px;">' + cat.label + '</div></div>';
-        rightItems += '<div style="text-align:center;padding:8px 0;"><div style="font-family:Outfit,sans-serif;font-size:28px;font-weight:800;color:var(--xfinity-purple);line-height:1.2;">' + (aVal || '\u2014') + '</div><div style="font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:2px;">' + cat.label + '</div>' + upgradeTag + '</div>';
+        rightItems += '<div style="text-align:center;padding:8px 0;"><div style="font-family:Outfit,sans-serif;font-size:28px;font-weight:800;color:var(--xfinity-purple);line-height:1.2;">' + (aVal || '\u2014') + '</div><div style="font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:2px;">' + cat.label + ' ' + upgradeTag + '</div></div>';
       }
     });
     document.getElementById('coreCurrentItems').innerHTML = leftItems;
