@@ -3410,7 +3410,7 @@
           <div class="cbd-amount" id="cbd-current">—</div>
           <div class="cbd-sub">Monthly cost</div>
         </div>
-        <div class="core-breakdown-card core-bd-new">
+        <div class="core-breakdown-card core-bd-rebundle">
           <div class="cbd-label">New Core Cost with Xfinity Mobile</div>
           <div class="cbd-amount" id="cbd-rebundle">—</div>
           <div class="cbd-sub">After rebundle discount</div>
@@ -3423,13 +3423,20 @@
       </div>
     </div>
 
-    
-    <div class="lines-section" id="rpkgComparisonSection" style="display:none;">
-      <div class="section-label">Repackage Details</div>
-      <div class="repackage-grid" style="margin-top:10px;">
-        <div class="repackage-col-head">Before</div>
-        <div class="repackage-col-head">After</div>
-        <div id="rpkg-comp-rows"></div>
+    <!-- Core Services Side-by-Side Repackage Comparison -->
+    <div id="coreRepackageComparison" class="quote-section" style="display:none;">
+      <div class="section-label">Core Services Repackage Details</div>
+      <div class="quote-grid">
+        <div class="competitor-side">
+          <div class="side-header">Current Services</div>
+          <div class="side-body" id="rpkg-comp-left" style="padding:20px 16px;text-align:left;">
+          </div>
+        </div>
+        <div class="xfinity-side">
+          <div class="side-header">New Services <span class="pill pill-xfinity" style="font-size:10px;">XFINITY</span></div>
+          <div class="side-body" id="rpkg-comp-right" style="padding:20px 16px;text-align:left;">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -6285,38 +6292,41 @@ try {
     document.getElementById('coreSavingsSection').style.display = 'block';
   } else {
     document.getElementById('coreSavingsSection').style.display = 'none';
-
-  // Populate repackage details on comparison screen
-  const rpkgCategories = [
-    {label:'Internet', before:'rpkg_internet_before', after:'rpkg_internet_after'},
-    {label:'TV', before:'rpkg_tv_before', after:'rpkg_tv_after'},
-    {label:'Home Phone (XV)', before:'rpkg_phone_before', after:'rpkg_phone_after'},
-    {label:'Home Security', before:'rpkg_security_before', after:'rpkg_security_after'}
-  ];
-  let rpkgHTML = '';
-  let hasRpkg = false;
-  rpkgCategories.forEach(cat => {
-    const bVal = document.getElementById(cat.before)?.value || '';
-    const aVal = document.getElementById(cat.after)?.value || '';
-    if (bVal || aVal) {
-      hasRpkg = true;
-      rpkgHTML += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-bottom:8px;">';
-      rpkgHTML += '<div style="text-align:center;"><span style="font-weight:700;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;">' + cat.label + '</span><br><span style="font-size:13px;color:var(--text-primary);">' + (bVal || 'None') + '</span></div>';
-      rpkgHTML += '<div style="text-align:center;"><span style="font-weight:700;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;">' + cat.label + '</span><br><span style="font-size:13px;color:var(--xfinity-purple);font-weight:600;">' + (aVal || 'None') + '</span></div>';
-      rpkgHTML += '</div>';
-    }
-  });
-  const rpkgSection = document.getElementById('rpkgComparisonSection');
-  if (rpkgSection) {
-    if (hasRpkg) {
-      document.getElementById('rpkg-comp-rows').innerHTML = rpkgHTML;
-      rpkgSection.style.display = 'block';
-    } else {
-      rpkgSection.style.display = 'none';
-    }
-  }
   }
 
+  // Populate core services repackage side-by-side comparison
+  (function() {
+    var cats = [
+      {label:'Internet', before:'rpkg_internet_before', after:'rpkg_internet_after', icon:'\uD83C\uDF10'},
+      {label:'TV', before:'rpkg_tv_before', after:'rpkg_tv_after', icon:'\uD83D\uDCFA'},
+      {label:'Home Phone (XV)', before:'rpkg_phone_before', after:'rpkg_phone_after', icon:'\u260E\uFE0F'},
+      {label:'Home Security', before:'rpkg_security_before', after:'rpkg_security_after', icon:'\uD83D\uDD12'}
+    ];
+    var leftHTML = '', rightHTML = '', hasAny = false;
+    var rowStyle = 'padding:10px 12px;border-bottom:1px solid var(--border);';
+    var labelStyle = 'font-weight:700;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;';
+    var valStyle = 'font-size:15px;font-weight:600;color:var(--text-primary);';
+    var valStyleNew = 'font-size:15px;font-weight:700;color:var(--xfinity-purple);';
+    cats.forEach(function(cat) {
+      var bVal = document.getElementById(cat.before) ? document.getElementById(cat.before).value : '';
+      var aVal = document.getElementById(cat.after) ? document.getElementById(cat.after).value : '';
+      if (bVal || aVal) {
+        hasAny = true;
+        leftHTML += '<div style="' + rowStyle + '"><div style="' + labelStyle + '">' + cat.icon + ' ' + cat.label + '</div><div style="' + valStyle + '">' + (bVal || '\u2014 None') + '</div></div>';
+        rightHTML += '<div style="' + rowStyle + '"><div style="' + labelStyle + '">' + cat.icon + ' ' + cat.label + '</div><div style="' + valStyleNew + '">' + (aVal || '\u2014 None') + '</div></div>';
+      }
+    });
+    var rpSec = document.getElementById('coreRepackageComparison');
+    if (rpSec) {
+      if (hasAny) {
+        document.getElementById('rpkg-comp-left').innerHTML = leftHTML;
+        document.getElementById('rpkg-comp-right').innerHTML = rightHTML;
+        rpSec.style.display = 'block';
+      } else {
+        rpSec.style.display = 'none';
+      }
+    }
+  })();
   // Set plan key into hidden input and update plan display
   document.getElementById('xfinityPlan').value = intakeSelectedPlan;
   const planNames = {
