@@ -3402,42 +3402,58 @@
     </div>
 
     <!-- Core Savings Breakdown -->
-    <div class="lines-section" id="coreSavingsSection" style="display:none;">
-      <div class="section-label">Core Services Savings Breakdown</div>
-      <div class="core-breakdown-grid">
-        <div class="core-breakdown-card core-bd-current">
-          <div class="cbd-label">Current Core Services Monthly Cost</div>
-          <div class="cbd-amount" id="cbd-current">—</div>
-          <div class="cbd-sub">Monthly cost</div>
-        </div>
-        <div class="core-breakdown-card core-bd-rebundle">
-          <div class="cbd-label">New Core Cost with Xfinity Mobile</div>
-          <div class="cbd-amount" id="cbd-rebundle">—</div>
-          <div class="cbd-sub">After rebundle discount</div>
-        </div>
-        <div class="core-breakdown-card core-bd-savings">
-          <div class="cbd-label">Monthly Savings on Core Services</div>
-          <div class="cbd-amount" id="cbd-savings">—</div>
-          <div class="cbd-sub">Included in total savings estimate</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Core Services Side-by-Side Repackage Comparison -->
-    <div id="coreRepackageComparison" class="quote-section" style="display:none;">
-      <div class="section-label">Core Services Repackage Details</div>
+    <div class="quote-section" id="coreSavingsSection" style="display:none;">
+      <div class="section-label">Core Services Comparison</div>
       <div class="quote-grid">
+
+        <!-- LEFT: Current Core Services (Red/Competitor styling) -->
         <div class="competitor-side">
-          <div class="side-header">Current Services</div>
-          <div class="side-body" id="rpkg-comp-left" style="padding:20px 16px;text-align:left;">
+          <div class="side-header">
+            <span>Current Services</span>
+          </div>
+          <div class="side-body">
+            <div class="comp-combined-box">
+              <div id="coreCurrentItems"></div>
+              <div class="ccb-divider"></div>
+              <div class="ccb-bill-label">CURRENT MONTHLY BILL</div>
+              <div class="ccb-bill-amount" id="coreCurrentBillDisplay">—</div>
+            </div>
+          </div>
+          <div class="side-total-bar" id="coreCurrentTotalBar">
+            <div class="stb-label">TOTAL CURRENT COST</div>
+            <div class="stb-amount" id="coreCurrentTotalAmount">—</div>
           </div>
         </div>
+
+        <!-- RIGHT: New Core Services (Purple/Xfinity styling) -->
         <div class="xfinity-side">
-          <div class="side-header">New Services <span class="pill pill-xfinity" style="font-size:10px;">XFINITY</span></div>
-          <div class="side-body" id="rpkg-comp-right" style="padding:20px 16px;text-align:left;">
+          <div class="side-header">
+            <span>Xfinity Mobile</span>
+            <span class="pill pill-xfinity">US</span>
+          </div>
+          <div class="side-body">
+            <div class="comp-combined-box" style="border-color:rgba(103,19,210,0.15);">
+              <div id="coreNewItems"></div>
+              <div class="ccb-divider"></div>
+              <div class="ccb-bill-label" style="color:var(--xfinity-purple);">XFINITY MONTHLY BILL</div>
+              <div class="ccb-bill-amount" style="color:var(--xfinity-purple);" id="coreNewBillDisplay">—</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;" id="coreNewBillSub"></div>
+            </div>
+          </div>
+          <div class="savings-stack">
+            <div class="savings-card-stacked">
+              <div class="savings-amount" id="coreMonthSavingsDisplay">—</div>
+              <div class="savings-label">MONTHLY SAVINGS</div>
+            </div>
+            <div class="savings-card-stacked">
+              <div class="savings-amount" id="coreYearSavingsDisplay">—</div>
+              <div class="savings-label">FIRST YEAR SAVINGS</div>
+            </div>
           </div>
         </div>
+
       </div>
+      <div class="xfinity-disclaimer">* Estimate only. Taxes &amp; fees not included.</div>
     </div>
 
 <!-- Line Breakdown + Device Financing side by side -->
@@ -6283,50 +6299,44 @@ try {
   document.getElementById('coreCurrentHidden').value  = coreCurrent;
   document.getElementById('coreRebundleHidden').value = coreRebundle;
 
-  // Update core savings breakdown section
+  // Update core services comparison section
+  var coreSection = document.getElementById('coreSavingsSection');
   if (coreCurrent > 0 && coreRebundle > 0) {
-    const coreSavings = Math.max(0, coreCurrent - coreRebundle);
-    document.getElementById('cbd-current').textContent   = `$${coreCurrent.toFixed(2)}/mo`;
-    document.getElementById('cbd-rebundle').textContent  = `$${coreRebundle.toFixed(2)}/mo`;
-    document.getElementById('cbd-savings').textContent   = `$${coreSavings.toFixed(2)}/mo`;
-    document.getElementById('coreSavingsSection').style.display = 'block';
-  } else {
-    document.getElementById('coreSavingsSection').style.display = 'none';
-  }
+    var coreSavings = Math.max(0, coreCurrent - coreRebundle);
 
-  // Populate core services repackage side-by-side comparison
-  (function() {
+    // Build itemized left side (current services)
     var cats = [
-      {label:'Internet', before:'rpkg_internet_before', after:'rpkg_internet_after', icon:'\uD83C\uDF10'},
-      {label:'TV', before:'rpkg_tv_before', after:'rpkg_tv_after', icon:'\uD83D\uDCFA'},
-      {label:'Home Phone (XV)', before:'rpkg_phone_before', after:'rpkg_phone_after', icon:'\u260E\uFE0F'},
-      {label:'Home Security', before:'rpkg_security_before', after:'rpkg_security_after', icon:'\uD83D\uDD12'}
+      {label:'Internet', before:'rpkg_internet_before', after:'rpkg_internet_after'},
+      {label:'TV', before:'rpkg_tv_before', after:'rpkg_tv_after'},
+      {label:'Home Phone (XV)', before:'rpkg_phone_before', after:'rpkg_phone_after'},
+      {label:'Home Security', before:'rpkg_security_before', after:'rpkg_security_after'}
     ];
-    var leftHTML = '', rightHTML = '', hasAny = false;
-    var rowStyle = 'padding:10px 12px;border-bottom:1px solid var(--border);';
-    var labelStyle = 'font-weight:700;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;';
-    var valStyle = 'font-size:15px;font-weight:600;color:var(--text-primary);';
-    var valStyleNew = 'font-size:15px;font-weight:700;color:var(--xfinity-purple);';
+    var leftItems = '', rightItems = '';
     cats.forEach(function(cat) {
       var bVal = document.getElementById(cat.before) ? document.getElementById(cat.before).value : '';
       var aVal = document.getElementById(cat.after) ? document.getElementById(cat.after).value : '';
       if (bVal || aVal) {
-        hasAny = true;
-        leftHTML += '<div style="' + rowStyle + '"><div style="' + labelStyle + '">' + cat.icon + ' ' + cat.label + '</div><div style="' + valStyle + '">' + (bVal || '\u2014 None') + '</div></div>';
-        rightHTML += '<div style="' + rowStyle + '"><div style="' + labelStyle + '">' + cat.icon + ' ' + cat.label + '</div><div style="' + valStyleNew + '">' + (aVal || '\u2014 None') + '</div></div>';
+        leftItems += '<div class="ccb-carrier" style="font-size:14px;font-weight:600;margin-bottom:2px;">' + (bVal || '\u2014') + '</div><div class="ccb-lines" style="font-size:11px;margin-bottom:10px;">' + cat.label + '</div>';
+        rightItems += '<div class="ccb-carrier" style="font-size:14px;font-weight:600;margin-bottom:2px;color:var(--xfinity-purple);">' + (aVal || '\u2014') + '</div><div class="ccb-lines" style="font-size:11px;margin-bottom:10px;">' + cat.label + '</div>';
       }
     });
-    var rpSec = document.getElementById('coreRepackageComparison');
-    if (rpSec) {
-      if (hasAny) {
-        document.getElementById('rpkg-comp-left').innerHTML = leftHTML;
-        document.getElementById('rpkg-comp-right').innerHTML = rightHTML;
-        rpSec.style.display = 'block';
-      } else {
-        rpSec.style.display = 'none';
-      }
-    }
-  })();
+    document.getElementById('coreCurrentItems').innerHTML = leftItems;
+    document.getElementById('coreNewItems').innerHTML = rightItems;
+
+    // Set bill amounts
+    document.getElementById('coreCurrentBillDisplay').textContent = '$' + coreCurrent.toFixed(2) + '/mo';
+    document.getElementById('coreCurrentTotalAmount').textContent = '$' + coreCurrent.toFixed(2) + '/mo';
+    document.getElementById('coreNewBillDisplay').textContent = '$' + coreRebundle.toFixed(2) + '/mo';
+    document.getElementById('coreNewBillSub').textContent = 'After rebundle discount';
+
+    // Set savings
+    document.getElementById('coreMonthSavingsDisplay').textContent = '$' + coreSavings.toFixed(0);
+    document.getElementById('coreYearSavingsDisplay').textContent = '$' + (coreSavings * 12).toFixed(0);
+
+    coreSection.style.display = 'block';
+  } else {
+    coreSection.style.display = 'none';
+  }
   // Set plan key into hidden input and update plan display
   document.getElementById('xfinityPlan').value = intakeSelectedPlan;
   const planNames = {
