@@ -2867,7 +2867,7 @@
 
 
 /* ── Repackage Details ── */
-.repackage-panel{margin-top:12px;padding:18px 20px;border:2px solid var(--xfinity-purple);border-radius:14px;background:var(--surface-secondary);display:none;}
+.repackage-panel{margin-top:12px;padding:18px 20px;border:2px solid var(--xfinity-purple);border-radius:14px;background:var(--surface-secondary);display:none;width:100%;box-sizing:border-box;}
 .repackage-panel.visible{display:block;}
 .repackage-title{text-align:center;font-weight:800;font-size:15px;color:var(--xfinity-purple);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
 .repackage-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;}
@@ -3087,20 +3087,20 @@
 
           <div>
             <div class="rpkg-cat">Internet</div>
-            <select class="rpkg-select" id="rpkg_internet_before"><option value="">-- Select --</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>300 Mbps</option><option>500 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
+            <select class="rpkg-select" id="rpkg_internet_before"><option value="">-- Select --</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>100 Mbps</option><option>150 Mbps</option><option>300 Mbps</option><option>500 Mbps</option><option>600 Mbps</option><option>800 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
           </div>
           <div>
             <div class="rpkg-cat">Internet</div>
-            <select class="rpkg-select" id="rpkg_internet_after"><option value="">-- Select --</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>300 Mbps</option><option>500 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
+            <select class="rpkg-select" id="rpkg_internet_after"><option value="">-- Select --</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>100 Mbps</option><option>150 Mbps</option><option>300 Mbps</option><option>500 Mbps</option><option>600 Mbps</option><option>800 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
           </div>
 
           <div>
             <div class="rpkg-cat">TV</div>
-            <select class="rpkg-select" id="rpkg_tv_before"><option value="">-- Select --</option><option>NOW TV</option><option>Choice TV</option><option>Plus TV</option><option>Premium TV</option></select>
+            <select class="rpkg-select" id="rpkg_tv_before"><option value="">-- Select --</option><option>NOW TV</option><option>Choice TV</option><option>Popular TV</option><option>Plus TV</option><option>Ultimate TV</option><option>Premium TV</option></select>
           </div>
           <div>
             <div class="rpkg-cat">TV</div>
-            <select class="rpkg-select" id="rpkg_tv_after"><option value="">-- Select --</option><option>NOW TV</option><option>Choice TV</option><option>Plus TV</option><option>Premium TV</option></select>
+            <select class="rpkg-select" id="rpkg_tv_after"><option value="">-- Select --</option><option>NOW TV</option><option>Choice TV</option><option>Popular TV</option><option>Plus TV</option><option>Ultimate TV</option><option>Premium TV</option></select>
           </div>
 
           <div>
@@ -3423,7 +3423,17 @@
       </div>
     </div>
 
-    <!-- Line Breakdown + Device Financing side by side -->
+    
+    <div class="lines-section" id="rpkgComparisonSection" style="display:none;">
+      <div class="section-label">Repackage Details</div>
+      <div class="repackage-grid" style="margin-top:10px;">
+        <div class="repackage-col-head">Before</div>
+        <div class="repackage-col-head">After</div>
+        <div id="rpkg-comp-rows"></div>
+      </div>
+    </div>
+
+<!-- Line Breakdown + Device Financing side by side -->
     <div id="tablesSideBySide" style="display:none;">
       <div class="tables-side-by-side-grid">
         <!-- Line Breakdown Table -->
@@ -6275,6 +6285,36 @@ try {
     document.getElementById('coreSavingsSection').style.display = 'block';
   } else {
     document.getElementById('coreSavingsSection').style.display = 'none';
+
+  // Populate repackage details on comparison screen
+  const rpkgCategories = [
+    {label:'Internet', before:'rpkg_internet_before', after:'rpkg_internet_after'},
+    {label:'TV', before:'rpkg_tv_before', after:'rpkg_tv_after'},
+    {label:'Home Phone (XV)', before:'rpkg_phone_before', after:'rpkg_phone_after'},
+    {label:'Home Security', before:'rpkg_security_before', after:'rpkg_security_after'}
+  ];
+  let rpkgHTML = '';
+  let hasRpkg = false;
+  rpkgCategories.forEach(cat => {
+    const bVal = document.getElementById(cat.before)?.value || '';
+    const aVal = document.getElementById(cat.after)?.value || '';
+    if (bVal || aVal) {
+      hasRpkg = true;
+      rpkgHTML += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-bottom:8px;">';
+      rpkgHTML += '<div style="text-align:center;"><span style="font-weight:700;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;">' + cat.label + '</span><br><span style="font-size:13px;color:var(--text-primary);">' + (bVal || 'None') + '</span></div>';
+      rpkgHTML += '<div style="text-align:center;"><span style="font-weight:700;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;">' + cat.label + '</span><br><span style="font-size:13px;color:var(--xfinity-purple);font-weight:600;">' + (aVal || 'None') + '</span></div>';
+      rpkgHTML += '</div>';
+    }
+  });
+  const rpkgSection = document.getElementById('rpkgComparisonSection');
+  if (rpkgSection) {
+    if (hasRpkg) {
+      document.getElementById('rpkg-comp-rows').innerHTML = rpkgHTML;
+      rpkgSection.style.display = 'block';
+    } else {
+      rpkgSection.style.display = 'none';
+    }
+  }
   }
 
   // Set plan key into hidden input and update plan display
