@@ -750,7 +750,7 @@
 
   .feature-card h4 {
     font-family: 'Outfit', sans-serif;
-    font-size: 13px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--xfinity-purple);
     text-transform: uppercase;
@@ -772,7 +772,7 @@
 
   .features-two-col li,
   .feature-card ul li {
-    font-size: 13px;
+    font-size: 15px;
     color: var(--text-secondary);
     padding: 5px 0;
     display: flex;
@@ -3087,38 +3087,38 @@
 
           <div>
             <div class="rpkg-cat">Internet</div>
-            <select class="rpkg-select" id="rpkg_internet_before"><option value="">-- Select --</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>100 Mbps</option><option>150 Mbps</option><option>300 Mbps</option><option>500 Mbps</option><option>600 Mbps</option><option>800 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
+            <select class="rpkg-select" id="rpkg_internet_before"><option value="">-- Select --</option><option>Other Provider</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>100 Mbps</option><option>150 Mbps</option><option>300 Mbps</option><option>500 Mbps</option><option>600 Mbps</option><option>800 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
           </div>
           <div>
             <div class="rpkg-cat">Internet</div>
-            <select class="rpkg-select" id="rpkg_internet_after"><option value="">-- Select --</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>100 Mbps</option><option>150 Mbps</option><option>300 Mbps</option><option>500 Mbps</option><option>600 Mbps</option><option>800 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
+            <select class="rpkg-select" id="rpkg_internet_after"><option value="">-- Select --</option><option>Other Provider</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>100 Mbps</option><option>150 Mbps</option><option>300 Mbps</option><option>500 Mbps</option><option>600 Mbps</option><option>800 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
           </div>
 
           <div>
             <div class="rpkg-cat">TV</div>
-            <select class="rpkg-select" id="rpkg_tv_before"><option value="">-- Select --</option><option>NOW TV</option><option>Choice TV</option><option>Popular TV</option><option>Plus TV</option><option>Ultimate TV</option><option>Premium TV</option></select>
+            <select class="rpkg-select" id="rpkg_tv_before"><option value="">-- Select --</option><option>Other Provider</option><option>NOW TV</option><option>Choice TV</option><option>Popular TV</option><option>Plus TV</option><option>Ultimate TV</option><option>Premium TV</option></select>
           </div>
           <div>
             <div class="rpkg-cat">TV</div>
-            <select class="rpkg-select" id="rpkg_tv_after"><option value="">-- Select --</option><option>NOW TV</option><option>Choice TV</option><option>Popular TV</option><option>Plus TV</option><option>Ultimate TV</option><option>Premium TV</option></select>
+            <select class="rpkg-select" id="rpkg_tv_after"><option value="">-- Select --</option><option>Other Provider</option><option>NOW TV</option><option>Choice TV</option><option>Popular TV</option><option>Plus TV</option><option>Ultimate TV</option><option>Premium TV</option></select>
           </div>
 
           <div>
             <div class="rpkg-cat">Home Phone (XV)</div>
-            <select class="rpkg-select" id="rpkg_phone_before"><option value="">-- Select --</option><option>Xfinity Voice</option></select>
+            <select class="rpkg-select" id="rpkg_phone_before"><option value="">-- Select --</option><option>Other Provider</option><option>Xfinity Voice</option></select>
           </div>
           <div>
             <div class="rpkg-cat">Home Phone (XV)</div>
-            <select class="rpkg-select" id="rpkg_phone_after"><option value="">-- Select --</option><option>Xfinity Voice</option></select>
+            <select class="rpkg-select" id="rpkg_phone_after"><option value="">-- Select --</option><option>Other Provider</option><option>Xfinity Voice</option></select>
           </div>
 
           <div>
             <div class="rpkg-cat">Home Security</div>
-            <select class="rpkg-select" id="rpkg_security_before"><option value="">-- Select --</option><option>Self Protect</option><option>Pro Protection</option></select>
+            <select class="rpkg-select" id="rpkg_security_before"><option value="">-- Select --</option><option>Other Provider</option><option>Self Protect</option><option>Pro Protection</option></select>
           </div>
           <div>
             <div class="rpkg-cat">Home Security</div>
-            <select class="rpkg-select" id="rpkg_security_after"><option value="">-- Select --</option><option>Self Protect</option><option>Pro Protection</option></select>
+            <select class="rpkg-select" id="rpkg_security_after"><option value="">-- Select --</option><option>Other Provider</option><option>Self Protect</option><option>Pro Protection</option></select>
           </div>
         </div>
       </div>
@@ -3409,7 +3409,7 @@
         <!-- LEFT: Current Core Services (Red/Competitor styling) -->
         <div class="competitor-side">
           <div class="side-header">
-            <span>Current Services</span>
+            <span>Current Core Services</span>
           </div>
           <div class="side-body">
             <div class="comp-combined-box">
@@ -3428,7 +3428,7 @@
         <!-- RIGHT: New Core Services (Purple/Xfinity styling) -->
         <div class="xfinity-side">
           <div class="side-header">
-            <span>Xfinity Mobile</span>
+            <span>Core Services With Xfinity Mobile</span>
             <span class="pill pill-xfinity">US</span>
           </div>
           <div class="side-body">
@@ -3456,6 +3456,13 @@
       <div class="xfinity-disclaimer">* Estimate only. Taxes &amp; fees not included.</div>
     </div>
 
+    <!-- Features & Benefits -->
+    <div class="features-section" id="featuresSection" style="display:none">
+      <div class="section-label">Plan Features &amp; Promotions</div>
+      <div class="features-grid" id="featuresGrid"></div>
+    </div>
+
+
 <!-- Line Breakdown + Device Financing side by side -->
     <div id="tablesSideBySide" style="display:none;">
       <div class="tables-side-by-side-grid">
@@ -3474,11 +3481,7 @@
       </div>
     </div>
 
-    <!-- Features & Benefits -->
-    <div class="features-section" id="featuresSection" style="display:none">
-      <div class="section-label">Plan Features &amp; Promotions</div>
-      <div class="features-grid" id="featuresGrid"></div>
-    </div>
+    
 
     <!-- Rep Info + Actions -->
     <div class="actions-footer">
@@ -6299,12 +6302,19 @@ try {
   document.getElementById('coreCurrentHidden').value  = coreCurrent;
   document.getElementById('coreRebundleHidden').value = coreRebundle;
 
-  // Update core services comparison section
+    // Update core services comparison section
   var coreSection = document.getElementById('coreSavingsSection');
   if (coreCurrent > 0 && coreRebundle > 0) {
     var coreSavings = Math.max(0, coreCurrent - coreRebundle);
 
-    // Build itemized left side (current services)
+    // Tier rankings for upgrade detection
+    var tiers = {
+      'Internet': ['Other Provider','Internet Essentials','Internet Essentials Plus','NOW Internet','100 Mbps','150 Mbps','300 Mbps','500 Mbps','600 Mbps','800 Mbps','1 Gig','2 Gig'],
+      'TV': ['Other Provider','NOW TV','Choice TV','Popular TV','Plus TV','Ultimate TV','Premium TV'],
+      'Home Phone (XV)': ['Other Provider','Xfinity Voice'],
+      'Home Security': ['Other Provider','Self Protect','Pro Protection']
+    };
+
     var cats = [
       {label:'Internet', before:'rpkg_internet_before', after:'rpkg_internet_after'},
       {label:'TV', before:'rpkg_tv_before', after:'rpkg_tv_after'},
@@ -6316,20 +6326,23 @@ try {
       var bVal = document.getElementById(cat.before) ? document.getElementById(cat.before).value : '';
       var aVal = document.getElementById(cat.after) ? document.getElementById(cat.after).value : '';
       if (bVal || aVal) {
-        leftItems += '<div class="ccb-carrier" style="font-size:14px;font-weight:600;margin-bottom:2px;">' + (bVal || '\u2014') + '</div><div class="ccb-lines" style="font-size:11px;margin-bottom:10px;">' + cat.label + '</div>';
-        rightItems += '<div class="ccb-carrier" style="font-size:14px;font-weight:600;margin-bottom:2px;color:var(--xfinity-purple);">' + (aVal || '\u2014') + '</div><div class="ccb-lines" style="font-size:11px;margin-bottom:10px;">' + cat.label + '</div>';
+        var tierList = tiers[cat.label] || [];
+        var bIdx = tierList.indexOf(bVal);
+        var aIdx = tierList.indexOf(aVal);
+        var isUpgrade = (aIdx > bIdx && bIdx >= 0 && aIdx >= 0);
+        var upgradeTag = isUpgrade ? '<div style="display:inline-block;background:linear-gradient(135deg,#00C853,#00E676);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;margin-top:4px;letter-spacing:.5px;">\u2B06 UPGRADE</div>' : '';
+
+        leftItems += '<div style="text-align:center;padding:8px 0;"><div style="font-family:Outfit,sans-serif;font-size:28px;font-weight:800;color:var(--text-primary);line-height:1.2;">' + (bVal || '\u2014') + '</div><div style="font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:2px;">' + cat.label + '</div></div>';
+        rightItems += '<div style="text-align:center;padding:8px 0;"><div style="font-family:Outfit,sans-serif;font-size:28px;font-weight:800;color:var(--xfinity-purple);line-height:1.2;">' + (aVal || '\u2014') + '</div><div style="font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:2px;">' + cat.label + '</div>' + upgradeTag + '</div>';
       }
     });
     document.getElementById('coreCurrentItems').innerHTML = leftItems;
     document.getElementById('coreNewItems').innerHTML = rightItems;
 
-    // Set bill amounts
     document.getElementById('coreCurrentBillDisplay').textContent = '$' + coreCurrent.toFixed(2) + '/mo';
     document.getElementById('coreCurrentTotalAmount').textContent = '$' + coreCurrent.toFixed(2) + '/mo';
     document.getElementById('coreNewBillDisplay').textContent = '$' + coreRebundle.toFixed(2) + '/mo';
     document.getElementById('coreNewBillSub').textContent = 'After rebundle discount';
-
-    // Set savings
     document.getElementById('coreMonthSavingsDisplay').textContent = '$' + coreSavings.toFixed(0);
     document.getElementById('coreYearSavingsDisplay').textContent = '$' + (coreSavings * 12).toFixed(0);
 
@@ -6337,6 +6350,7 @@ try {
   } else {
     coreSection.style.display = 'none';
   }
+
   // Set plan key into hidden input and update plan display
   document.getElementById('xfinityPlan').value = intakeSelectedPlan;
   const planNames = {
