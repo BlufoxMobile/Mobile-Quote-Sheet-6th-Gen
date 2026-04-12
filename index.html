@@ -2864,6 +2864,16 @@
     box-shadow: 0 2px 10px rgba(103,19,210,0.2);
   }
 
+
+/* ── Repackage Details ── */
+.repackage-panel{margin-top:12px;padding:18px 20px;border:2px solid var(--xfinity-purple);border-radius:14px;background:var(--surface-secondary);display:none;}
+.repackage-panel.visible{display:block;}
+.repackage-title{text-align:center;font-weight:800;font-size:15px;color:var(--xfinity-purple);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+.repackage-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;}
+.repackage-col-head{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-secondary);text-align:center;margin-bottom:4px;}
+.rpkg-cat{font-weight:700;font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;}
+.rpkg-select{width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:13px;color:var(--text-primary);margin-bottom:8px;appearance:auto;}
+.rpkg-select:focus{border-color:var(--xfinity-purple);outline:none;}
 </style>
 </head>
 <body>
@@ -3066,6 +3076,52 @@
           <div class="csr-sub">Added to your total monthly &amp; yearly savings estimate</div>
         </div>
       </div>
+
+      <!-- Repackage Details (visible when both core fields filled) -->
+      <div class="repackage-panel" id="repackagePanel">
+        <div class="repackage-title">Repackage Details</div>
+        <div class="repackage-grid">
+          <div class="repackage-col-head">Current Services</div>
+          <div class="repackage-col-head">After Repackage</div>
+
+          <div>
+            <div class="rpkg-cat">Internet</div>
+            <select class="rpkg-select" id="rpkg_internet_before"><option value="">-- Select --</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>300 Mbps</option><option>500 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
+          </div>
+          <div>
+            <div class="rpkg-cat">Internet</div>
+            <select class="rpkg-select" id="rpkg_internet_after"><option value="">-- Select --</option><option>Internet Essentials</option><option>Internet Essentials Plus</option><option>NOW Internet</option><option>300 Mbps</option><option>500 Mbps</option><option>1 Gig</option><option>2 Gig</option></select>
+          </div>
+
+          <div>
+            <div class="rpkg-cat">TV</div>
+            <select class="rpkg-select" id="rpkg_tv_before"><option value="">-- Select --</option><option>NOW TV</option><option>Choice TV</option><option>Plus TV</option><option>Premium TV</option></select>
+          </div>
+          <div>
+            <div class="rpkg-cat">TV</div>
+            <select class="rpkg-select" id="rpkg_tv_after"><option value="">-- Select --</option><option>NOW TV</option><option>Choice TV</option><option>Plus TV</option><option>Premium TV</option></select>
+          </div>
+
+          <div>
+            <div class="rpkg-cat">Home Phone (XV)</div>
+            <select class="rpkg-select" id="rpkg_phone_before"><option value="">-- Select --</option><option>Xfinity Voice</option></select>
+          </div>
+          <div>
+            <div class="rpkg-cat">Home Phone (XV)</div>
+            <select class="rpkg-select" id="rpkg_phone_after"><option value="">-- Select --</option><option>Xfinity Voice</option></select>
+          </div>
+
+          <div>
+            <div class="rpkg-cat">Home Security</div>
+            <select class="rpkg-select" id="rpkg_security_before"><option value="">-- Select --</option><option>Self Protect</option><option>Pro Protection</option></select>
+          </div>
+          <div>
+            <div class="rpkg-cat">Home Security</div>
+            <select class="rpkg-select" id="rpkg_security_after"><option value="">-- Select --</option><option>Self Protect</option><option>Pro Protection</option></select>
+          </div>
+        </div>
+      </div>
+
 
       <!-- Device Financing — collapsible toggle -->
       <div class="intake-section" id="sec-financing">
@@ -5117,6 +5173,16 @@ function calcCoreSavings() {
     resultEl.style.display = 'none';
   }
 }
+  // Show/hide repackage panel when both core fields have values
+  const rpPanel = document.getElementById('repackagePanel');
+  if (rpPanel) {
+    if (current > 0 && rebundle > 0) {
+      rpPanel.classList.add('visible');
+    } else {
+      rpPanel.classList.remove('visible');
+    }
+  }
+
 
 function selectIntakeReward(btn) {
   document.querySelectorAll('.intake-reward-btn').forEach(b => b.classList.remove('active'));
