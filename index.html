@@ -5172,7 +5172,6 @@ function calcCoreSavings() {
   } else {
     resultEl.style.display = 'none';
   }
-}
   // Show/hide repackage panel when both core fields have values
   const rpPanel = document.getElementById('repackagePanel');
   if (rpPanel) {
@@ -5182,6 +5181,7 @@ function calcCoreSavings() {
       rpPanel.classList.remove('visible');
     }
   }
+
 
 
 function selectIntakeReward(btn) {
@@ -6375,7 +6375,7 @@ function resetToIntake() {
 
 
 // ── YEAR VIEW TOGGLE ──
-let currentYearView = 1;
+var currentYearView = 1;
 function setYearView(yr) {
   currentYearView = yr;
   document.getElementById('yrBtn1').classList.toggle('active', yr === 1);
