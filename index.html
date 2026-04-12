@@ -2558,6 +2558,7 @@
   .savings-tally-bar.visible {
     transform: translateY(0);
   }
+  body.tally-active { padding-top: 48px; transition: padding-top 0.35s ease; }
   .stb-inner {
     display: flex;
     align-items: center;
@@ -5941,6 +5942,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Show the savings tally bar immediately — always visible on intake screen
   const tallyBarInit = document.getElementById('savingsTallyBar');
   if (tallyBarInit) tallyBarInit.classList.add('visible');
+  document.body.classList.add('tally-active');
 
   // Auto-capitalize names as the rep types
   function autoTitleCase(el) {
@@ -6326,6 +6328,7 @@ try {
   // Hide tally bar on comparison screen
   const tallyBar = document.getElementById('savingsTallyBar');
   if (tallyBar) tallyBar.classList.remove('visible');
+  document.body.classList.remove('tally-active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
 } catch(e) { alert('Build Comparison Error: ' + e.message); console.error(e); }
@@ -6338,6 +6341,7 @@ function goBack() {
   // Restore tally bar on intake screen
   const tallyBarBack = document.getElementById('savingsTallyBar');
   if (tallyBarBack) tallyBarBack.classList.add('visible');
+  document.body.classList.add('tally-active');
   setTimeout(updateIntakeSavingsPreview, 50);
 }
 
