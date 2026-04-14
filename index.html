@@ -4297,9 +4297,12 @@ function getTabletDataset() {
   let filtered;
   if (brand === 'Apple') {
     filtered = TABLETS_FOR_SALE.filter(t => t.name.startsWith('iPad'));
+  } else if (brand === 'Samsung' || brand === 'Google' || brand === 'Motorola') {
+    // Samsung, Google, Motorola → Samsung/Galaxy tablets
+    filtered = TABLETS_FOR_SALE.filter(t => t.name.startsWith('Galaxy') || t.name.startsWith('Samsung'));
   } else {
-    // Samsung, Google, Motorola → Samsung tablets
-    filtered = TABLETS_FOR_SALE.filter(t => t.name.startsWith('Samsung'));
+    // No primary phone selected yet → show all tablets
+    filtered = TABLETS_FOR_SALE.slice();
   }
   return [...filtered].sort((a, b) => {
     const pa = a.storage && a.storage.length ? a.storage[0].price : a.price;
@@ -4871,6 +4874,7 @@ function updateTotalWithDevices(planMonthly) {
   }
 
   let deviceTotal = 0;
+  let totalLineFees = 0;
   let hasDevice = false;
   allRows.forEach(row => {
     const type = row.dataset.type;
@@ -4881,7 +4885,7 @@ function updateTotalWithDevices(planMonthly) {
     const xmcRate = parseFloat(row.dataset.xmcRate) || 0;
     const isByod = (row.dataset.deviceName || '') === 'BYOD (Bring Your Own Device)';
     if (!isByod && devicePrice > 0) deviceTotal += (Math.max(0, devicePrice - promoAmt) / 36);
-    deviceTotal += lineFee;
+    totalLineFees += lineFee;
     if (xmcEnabled) deviceTotal += xmcRate;
     hasDevice = true;
   });
@@ -4890,6 +4894,10 @@ function updateTotalWithDevices(planMonthly) {
     document.getElementById('xfinityTotalWithDevices').style.display = 'none';
     return;
   }
+
+  // Cap watch/tablet line fees at $35/mo combined (except NOW Mobile)
+  if (intakeSelectedPlan !== 'now_mobile') totalLineFees = Math.min(totalLineFees, 35);
+  deviceTotal += totalLineFees;
 
   const grandTotal = planMonthly + deviceTotal;
   document.getElementById('xtwd-amount').textContent = `$${grandTotal.toFixed(2)}/mo`;
@@ -5267,9 +5275,22 @@ function selectIntakePlan(btn) {
     }
   });
 
-  // Hide watches & tablets section for NOW Mobile
+  // Hide watches & tablets section for NOW Mobile (and clear any already-added rows)
   const wtSection = document.getElementById('wt-section');
   if (wtSection) wtSection.style.display = planIsNow ? 'none' : '';
+  if (planIsNow) {
+    // NOW Mobile does not support watches or tablets — reset counts and clear rows
+    if (watchCount !== 0 || tabletCount !== 0) {
+      watchCount = 0;
+      tabletCount = 0;
+      rebuildWatchRows();
+      rebuildTabletRows();
+    }
+    // Reset the None/1/2/... toggle buttons so "None" is active
+    document.querySelectorAll('.wt-count-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.val === '0');
+    });
+  }
 }
 
 // ── WATCHES & TABLETS COUNT ──
