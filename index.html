@@ -5934,7 +5934,7 @@ function updateIntakeSavingsPreview() {
   const coreCurrent  = parseFloat(document.getElementById('i_coreCurrent')?.value)  || 0;
   const coreRebundle = parseFloat(document.getElementById('i_coreRebundle')?.value) || 0;
   const coreSavings  = Math.max(0, coreCurrent - coreRebundle);
-  const mpdDiscount   = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std') ? 10 : 0;
+  const mpdDiscount   = 10; // Always-on mobile discount: $10/mo when customer signs up for Xfinity Mobile
 
   const xfinityTotal = planMonthly + deviceMonthly;
   const mobileSavings = competitorBill - xfinityTotal;
