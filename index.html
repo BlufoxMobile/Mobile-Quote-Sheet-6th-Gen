@@ -4678,10 +4678,10 @@ function buildLinesTable(plan, lines, totalPrice) {
         <td>$${lineFeesCapped}/mo</td>
         ${yr2Plan ? `<td>$${lineFeesCapped}/mo</td>` : ''}
       </tr>
-      <tr class="total-row" style="background:var(--xfinity-purple);color:#fff;">
-        <td colspan="2" style="color:#fff;">Grand Total (Plan + Line Fees)</td>
-        <td style="color:#fff;">$${grandYr1}/mo</td>
-        ${yr2Plan ? `<td style="color:#fff;">$${grandYr2}/mo</td>` : ''}
+      <tr class="total-row">
+        <td colspan="2">Grand Total (Plan + Line Fees)</td>
+        <td>$${grandYr1}/mo</td>
+        ${yr2Plan ? `<td>$${grandYr2}/mo</td>` : ''}
       </tr>` : ''}
     </tfoot>
   `;
