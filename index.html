@@ -2281,6 +2281,56 @@
     flex-shrink: 0;
   }
 
+  /* ── DEVICES-ONLY MODE (Customer Declined Mobile Offer) ── */
+  .devices-only-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: 2px solid #ff9800;
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin: 0 0 18px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e65100;
+  }
+  .devices-only-banner.visible { display: flex; }
+  .devices-only-banner .dob-link {
+    background: transparent;
+    border: 1.5px solid #e65100;
+    color: #e65100;
+    padding: 6px 12px;
+    border-radius: 18px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .devices-only-banner .dob-link:hover { background: #e65100; color: #fff; }
+  /* When the Devices-Only mode is active, hide all mobile-plan-specific sections */
+  body.devices-only #sec-carrier,
+  body.devices-only #sec-plan,
+  body.devices-only #mobileCompareSection,
+  body.devices-only #featuresSection,
+  body.devices-only #linesSection,
+  body.devices-only #yrToggleWrap,
+  body.devices-only .savings-stack,
+  body.devices-only #compTotalBar {
+    display: none !important;
+  }
+  body.devices-only .tables-side-by-side-grid { grid-template-columns: 100% !important; }
+  /* Decline button in comparison footer */
+  .btn-footer-decline {
+    background: #fff;
+    color: #e65100;
+    border: 2px solid #e65100;
+    font-weight: 700;
+  }
+  .btn-footer-decline:hover { background: #e65100; color: #fff; }
+
   /* ── WATCH / TABLET STANDALONE SECTIONS (below Device Financing) ── */
   .wt-standalone-section {
     background: white;
@@ -2897,6 +2947,12 @@
     <form id="intakeForm" autocomplete="off" onsubmit="return false;">
     <div class="intake-body">
 
+      <!-- Devices-Only Mode Banner (shown when customer declined mobile offer) -->
+      <div class="devices-only-banner" id="devicesOnlyBanner">
+        <span>🎧 <strong>Devices-Only Mode</strong> — Customer declined the mobile offer. Carrier, lines, bill, and plan fields are optional. Add watches/tablets as needed.</span>
+        <button type="button" class="dob-link" onclick="exitDevicesOnlyMode()">Re-enable Mobile Offer</button>
+      </div>
+
       <!-- Rep Info — shown first -->
       <div class="intake-section" id="sec-rep">
         <div class="intake-section-title">👤 Rep Information</div>
@@ -3324,7 +3380,7 @@
     </div>
 
     <!-- Quote Comparison -->
-    <div class="quote-section">
+    <div class="quote-section" id="mobileCompareSection">
       <div class="section-label">📊 Full Monthly Bill Comparison</div>
       <div class="quote-grid">
 
@@ -3495,6 +3551,7 @@
       <!-- Buttons -->
       <div class="footer-btn-row no-print">
         <button class="btn btn-footer-back" onclick="goBack()">← Back</button>
+        <button class="btn btn-footer-decline" onclick="declineMobileOffer()">✖ Customer Declines Mobile Offer</button>
         <button class="btn btn-footer-save" onclick="handleSavePDF()">💾 Save as PDF</button>
         <button class="btn btn-footer-print" onclick="handlePrint()">🖨 Print</button>
         <button class="btn btn-footer-submit" onclick="handleSubmit()">✅ Submit</button>
@@ -3543,6 +3600,7 @@
 // ── GLOBAL STATE (declared early to avoid hoisting issues) ──
 let intakeSelectedTier = '';
 let intakeSelectedPlan = 'mobile_plus_promo'; // default
+let devicesOnlyMode = false; // When true, rep is quoting watches/tablets only (customer declined the mobile offer)
 
 // ══════════════════════════════════════════════════════════════
 // EDITABLE DATA — UPDATE MONTHLY AS NEEDED
@@ -6286,17 +6344,22 @@ try {
   const lines   = document.getElementById('i_lines').value;
   const bill    = document.getElementById('i_bill').value.trim();
 
-  // Validate required
+  // Validate required (mobile fields only required when NOT in devices-only mode)
   let errors = [];
   if (!name)    { errors.push('Customer Name'); document.getElementById('i_customerName').style.border = '2px solid #e53935'; }
   else            document.getElementById('i_customerName').style.border = '';
-  if (!carrier) { errors.push('Current Carrier'); document.getElementById('i_carrier').style.border = '2px solid #e53935'; }
-  else            document.getElementById('i_carrier').style.border = '';
-  if (!lines)   { errors.push('Number of Lines'); document.getElementById('i_lines').style.border = '2px solid #e53935'; }
-  else            document.getElementById('i_lines').style.border = '';
-  if (!bill)    { errors.push('Current Monthly Bill'); document.getElementById('i_bill').style.border = '2px solid #e53935'; }
-  else            document.getElementById('i_bill').style.border = '';
-  if (!intakeSelectedPlan) { errors.push('Xfinity Plan'); }
+  if (!devicesOnlyMode) {
+    if (!carrier) { errors.push('Current Carrier'); document.getElementById('i_carrier').style.border = '2px solid #e53935'; }
+    else            document.getElementById('i_carrier').style.border = '';
+    if (!lines)   { errors.push('Number of Lines'); document.getElementById('i_lines').style.border = '2px solid #e53935'; }
+    else            document.getElementById('i_lines').style.border = '';
+    if (!bill)    { errors.push('Current Monthly Bill'); document.getElementById('i_bill').style.border = '2px solid #e53935'; }
+    else            document.getElementById('i_bill').style.border = '';
+    if (!intakeSelectedPlan) { errors.push('Xfinity Plan'); }
+  } else {
+    // Clear any red borders left over from previous attempts
+    ['i_carrier','i_lines','i_bill'].forEach(id => { const el = document.getElementById(id); if (el) el.style.border = ''; });
+  }
 
   if (errors.length > 0) {
     alert('Please fill in the following required fields:\n\n• ' + errors.join('\n• '));
@@ -6451,6 +6514,34 @@ try {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
 } catch(e) { alert('Build Comparison Error: ' + e.message); console.error(e); }
+}
+
+// ── DEVICES-ONLY MODE ──
+function declineMobileOffer() {
+  const ok = confirm('Switch to Devices-Only Mode? The customer declined the mobile offer. Mobile carrier/lines/bill/plan fields become optional and the plan comparison will be hidden on the quote. You can still add watches and tablets.');
+  if (!ok) return;
+  devicesOnlyMode = true;
+  document.body.classList.add('devices-only');
+  const banner = document.getElementById('devicesOnlyBanner');
+  if (banner) banner.classList.add('visible');
+  // Clear mobile-only fields and their error borders
+  ['i_carrier','i_lines','i_bill'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.style.border = ''; }
+  });
+  // Navigate back to intake
+  document.getElementById('comparisonScreen').style.display = 'none';
+  document.getElementById('intakeScreen').style.display = 'block';
+  setTimeout(updateIntakeSavingsPreview, 50);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function exitDevicesOnlyMode() {
+  devicesOnlyMode = false;
+  document.body.classList.remove('devices-only');
+  const banner = document.getElementById('devicesOnlyBanner');
+  if (banner) banner.classList.remove('visible');
+  setTimeout(updateIntakeSavingsPreview, 50);
 }
 
 // ── GO BACK ──
