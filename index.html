@@ -2313,12 +2313,9 @@
   /* When the Devices-Only mode is active, hide all mobile-plan-specific sections */
   body.devices-only #sec-carrier,
   body.devices-only #sec-plan,
-  body.devices-only #mobileCompareSection,
   body.devices-only #featuresSection,
   body.devices-only #linesSection,
-  body.devices-only #yrToggleWrap,
-  body.devices-only .savings-stack,
-  body.devices-only #compTotalBar {
+  body.devices-only #yrToggleWrap {
     display: none !important;
   }
   body.devices-only .tables-side-by-side-grid { grid-template-columns: 100% !important; }
@@ -4603,6 +4600,11 @@ function updateQuote() {
   unavailEl.style.display = 'none';
   updateYrToggleVisibility(planKey);
 
+  // ── DEVICES-ONLY MODE: skip plan comparison, show devices on Xfinity side ──
+  if (devicesOnlyMode) {
+    return renderDevicesOnlyQuote();
+  }
+
   if (!planKey || !lines) {
     document.getElementById('monthlySavings').textContent = '$—';
     document.getElementById('yearlySavings').textContent  = '$—';
@@ -4665,6 +4667,67 @@ function updateQuote() {
   buildFeatures(activePlan);
   buildDeviceSummary(activePrice, compBill);
   updateTotalWithDevices(activePrice);
+}
+
+// Render the comparison screen for Devices-Only Mode (customer declined the mobile offer).
+// Competitor side is blank, Xfinity side lists watches/tablets with device financing total.
+function renderDevicesOnlyQuote() {
+  // Count watches and tablets currently added
+  let watchCount = 0, tabletCount = 0;
+  document.querySelectorAll('.df-row').forEach(row => {
+    if (row.dataset.type === 'watch') watchCount++;
+    if (row.dataset.type === 'tablet') tabletCount++;
+  });
+
+  // Competitor side (left) — no mobile plan positioned
+  document.getElementById('dispCarrier').textContent = 'No Mobile Plan';
+  document.getElementById('dispLines').textContent = '—';
+  document.getElementById('dispBill').textContent = '$0/mo';
+  document.getElementById('compTotalAmount').textContent = '$0/mo';
+
+  // Xfinity side (right) — devices summary
+  document.getElementById('xfPlanNameDisplay').textContent = 'Devices Only';
+  const summaryParts = [];
+  if (watchCount > 0) summaryParts.push(watchCount + ' Watch' + (watchCount > 1 ? 'es' : ''));
+  if (tabletCount > 0) summaryParts.push(tabletCount + ' Tablet' + (tabletCount > 1 ? 's' : ''));
+  document.getElementById('xfLineSummary').textContent = summaryParts.join(' · ') || 'No devices added yet';
+
+  // Default bill (will be overridden by updateTotalWithDevices if devices exist)
+  document.getElementById('xfBillAmount').textContent = '$0.00/mo';
+  document.getElementById('xfBillSub').textContent = 'Device financing + line fees';
+
+  // Apply a neutral purple tint (no plan color to key off of)
+  const planColor = '#6713D2';
+  const planColorDark = '#4A0F96';
+  const xfinitySideHeader = document.querySelector('.xfinity-side .side-header');
+  if (xfinitySideHeader) xfinitySideHeader.style.background = 'linear-gradient(135deg, ' + planColorDark + ', ' + planColor + ')';
+  const xfinitySide = document.querySelector('.xfinity-side');
+  if (xfinitySide) xfinitySide.style.borderColor = planColor + '40';
+  document.querySelectorAll('.savings-card-stacked').forEach(el => {
+    el.style.background = 'linear-gradient(135deg, ' + planColorDark + ', ' + planColor + ')';
+  });
+  document.querySelectorAll('.section-label').forEach(el => el.style.color = planColor);
+  document.querySelectorAll('.xf-bill-label, .xf-bill-amount').forEach(el => el.style.color = planColor);
+
+  // Show the tables side-by-side container (CSS hides linesSection, so only device summary will show)
+  document.getElementById('tablesSideBySide').style.display = 'block';
+  document.getElementById('featuresSection').style.display = 'none';
+
+  // Build/refresh the device summary (planMonthly = 0 in devices-only mode)
+  // buildDeviceSummary internally calls updateSavingsBanners with (0 + deviceTotal, 0),
+  // which makes monthly savings = coreSavings − deviceTotal.
+  buildDeviceSummary(0, 0);
+  updateTotalWithDevices(0);
+
+  // If no devices at all, show $0 savings so the UI doesn’t read “—”
+  if (document.querySelectorAll('.df-row').length === 0) {
+    const coreCurrent  = parseFloat(document.getElementById('coreCurrentHidden').value) || 0;
+    const coreRebundle = parseFloat(document.getElementById('coreRebundleHidden').value) || 0;
+    const coreSavings  = Math.max(0, coreCurrent - coreRebundle);
+    updateSavingsBanners(0, 0);
+    // updateSavingsBanners adds coreSavings internally, so that’s the net
+    void coreSavings;
+  }
 }
 
 function buildLinesTable(plan, lines, totalPrice) {
