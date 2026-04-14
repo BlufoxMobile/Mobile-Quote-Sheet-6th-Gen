@@ -4649,6 +4649,21 @@ function buildLinesTable(plan, lines, totalPrice) {
 
   // Totals row
   const yr2Total = yr2Plan ? yr2Plan.pricing[lines - 1] : null;
+
+  // Compute connected-device line fees (watches $10, tablets $20 each) — capped at $35/mo combined (except NOW Mobile)
+  let rawLineFees = 0;
+  document.querySelectorAll('.df-row').forEach(r => {
+    const t = r.dataset.type;
+    if (t === 'watch') rawLineFees += 10;
+    else if (t === 'tablet') rawLineFees += 20;
+  });
+  const lineFeesCapped = intakeSelectedPlan !== 'now_mobile' ? Math.min(rawLineFees, 35) : rawLineFees;
+  const lineFeesCappedNote = (rawLineFees > 35 && intakeSelectedPlan !== 'now_mobile') ? ' (capped)' : '';
+
+  // Grand total = plan total + capped line fees
+  const grandYr1 = totalPrice + lineFeesCapped;
+  const grandYr2 = yr2Plan ? (yr2Total + lineFeesCapped) : null;
+
   rows += `
     </tbody>
     <tfoot>
@@ -4657,6 +4672,17 @@ function buildLinesTable(plan, lines, totalPrice) {
         <td>$${totalPrice}/mo</td>
         ${yr2Plan ? `<td>$${yr2Total}/mo</td>` : ''}
       </tr>
+      ${rawLineFees > 0 ? `
+      <tr class="total-row">
+        <td colspan="2">Device Line Fees${lineFeesCappedNote}</td>
+        <td>$${lineFeesCapped}/mo</td>
+        ${yr2Plan ? `<td>$${lineFeesCapped}/mo</td>` : ''}
+      </tr>
+      <tr class="total-row" style="background:var(--xfinity-purple);color:#fff;">
+        <td colspan="2" style="color:#fff;">Grand Total (Plan + Line Fees)</td>
+        <td style="color:#fff;">$${grandYr1}/mo</td>
+        ${yr2Plan ? `<td style="color:#fff;">$${grandYr2}/mo</td>` : ''}
+      </tr>` : ''}
     </tfoot>
   `;
 
@@ -5036,8 +5062,8 @@ function buildDeviceSummary(planMonthly, compBill) {
   }
 
   table.innerHTML = rows;
-  // All-in Tablet & Watch Plan: cap connected device line fees at $35/mo
-  if (intakeSelectedPlan !== 'now_mobile') totalLineFees = Math.min(totalLineFees, 35);
+  // Device Financing Summary shows raw (uncapped) cost per device so the math sums correctly.
+  // The $35 line-fee cap is applied separately in the Line-by-Line Breakdown and Xfinity bill totals.
 
   const grandDeviceTotal = totalDeviceMonthly + totalLineFees + totalXmc;
   totalBar.innerHTML = `
