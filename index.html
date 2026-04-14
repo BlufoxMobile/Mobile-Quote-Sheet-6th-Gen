@@ -3038,11 +3038,11 @@
         <div class="intake-plan-pills">
           <button class="intake-plan-pill active" data-plan="mobile_plus_promo" onclick="selectIntakePlan(this)">
             <div class="ipp-name">Mobile Plus</div>
-            <div class="ipp-sub">$40/mo Year 1 Discount</div>
+            <div class="ipp-sub">$30/mo off Line 1 (Year 1)</div>
           </button>
           <button class="intake-plan-pill" data-plan="mobile_select_promo" onclick="selectIntakePlan(this)">
             <div class="ipp-name">Mobile Select</div>
-            <div class="ipp-sub">$40/mo Year 1 Discount</div>
+            <div class="ipp-sub">Line 1 free · $30/mo addl (Year 1)</div>
           </button>
           <button class="intake-plan-pill" data-plan="now_mobile" onclick="selectIntakePlan(this)">
             <div class="ipp-name">NOW Mobile</div>
@@ -4434,7 +4434,7 @@ const PLANS = {
     badge: "Year 1 Discount",
     color: "#6713D2",
     maxLines: 12,
-    pricing: [5,50,95,140,185,230,275,320,365,410,455,500],
+    pricing: [15,60,105,150,195,240,285,330,375,420,465,510],
     yr2Plan: "mobile_plus_std",
     features: [
       "📺 4K Ultra HD video streaming",
@@ -4454,7 +4454,7 @@ const PLANS = {
     badge: "Year 1 Discount",
     color: "#4A0F96",
     maxLines: 12,
-    pricing: [0,20,50,80,110,140,170,200,230,260,290,320],
+    pricing: [0,30,60,90,120,150,180,210,240,270,300,330],
     yr2Plan: "mobile_select_std",
     features: [
       "📺 HD video (720p) — defaults to 480p, customer can enable HD",
@@ -5933,14 +5933,13 @@ function updateIntakeSavingsPreview() {
   const coreCurrent  = parseFloat(document.getElementById('i_coreCurrent')?.value)  || 0;
   const coreRebundle = parseFloat(document.getElementById('i_coreRebundle')?.value) || 0;
   const coreSavings  = Math.max(0, coreCurrent - coreRebundle);
-  const mpdDiscount   = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std') ? 10 : 0;
 
   const xfinityTotal = planMonthly + deviceMonthly;
   const mobileSavings = competitorBill - xfinityTotal;
-  const totalMonthly  = mobileSavings + coreSavings + mpdDiscount;
+  const totalMonthly  = mobileSavings + coreSavings;
   const totalYearly   = totalMonthly * 12;
 
-  if (totalMonthly <= 0 && coreSavings <= 0 && mpdDiscount <= 0) {
+  if (totalMonthly <= 0 && coreSavings <= 0) {
     panel.style.display = 'none';
     return;
   }
@@ -5954,7 +5953,7 @@ function updateIntakeSavingsPreview() {
   // Update the floating tally bar
   const fssM = document.getElementById('fssMonthly');
   const fssY = document.getElementById('fssYearly');
-  if (fssM) fssM.textContent = fmtMo(totalMonthly) + (mpdDiscount > 0 ? ' (incl. $10 MPD)' : '');
+  if (fssM) fssM.textContent = fmtMo(totalMonthly);
   if (fssY) fssY.textContent = fmtMo(totalYearly);
   // Show the bar
   const bar = document.getElementById('savingsTallyBar');
@@ -5972,7 +5971,6 @@ function updateIntakeSavingsPreview() {
 
   addPill('📱', 'Mobile Savings', mobileSavings);
   if (coreSavings > 0) addPill('🏠', 'Core Rebundle', coreSavings);
-  if (mpdDiscount > 0) addPill('\u2795', 'Mobile Plus Discount', mpdDiscount);
   if (deviceMonthly > 0) addPill('💳', 'Device Financing', -deviceMonthly);
   addPill('🏢', `Competitor Bill`, competitorBill);
   addPill('💜', `Xfinity Total`, -xfinityTotal);
