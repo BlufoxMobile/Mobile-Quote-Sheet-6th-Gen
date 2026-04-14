@@ -5014,12 +5014,12 @@ function buildDeviceSummary(planMonthly, compBill) {
           <td style="font-weight:700;color:var(--xfinity-purple);">$${moTotal.toFixed(2)}/mo</td>
         </tr>`;
       } else if (type === 'watch' || type === 'tablet') {
+        // Blank device line → treat as BYOD (no device financing charge). Line fee shown on left side only.
         hasAnyDevice = true;
-        totalLineFees += lineFee;
-        const moTotal = lineFee + (xmcEnabled ? xmcRate : 0);
+        const moTotal = xmcEnabled ? xmcRate : 0;
         rows += `<tr>
           <td>${lineLabel}</td>
-          <td><em style="color:var(--text-muted);">No device</em></td>
+          <td><em style="color:var(--text-muted);">BYOD (Bring Your Own Device)</em></td>
           <td>—</td><td>—</td><td>—</td>
           <td>${xmcDisplay}</td>
           <td style="font-weight:700;color:var(--xfinity-purple);">$${moTotal.toFixed(2)}/mo</td>
@@ -5032,13 +5032,12 @@ function buildDeviceSummary(planMonthly, compBill) {
     const isByod = deviceName === 'BYOD (Bring Your Own Device)';
     const netPrice = isByod ? 0 : Math.max(0, devicePrice - promoAmt);
     const monthly  = netPrice / 36;
-    const totalMonthly = monthly + lineFee + (xmcEnabled ? xmcRate : 0);
+    // Line fees are shown on the LEFT breakdown only — the right Device Financing Summary is financing-only.
+    const totalMonthly = monthly + (xmcEnabled ? xmcRate : 0);
     totalDeviceMonthly += monthly;
-    totalLineFees += lineFee;
 
     let promoLabel = isByod ? '—' : '—';
     if (!isByod && promoAmt > 0) promoLabel = `<span style="color:var(--xfinity-green);font-weight:600;">-$${promoAmt.toFixed(0)}</span>`;
-    const lineFeeNote = lineFee > 0 ? `<span style="font-size:10px;color:var(--text-muted);"> (+$${lineFee} fee)</span>` : '';
 
     const tradeCol = isByod ? '—' : tradeDisplay;
     const condCol  = isByod ? '—' : conditionDisplay;
@@ -5050,7 +5049,7 @@ function buildDeviceSummary(planMonthly, compBill) {
       <td>${condCol}</td>
       <td>${promoLabel}</td>
       <td>${xmcDisplay}</td>
-      <td style="font-weight:700;color:var(--xfinity-purple);">$${totalMonthly.toFixed(2)}/mo${lineFeeNote}</td>
+      <td style="font-weight:700;color:var(--xfinity-purple);">$${totalMonthly.toFixed(2)}/mo</td>
     </tr>`;
   });
 
@@ -5065,12 +5064,12 @@ function buildDeviceSummary(planMonthly, compBill) {
   // Device Financing Summary shows raw (uncapped) cost per device so the math sums correctly.
   // The $35 line-fee cap is applied separately in the Line-by-Line Breakdown and Xfinity bill totals.
 
-  const grandDeviceTotal = totalDeviceMonthly + totalLineFees + totalXmc;
+  const grandDeviceTotal = totalDeviceMonthly + totalXmc;
   totalBar.innerHTML = `
-    <span class="dtb-label">Device Total</span>
+    <span class="dtb-label">Device Financing Total</span>
     <div>
       <span class="dtb-amount">$${grandDeviceTotal.toFixed(2)}/mo</span>
-      <div class="dtb-sub">Financing + line fees${totalXmc > 0 ? ` + $${totalXmc.toFixed(2)} XMC` : ''} · over 36 months</div>
+      <div class="dtb-sub">Device financing${totalXmc > 0 ? ` + $${totalXmc.toFixed(2)} XMC` : ''} · over 36 months (line fees shown on left)</div>
     </div>
   `;
   section.style.display = 'block';
@@ -5934,7 +5933,7 @@ function updateIntakeSavingsPreview() {
   const coreCurrent  = parseFloat(document.getElementById('i_coreCurrent')?.value)  || 0;
   const coreRebundle = parseFloat(document.getElementById('i_coreRebundle')?.value) || 0;
   const coreSavings  = Math.max(0, coreCurrent - coreRebundle);
-  const mpdDiscount   = 10; // Always-on mobile discount: $10/mo when customer signs up for Xfinity Mobile
+  const mpdDiscount   = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std') ? 10 : 0;
 
   const xfinityTotal = planMonthly + deviceMonthly;
   const mobileSavings = competitorBill - xfinityTotal;
