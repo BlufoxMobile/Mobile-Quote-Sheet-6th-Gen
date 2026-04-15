@@ -4378,13 +4378,13 @@ const PROMO_DEFINITIONS = [
   // ── Prepaid Mastercard promos ──
   {
     tag:       'mc_200',
-    text:      '💳 $200 Prepaid Mastercard when adding 2 new lines (Retail & Field Sales event teams only)',
+    text:      '💳 $200 Prepaid Mastercard when adding 2+ new lines (phones, watches, or tablets) — Retail & Field Sales event teams only',
     startDate: '2026-03-24',
     endDate:   '2026-05-10',
   },
   {
     tag:       'mc_400',
-    text:      '💳 $400 Prepaid Mastercard when adding 2 new lines with at least one DPP (Retail & Field Sales event teams only)',
+    text:      '💳 $400 Prepaid Mastercard when adding 2+ new lines (phones, watches, or tablets) AND financing at least one phone or tablet — Retail & Field Sales event teams only',
     startDate: '2026-03-24',
     endDate:   '2026-05-10',
   },
@@ -4952,9 +4952,27 @@ function buildFeatures(plan) {
   if (hasTabletXmc)       activeTags.add('xmc_50_tablet');
   if (hasA11)             activeTags.add('a11_50off');
   if (hasIpadA16)         activeTags.add('ipad_a16_50off');
-  // Mastercard rebates are always shown when any new mobile line is present (simplification: show if any .df-row phone exists)
-  const hasAnyPhoneLine = document.querySelectorAll('.df-row[data-type="phone"]').length > 0;
-  if (hasAnyPhoneLine) { activeTags.add('mc_200'); activeTags.add('mc_400'); }
+
+  // ── Prepaid Mastercard qualification ──
+  // $200: 2+ total lines (phones + watches + tablets) being added.
+  // $400: Same 2+ lines requirement AND at least one phone or tablet is being FINANCED (non-BYOD).
+  // Show whichever tier qualifies (mutually exclusive — $400 supersedes $200).
+  const allRowsMc = document.querySelectorAll('.df-row');
+  const totalLineCount = allRowsMc.length;
+  let hasFinancedPhoneOrTablet = false;
+  allRowsMc.forEach(row => {
+    const t = row.dataset.type;
+    if (t !== 'phone' && t !== 'tablet') return;
+    const dName = row.dataset.deviceName || '';
+    const dPrice = parseFloat(row.dataset.devicePrice) || 0;
+    const isByod = dName === 'BYOD (Bring Your Own Device)' || dName === '';
+    if (!isByod && dPrice > 0) hasFinancedPhoneOrTablet = true;
+  });
+  if (totalLineCount >= 2 && hasFinancedPhoneOrTablet) {
+    activeTags.add('mc_400');
+  } else if (totalLineCount >= 2) {
+    activeTags.add('mc_200');
+  }
 
   // Build promo list — only active and date-valid promos
   const promoItems = PROMO_DEFINITIONS
