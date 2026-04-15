@@ -4375,105 +4375,134 @@ function getTabletDataset() {
 // tag: used to conditionally show promos based on what's selected
 // endDate: YYYY-MM-DD — promo auto-hides on or after this date (null = always active)
 const PROMO_DEFINITIONS = [
-  // ── Always-on promos ──
+  // ── Prepaid Mastercard promos ──
   {
-    tag:     'always',
-    text:    '🚫 One-time Waived Activation Fee (mobile, smartwatches, tablets)',
-    endDate: null,
+    tag:       'mc_200',
+    text:      '💳 $200 Prepaid Mastercard when adding 2 new lines (Retail & Field Sales event teams only)',
+    startDate: '2026-03-24',
+    endDate:   '2026-05-10',
   },
   {
-    tag:     'always',
-    text:    '💳 $200 Prepaid Mastercard when adding 2 or more new lines',
-    endDate: null,
-  },
-  {
-    tag:     'always',
-    text:    '💜 $40/mo off first line for 12 months for new & existing Xfinity Internet customers (300 Mbps+) new to Xfinity Mobile',
-    endDate: null,
+    tag:       'mc_400',
+    text:      '💳 $400 Prepaid Mastercard when adding 2 new lines with at least one DPP (Retail & Field Sales event teams only)',
+    startDate: '2026-03-24',
+    endDate:   '2026-05-10',
   },
   // ── Samsung TIPS trade-in ($1,100 off Samsung devices) ──
   {
     tag:     'tips_samsung_1100',
     text:    '📱 TIPS Trade-In: Up to $1,100 off select Samsung devices w/ Premium Unlimited — New Line or Elite Upgrade',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   // ── Non-Samsung TIPS trade-in ($830 off Apple/Google/Motorola) ──
   {
     tag:     'tips_nonsam_830',
     text:    '📱 TIPS Trade-In: Up to $830 off select Apple, Google, or Motorola devices w/ Premium Unlimited — New Line or Elite Upgrade',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   // ── Samsung no-trade promo ($500 off) ──
   {
     tag:     'samsung_notrade',
     text:    '💰 $500 off select Samsung devices w/ Premium Unlimited — New Line or Elite Upgrade (no trade-in required)',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   // ── Samsung Unlimited trade-in ($500 TIPS) ──
   {
     tag:     'tips_samsung_500',
     text:    '📱 TIPS Trade-In: Up to $500 off select Samsung devices w/ Unlimited — New Line or Upgrade',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   // ── Premium plan $400 off (non-Samsung, no qualifying trade) ──
   {
     tag:     'premium_400',
     text:    '💰 $400 off select Apple, Samsung, Google, or Motorola devices w/ Premium Unlimited — New Line or Elite Upgrade',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   // ── $200 off Samsung w/ Unlimited (non-TIPS) ──
   {
     tag:     'samsung_200_unlimited',
     text:    '💰 $200 off select Samsung devices w/ Unlimited — New Line or Upgrade',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   // ── iPhone 17e specific promos ──
   {
     tag:     'iphone17e_onus',
     text:    '🍎 iPhone 17e "On Us" w/ TIPs & Premium Unlimited',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   {
     tag:     'iphone17e_50off',
     text:    '🍎 50% off iPhone 17e w/ TIPs & Unlimited',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   {
     tag:     'iphone17e_400off',
     text:    '🍎 $400 off iPhone 17e w/ Premium Unlimited',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   // ── Watch promos ──
   {
-    tag:     'watch_diamond',
-    text:    '⌚ $300 off select smartwatches for Diamond Xfinity Membership customers',
-    endDate: null,
+    tag:     'watch_elite',
+    text:    '⌚ $300 off select smartwatches for Diamond & Platinum Xfinity Membership customers',
+    startDate: '2026-04-20',
+    endDate: '2026-05-10',
   },
   {
     tag:     'xmc_50_watch',
     text:    '🛡️ 50% off XMC for first 3 months on new watch line',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   // ── Tablet promos ──
   {
     tag:     'xmc_50_tablet',
     text:    '🛡️ 50% off XMC for first 3 months on new tablet line',
-    endDate: null,
+    endDate: '2026-05-10',
   },
   {
-    tag:     'a11_50off',
-    text:    '📲 50% off Samsung Galaxy Tab A11+ 5G — $279.99 *NEW*',
-    endDate: null,
+    tag:       'a11_50off',
+    text:      '📲 50% off Samsung Galaxy Tab A11+ 5G',
+    startDate: '2026-03-11',
+    endDate:   '2026-05-10',
+  },
+  {
+    tag:       'ipad_a16_50off',
+    text:      '📲 50% off iPad (A16) — 11th gen',
+    startDate: '2026-04-20',
+    endDate:   '2026-05-10',
   },
 ];
 
 // Returns true if today is on or before the endDate (null = always active)
 function isPromoActive(promo) {
-  if (!promo.endDate) return true;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const end = new Date(promo.endDate + 'T00:00:00');
-  return today <= end;
+  if (promo.startDate) {
+    const start = new Date(promo.startDate + 'T00:00:00');
+    if (today < start) return false;
+  }
+  if (promo.endDate) {
+    const end = new Date(promo.endDate + 'T00:00:00');
+    if (today > end) return false;
+  }
+  return true;
+}
+
+// Helper: look up a promo by tag and check if it is currently active
+function isPromoActiveByTag(tag) {
+  const promo = PROMO_DEFINITIONS.find(p => p.tag === tag);
+  return promo ? isPromoActive(promo) : false;
+}
+
+// Returns the current tablet promo discount (in dollars) for a given device
+function getTabletPromoDiscount(deviceName, devicePrice) {
+  const name = (deviceName || '').toLowerCase();
+  if (name.includes('a11') && isPromoActiveByTag('a11_50off')) {
+    return devicePrice * 0.5;
+  }
+  if ((name.includes('ipad (a16)') || name.includes('ipad a16')) && isPromoActiveByTag('ipad_a16_50off')) {
+    return devicePrice * 0.5;
+  }
+  return 0;
 }
 
 // Format end date as "Ends Mar 23"
@@ -4837,6 +4866,7 @@ function buildFeatures(plan) {
   let hasWatchXmc        = false;
   let hasTabletXmc       = false;
   let hasA11             = false;
+  let hasIpadA16         = false;
 
   const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
   const isUnlimitedOrHigher = isPremiumPlan; // Only Mobile Plus gets device promos
@@ -4896,13 +4926,15 @@ function buildFeatures(plan) {
     }
 
     if (type === 'watch') {
-      if (intakeSelectedTier === 'diamond' && deviceName) hasWatchDiamond = true;
+      if ((intakeSelectedTier === 'diamond' || intakeSelectedTier === 'platinum') && deviceName) hasWatchDiamond = true;
       if (xmcEnabled) hasWatchXmc = true;
     }
 
     if (type === 'tablet') {
       if (xmcEnabled) hasTabletXmc = true;
-      if (deviceName.includes('a11')) hasA11 = true;
+      const nameLower = (deviceName || '').toLowerCase();
+      if (nameLower.includes('a11')) hasA11 = true;
+      if (nameLower.includes('ipad (a16)') || nameLower.includes('ipad a16')) hasIpadA16 = true;
     }
   });
 
@@ -4915,10 +4947,14 @@ function buildFeatures(plan) {
   if (hasIphone17eOnUs)   activeTags.add('iphone17e_onus');
   if (hasIphone17e50off)  activeTags.add('iphone17e_50off');
   if (hasIphone17e400off) activeTags.add('iphone17e_400off');
-  if (hasWatchDiamond)    activeTags.add('watch_diamond');
+  if (hasWatchDiamond)    activeTags.add('watch_elite'); // now includes Platinum + Diamond
   if (hasWatchXmc)        activeTags.add('xmc_50_watch');
   if (hasTabletXmc)       activeTags.add('xmc_50_tablet');
   if (hasA11)             activeTags.add('a11_50off');
+  if (hasIpadA16)         activeTags.add('ipad_a16_50off');
+  // Mastercard rebates are always shown when any new mobile line is present (simplification: show if any .df-row phone exists)
+  const hasAnyPhoneLine = document.querySelectorAll('.df-row[data-type="phone"]').length > 0;
+  if (hasAnyPhoneLine) { activeTags.add('mc_200'); activeTags.add('mc_400'); }
 
   // Build promo list — only active and date-valid promos
   const promoItems = PROMO_DEFINITIONS
@@ -5966,18 +6002,25 @@ function recalcRow(row) {
 
   } else if (type === 'watch') {
     let discount = 0;
-    if (intakeSelectedTier === 'diamond') discount = DIAMOND_WATCH_DISCOUNT;
+    const watchEliteActive = isPromoActiveByTag('watch_elite');
+    if ((intakeSelectedTier === 'diamond' || intakeSelectedTier === 'platinum') && watchEliteActive) {
+      discount = DIAMOND_WATCH_DISCOUNT;
+    }
     const netPrice = Math.max(0, devicePrice - discount);
     const monthly  = netPrice / 36 + 10 + xmcAdd;
     row.dataset.promoAmount = discount.toFixed(2);
+    const tierLabel = intakeSelectedTier === 'platinum' ? 'Platinum' : 'Diamond';
     monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo`
-      + (discount > 0 ? `<span class="df-mo-promo">Diamond -$${discount}</span>` : '')
+      + (discount > 0 ? `<span class="df-mo-promo">${tierLabel} -$${discount}</span>` : '')
       + (xmcEnabled ? `<span class="df-mo-promo" style="color:var(--xfinity-accent);">+XMC $${xmcRate}/mo</span>` : '');
 
   } else if (type === 'tablet') {
-    const monthly = devicePrice / 36 + 20 + xmcAdd;
-    row.dataset.promoAmount = '0';
+    const tabletPromoDisc = getTabletPromoDiscount(deviceName, devicePrice);
+    const netPrice = Math.max(0, devicePrice - tabletPromoDisc);
+    const monthly = netPrice / 36 + 20 + xmcAdd;
+    row.dataset.promoAmount = tabletPromoDisc.toFixed(2);
     monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo`
+      + (tabletPromoDisc > 0 ? `<span class="df-mo-promo">50% off −$${tabletPromoDisc.toFixed(0)}</span>` : '')
       + (xmcEnabled ? `<span class="df-mo-promo" style="color:var(--xfinity-accent);">+XMC $${xmcRate}/mo</span>` : '');
   }
 
