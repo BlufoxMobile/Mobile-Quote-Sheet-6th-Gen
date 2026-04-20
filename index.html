@@ -4777,6 +4777,65 @@ function renderDevicesOnlyQuote() {
     document.getElementById('yearlySavings').textContent = '';
     document.querySelectorAll('.savings-card-stacked').forEach(el => el.style.display = 'none');
 
+      // --- DEVICES-ONLY: merge devices into core services comparison ---
+      const tablesSBS = document.getElementById('tablesSideBySide');
+      if (tablesSBS) tablesSBS.style.display = 'none';
+
+      const coreRight = document.getElementById('coreNewItems');
+      const coreLeft = document.getElementById('coreCurrentItems');
+      const coreBillDisp = document.getElementById('coreNewBillDisplay');
+      const coreRebundleVal = parseFloat(document.getElementById('coreRebundleHidden')?.value) || 0;
+      const coreMonthSav = document.getElementById('coreMonthSavingsDisplay');
+      const coreYearSav = document.getElementById('coreYearSavingsDisplay');
+
+      let deviceRightRows = "";
+      let deviceLeftSpacers = "";
+      let totalDeviceCost = 0;
+
+      const allDevRows = document.querySelectorAll('.df-row');
+      allDevRows.forEach(row => {
+        const dName = row.dataset.deviceName;
+        const dPrice = parseFloat(row.dataset.devicePrice) || 0;
+        const dPromo = parseFloat(row.dataset.promoAmount) || 0;
+        const dMonthly = Math.max(0, dPrice - dPromo);
+        if (!dName) return;
+        const dType = row.dataset.type;
+        let dLabel = dName;
+        if (dType === 'watch') dLabel = '\u231A ' + dName;
+        else if (dType === 'tablet') dLabel = '\uD83D\uDCF1 ' + dName;
+        else dLabel = '\uD83D\uDCDE ' + dName;
+        totalDeviceCost += dMonthly;
+        deviceRightRows += '<div style="text-align:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);"><strong style="color:var(--xfinity-purple);">' + dLabel + '</strong><br><span style="font-size:0.85rem;color:var(--text-secondary);">$' + dMonthly.toFixed(2) + '/mo</span></div>';
+        deviceLeftSpacers += '<div style="text-align:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);">&nbsp;</div>';
+      });
+
+      // Add Home Phone to XM if selected
+      const hpSel2 = document.getElementById('voiceToXMPlan');
+      let hpLineCost2 = 0;
+      if (hpSel2 && hpSel2.value) {
+        hpLineCost2 = getVoiceToXMCost();
+        const hpLbl = '\uD83D\uDCDE Home Phone \u2192 XM';
+        deviceRightRows += '<div style="text-align:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);"><strong style="color:var(--xfinity-purple);">' + hpLbl + '</strong><br><span style="font-size:0.85rem;color:var(--text-secondary);">$' + hpLineCost2.toFixed(2) + '/mo</span></div>';
+        deviceLeftSpacers += '<div style="text-align:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);">&nbsp;</div>';
+      }
+
+      // Append device rows to core comparison
+      if (coreRight && deviceRightRows) coreRight.innerHTML += deviceRightRows;
+      if (coreLeft && deviceLeftSpacers) coreLeft.innerHTML += deviceLeftSpacers;
+
+      // Update right-side bill to include devices
+      if (coreBillDisp) {
+        const newTotal = coreRebundleVal + totalDeviceCost + hpLineCost2;
+        coreBillDisp.textContent = '$' + newTotal.toFixed(2) + '/mo';
+      }
+
+      const coreBillSub = document.getElementById('coreNewBillSub');
+      if (coreBillSub) coreBillSub.textContent = 'Xfinity + Devices';
+
+      // Hide core savings in devices-only mode
+      if (coreMonthSav) coreMonthSav.parentElement.style.display = 'none';
+      if (coreYearSav) coreYearSav.parentElement.style.display = 'none';
+
   // If no devices at all, show $0 savings so the UI doesn’t read “—”
   if (document.querySelectorAll('.df-row').length === 0) {
     const coreCurrent  = parseFloat(document.getElementById('coreCurrentHidden').value) || 0;
@@ -6521,6 +6580,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── BUILD COMPARISON ──
 function buildComparison() {
+    // Re-show elements that devices-only mode may have hidden
+    const coreMonthSavEl = document.getElementById('coreMonthSavingsDisplay');
+    const coreYearSavEl = document.getElementById('coreYearSavingsDisplay');
+    if (coreMonthSavEl && coreMonthSavEl.parentElement) coreMonthSavEl.parentElement.style.display = '';
+    if (coreYearSavEl && coreYearSavEl.parentElement) coreYearSavEl.parentElement.style.display = '';
+    const tablesSBSel = document.getElementById('tablesSideBySide');
+    if (tablesSBSel) tablesSBSel.style.display = '';
+
 try {
   const name    = document.getElementById('i_customerName').value.trim();
   const carrier = document.getElementById('i_carrier').value;
