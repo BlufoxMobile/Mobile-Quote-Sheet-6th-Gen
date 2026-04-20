@@ -2319,6 +2319,8 @@
     display: none !important;
   }
   body.devices-only .tables-side-by-side-grid { grid-template-columns: 100% !important; }
+    body.devices-only #homePhoneToXM { display: block !important; }
+    #homePhoneToXM select { width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
   /* Decline button in comparison footer */
   .btn-footer-decline {
     background: #fff;
@@ -2948,6 +2950,20 @@
       <div class="devices-only-banner" id="devicesOnlyBanner">
         <span>🎧 <strong>Devices-Only Mode</strong> — Customer declined the mobile offer. Carrier, lines, bill, and plan fields are optional. Add watches/tablets as needed.</span>
         <button type="button" class="dob-link" onclick="exitDevicesOnlyMode()">Re-enable Mobile Offer</button>
+      </div>
+
+      <!-- Home Phone To XM — only visible in devices-only mode -->
+      <div class="intake-section" id="homePhoneToXM" style="display:none;">
+        <div class="section-header"><span>📞 Home Phone To XM</span></div>
+        <p style="font-size:0.9rem;color:#555;margin:0.5rem 0;">Customer wants to move their home phone to a cell phone line. Select a plan for the single line:</p>
+        <div class="form-group">
+          <label for="homePhonePlan">Plan for Home Phone Line</label>
+          <select id="homePhonePlan" onchange="updateHomePhonePlan()">
+            <option value="">— None —</option>
+            <option value="select">Mobile Select (Free - Introductory)</option>
+            <option value="plus">Mobile Plus ($15/mo - Introductory)</option>
+          </select>
+        </div>
       </div>
 
       <!-- Rep Info — shown first -->
@@ -4715,10 +4731,12 @@ function renderDevicesOnlyQuote() {
   document.getElementById('compTotalAmount').textContent = '$0/mo';
 
   // Xfinity side (right) — devices summary
-  document.getElementById('xfPlanNameDisplay').textContent = 'Devices Only';
+  document.getElementById('xfPlanNameDisplay').textContent = getHomePhoneLineCost() > 0 ? 'Home Phone to XM' : 'Devices Only';
   const summaryParts = [];
   if (watchCount > 0) summaryParts.push(watchCount + ' Watch' + (watchCount > 1 ? 'es' : ''));
   if (tabletCount > 0) summaryParts.push(tabletCount + ' Tablet' + (tabletCount > 1 ? 's' : ''));
+    const hpPlan = document.getElementById('homePhonePlan');
+    if (hpPlan && hpPlan.value) summaryParts.push('1 Home Phone (' + (hpPlan.value === 'plus' ? 'Plus $15/mo' : 'Select Free') + ')');
   document.getElementById('xfLineSummary').textContent = summaryParts.join(' · ') || 'No devices added yet';
 
   // Default bill (will be overridden by updateTotalWithDevices if devices exist)
@@ -4745,8 +4763,9 @@ function renderDevicesOnlyQuote() {
   // Build/refresh the device summary (planMonthly = 0 in devices-only mode)
   // buildDeviceSummary internally calls updateSavingsBanners with (0 + deviceTotal, 0),
   // which makes monthly savings = coreSavings − deviceTotal.
-  buildDeviceSummary(0, 0);
-  updateTotalWithDevices(0);
+  const hpCost = getHomePhoneLineCost();
+    buildDeviceSummary(hpCost, 0);
+  updateTotalWithDevices(hpCost);
 
   // If no devices at all, show $0 savings so the UI doesn’t read “—”
   if (document.querySelectorAll('.df-row').length === 0) {
@@ -6653,7 +6672,21 @@ function declineMobileOffer() {
     const el = document.getElementById(id);
     if (el) { el.value = ''; el.style.border = ''; }
   });
-  // Navigate back to intake
+  // Clear phone device selections (reset to empty/BYOD state)
+    document.querySelectorAll('.df-row[data-type="phone"]').forEach(row => {
+      row.dataset.deviceName = '';
+      row.dataset.devicePrice = '0';
+      row.dataset.promoAmount = '0';
+      const input = row.querySelector('input[type="text"]');
+      if (input) input.value = '';
+      recalcRow(row);
+    });
+
+    // Reset home phone plan dropdown
+    const hpSelect = document.getElementById('homePhonePlan');
+    if (hpSelect) hpSelect.value = '';
+
+    // Navigate back to intake
   document.getElementById('comparisonScreen').style.display = 'none';
   document.getElementById('intakeScreen').style.display = 'block';
   setTimeout(updateIntakeSavingsPreview, 50);
@@ -6665,8 +6698,29 @@ function exitDevicesOnlyMode() {
   document.body.classList.remove('devices-only');
   const banner = document.getElementById('devicesOnlyBanner');
   if (banner) banner.classList.remove('visible');
-  setTimeout(updateIntakeSavingsPreview, 50);
+  // Reset home phone dropdown
+    const hpSelect = document.getElementById('homePhonePlan');
+    if (hpSelect) hpSelect.value = '';
+    setTimeout(updateIntakeSavingsPreview, 50);
 }
+
+    function updateHomePhonePlan() {
+      // Called when the Home Phone To XM dropdown changes
+      // Triggers a recalculation of savings preview
+      if (typeof updateIntakeSavingsPreview === 'function') {
+        setTimeout(updateIntakeSavingsPreview, 100);
+      }
+    }
+
+    function getHomePhoneLineCost() {
+      // Returns the monthly cost for the home phone line (if selected)
+      const sel = document.getElementById('homePhonePlan');
+      if (!sel || !sel.value) return 0;
+      if (sel.value === 'select') return 0;  // Free introductory rate
+      if (sel.value === 'plus') return 15;   // $15 introductory rate
+      return 0;
+    }
+
 
 // ── GO BACK ──
 function goBack() {
