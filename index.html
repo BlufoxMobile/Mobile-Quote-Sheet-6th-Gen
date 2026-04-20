@@ -6093,18 +6093,50 @@ function updateIntakeSavingsPreview() {
   const planKey = (typeof intakeSelectedPlan !== 'undefined' ? intakeSelectedPlan : null) || document.getElementById('xfinityPlan')?.value || '';
 
   // Need at least a competitor bill and lines to show anything meaningful
-  if (competitorBill <= 0 || !linesVal) {
-    panel.style.display = 'none';
-    // Reset tally bar to $— but keep it visible
-    const fssM = document.getElementById('fssMonthly');
-    const fssY = document.getElementById('fssYearly');
-    if (fssM) fssM.textContent = '$—';
-    if (fssY) fssY.textContent = '$—';
-    return;
-  }
+  // Core savings (internet/TV rebundle) — compute early so tally can show even without mobile data
+    const coreCurrent  = parseFloat(document.getElementById('i_coreCurrent')?.value)  || 0;
+    const coreRebundle = parseFloat(document.getElementById('i_coreRebundle')?.value) || 0;
+    const coreSavings  = Math.max(0, coreCurrent - coreRebundle);
+
+    const hasMobileData = competitorBill > 0 && linesVal > 0;
+
+    if (!hasMobileData && coreSavings <= 0) {
+      panel.style.display = 'none';
+      // Reset tally bar to $— but keep it visible
+      const fssM = document.getElementById('fssMonthly');
+      const fssY = document.getElementById('fssYearly');
+      if (fssM) fssM.textContent = '$\u2014';
+      if (fssY) fssY.textContent = '$\u2014';
+      return;
+    }
 
   const plan = PLANS[planKey];
-  if (!plan) { panel.style.display = 'none'; return; }
+  if (!plan && !hasMobileData) {
+      // No plan selected and no mobile data — check if core savings alone should show
+      if (coreSavings > 0) {
+        // Show core savings only in tally
+        const fmtMo = v => (v >= 0 ? '+' : '') + '$' + Math.round(v);
+        document.getElementById('sppMonthly').textContent = fmtMo(coreSavings) + '/mo';
+        document.getElementById('sppYearly').textContent = fmtMo(coreSavings * 12) + '/yr';
+        const fssM = document.getElementById('fssMonthly');
+        const fssY = document.getElementById('fssYearly');
+        if (fssM) fssM.textContent = fmtMo(coreSavings);
+        if (fssY) fssY.textContent = fmtMo(coreSavings * 12);
+        const bar = document.getElementById('savingsTallyBar');
+        if (bar) bar.classList.add('visible');
+        // Build breakdown pills — core only
+        const bd = document.getElementById('sppBreakdown');
+        bd.innerHTML = '';
+        const pill = document.createElement('div');
+        pill.className = 'spp-item';
+        pill.innerHTML = '🏠 Core Rebundle <span class="spp-val">+$' + Math.round(coreSavings) + '/mo</span>';
+        bd.appendChild(pill);
+        panel.style.display = 'none'; // hide detailed panel, tally bar is enough
+        return;
+      }
+      panel.style.display = 'none'; return;
+    }
+    if (!plan) { panel.style.display = 'none'; return; }
 
   const planMonthly = plan.pricing[linesVal - 1] || 0;
 
@@ -6130,10 +6162,6 @@ function updateIntakeSavingsPreview() {
   if (intakeSelectedPlan !== 'now_mobile') previewLineFees = Math.min(previewLineFees, 35);
   deviceMonthly += previewLineFees;
 
-  // Core savings (internet/TV rebundle)
-  const coreCurrent  = parseFloat(document.getElementById('i_coreCurrent')?.value)  || 0;
-  const coreRebundle = parseFloat(document.getElementById('i_coreRebundle')?.value) || 0;
-  const coreSavings  = Math.max(0, coreCurrent - coreRebundle);
 
   const xfinityTotal = planMonthly + deviceMonthly;
   const mobileSavings = competitorBill - xfinityTotal;
