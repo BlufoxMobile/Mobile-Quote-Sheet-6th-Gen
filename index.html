@@ -4762,6 +4762,8 @@ function renderDevicesOnlyQuote() {
   document.querySelectorAll('.xf-bill-label, .xf-bill-amount').forEach(el => el.style.color = planColor);
       // Hide Full Monthly Bill Comparison - not needed in devices-only mode
       document.getElementById('tablesSideBySide').style.display = 'none';
+      const mobComp = document.getElementById('mobileCompareSection');
+      if (mobComp) mobComp.style.display = 'none';
       document.getElementById('featuresSection').style.display = 'none';
 
       // Build device summary (keeps financing tables at bottom)
@@ -4805,6 +4807,7 @@ function renderDevicesOnlyQuote() {
       let deviceRightHTML = '';
       let deviceLeftHTML = '';
       let totalDeviceCost = 0;
+      let totalLineFees = 0;
 
       document.querySelectorAll('.df-row').forEach(row => {
         const dName = row.dataset.deviceName;
@@ -4815,7 +4818,8 @@ function renderDevicesOnlyQuote() {
         const dPromo = parseFloat(row.dataset.promoAmount) || 0;
         const dMonthly = Math.max(0, dPrice - dPromo) / 36;
         const lineFee = dType === 'watch' ? 10 : 20;
-        totalDeviceCost += dMonthly + lineFee;
+        totalDeviceCost += dMonthly;
+        totalLineFees += lineFee;
         const tLabel = dType === 'watch' ? 'WATCH' : 'TABLET';
         deviceRightHTML += '<div style="' + itemStyle + '"><div style="' + nameStyle + 'color:var(--xfinity-purple);">' + dName + '</div><div style="' + lblStyle + 'color:var(--text-secondary);">' + tLabel + '</div></div>';
         deviceLeftHTML += '<div style="' + itemStyle + '"><div style="' + nameStyle + 'color:var(--text-primary);">&nbsp;</div><div style="' + lblStyle + 'color:var(--text-secondary);">&nbsp;</div></div>';
@@ -4823,6 +4827,10 @@ function renderDevicesOnlyQuote() {
 
       if (coreRight && deviceRightHTML) coreRight.innerHTML += deviceRightHTML;
       if (coreLeft && deviceLeftHTML) coreLeft.innerHTML += deviceLeftHTML;
+
+      // Cap watch/tablet line fees at $35/mo combined
+      totalLineFees = Math.min(totalLineFees, 35);
+      totalDeviceCost += totalLineFees;
 
       const hpLineCost = getVoiceToXMCost();
       if (coreBillDisp) {
@@ -6586,6 +6594,8 @@ function buildComparison() {
     if (coreYearSavEl && coreYearSavEl.parentElement) coreYearSavEl.parentElement.style.display = '';
     const tablesSBSel = document.getElementById('tablesSideBySide');
     if (tablesSBSel) tablesSBSel.style.display = '';
+    const mobCompSel = document.getElementById('mobileCompareSection');
+    if (mobCompSel) mobCompSel.style.display = '';
 
 try {
   const name    = document.getElementById('i_customerName').value.trim();
