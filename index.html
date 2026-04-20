@@ -4760,27 +4760,21 @@ function renderDevicesOnlyQuote() {
   });
   document.querySelectorAll('.section-label').forEach(el => el.style.color = planColor);
   document.querySelectorAll('.xf-bill-label, .xf-bill-amount').forEach(el => el.style.color = planColor);
+      // Hide Full Monthly Bill Comparison - not needed in devices-only mode
+      document.getElementById('tablesSideBySide').style.display = 'none';
+      document.getElementById('featuresSection').style.display = 'none';
 
-  // Show the tables side-by-side container (CSS hides linesSection, so only device summary will show)
-  document.getElementById('tablesSideBySide').style.display = 'block';
-  document.getElementById('featuresSection').style.display = 'none';
+      // Build device summary (keeps financing tables at bottom)
+      const hpCost = getVoiceToXMCost();
+      buildDeviceSummary(hpCost, 0);
+      updateTotalWithDevices(hpCost);
 
-  // Build/refresh the device summary (planMonthly = 0 in devices-only mode)
-  // buildDeviceSummary internally calls updateSavingsBanners with (0 + deviceTotal, 0),
-  // which makes monthly savings = coreSavings − deviceTotal.
-  const hpCost = getVoiceToXMCost();
-    buildDeviceSummary(hpCost, 0);
-  updateTotalWithDevices(hpCost);
+      // Hide savings banners in devices-only mode
+      document.getElementById('monthlySavings').textContent = '';
+      document.getElementById('yearlySavings').textContent = '';
+      document.querySelectorAll('.savings-card-stacked').forEach(el => el.style.display = 'none');
 
-    // Hide savings banners in devices-only mode — only show devices/home phone
-    document.getElementById('monthlySavings').textContent = '';
-    document.getElementById('yearlySavings').textContent = '';
-    document.querySelectorAll('.savings-card-stacked').forEach(el => el.style.display = 'none');
-
-      // --- DEVICES-ONLY: merge devices into core services comparison ---
-      const tablesSBS = document.getElementById('tablesSideBySide');
-      if (tablesSBS) tablesSBS.style.display = 'none';
-
+      // --- Modify core comparison for devices-only mode ---
       const coreRight = document.getElementById('coreNewItems');
       const coreLeft = document.getElementById('coreCurrentItems');
       const coreBillDisp = document.getElementById('coreNewBillDisplay');
@@ -4788,51 +4782,55 @@ function renderDevicesOnlyQuote() {
       const coreMonthSav = document.getElementById('coreMonthSavingsDisplay');
       const coreYearSav = document.getElementById('coreYearSavingsDisplay');
 
-      let deviceRightRows = "";
-      let deviceLeftSpacers = "";
+      const itemStyle = 'text-align:center;padding:12px 0;';
+      const nameStyle = 'font-family:Outfit,sans-serif;font-size:1.4rem;font-weight:700;line-height:1.3;';
+      const lblStyle = 'font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:4px;';
+
+      // Replace Home Phone (XV) row with Home Phone \u2192 XM on right side
+      const hpSel2 = document.getElementById('voiceToXMPlan');
+      if (hpSel2 && hpSel2.value && coreRight) {
+        const rightDivs = coreRight.querySelectorAll(':scope > div');
+        rightDivs.forEach(item => {
+          const subDivs = item.querySelectorAll('div');
+          if (subDivs.length >= 2 && subDivs[1].textContent.trim().toUpperCase().includes('HOME PHONE')) {
+            const planName = hpSel2.value === 'select' ? 'Mobile Select' : 'Mobile Plus';
+            subDivs[0].innerHTML = planName;
+            subDivs[0].style.color = 'var(--xfinity-purple)';
+            subDivs[1].innerHTML = 'HOME PHONE \u2192 XM';
+          }
+        });
+      }
+
+      // Add tablet/watch items below Home Security in core comparison
+      let deviceRightHTML = '';
+      let deviceLeftHTML = '';
       let totalDeviceCost = 0;
 
-      const allDevRows = document.querySelectorAll('.df-row');
-      allDevRows.forEach(row => {
+      document.querySelectorAll('.df-row').forEach(row => {
         const dName = row.dataset.deviceName;
+        if (!dName) return;
+        const dType = row.dataset.type;
+        if (dType === 'phone') return;
         const dPrice = parseFloat(row.dataset.devicePrice) || 0;
         const dPromo = parseFloat(row.dataset.promoAmount) || 0;
         const dMonthly = Math.max(0, dPrice - dPromo);
-        if (!dName) return;
-        const dType = row.dataset.type;
-        let dLabel = dName;
-        if (dType === 'watch') dLabel = '\u231A ' + dName;
-        else if (dType === 'tablet') dLabel = '\uD83D\uDCF1 ' + dName;
-        else dLabel = '\uD83D\uDCDE ' + dName;
         totalDeviceCost += dMonthly;
-        deviceRightRows += '<div style="text-align:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);"><strong style="color:var(--xfinity-purple);">' + dLabel + '</strong><br><span style="font-size:0.85rem;color:var(--text-secondary);">$' + dMonthly.toFixed(2) + '/mo</span></div>';
-        deviceLeftSpacers += '<div style="text-align:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);">&nbsp;</div>';
+        const tLabel = dType === 'watch' ? 'WATCH' : 'TABLET';
+        deviceRightHTML += '<div style="' + itemStyle + '"><div style="' + nameStyle + 'color:var(--xfinity-purple);">' + dName + '</div><div style="' + lblStyle + 'color:var(--text-secondary);">' + tLabel + '</div></div>';
+        deviceLeftHTML += '<div style="' + itemStyle + '"><div style="' + nameStyle + 'color:var(--text-primary);">&nbsp;</div><div style="' + lblStyle + 'color:var(--text-secondary);">&nbsp;</div></div>';
       });
 
-      // Add Home Phone to XM if selected
-      const hpSel2 = document.getElementById('voiceToXMPlan');
-      let hpLineCost2 = 0;
-      if (hpSel2 && hpSel2.value) {
-        hpLineCost2 = getVoiceToXMCost();
-        const hpLbl = '\uD83D\uDCDE Home Phone \u2192 XM';
-        deviceRightRows += '<div style="text-align:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);"><strong style="color:var(--xfinity-purple);">' + hpLbl + '</strong><br><span style="font-size:0.85rem;color:var(--text-secondary);">$' + hpLineCost2.toFixed(2) + '/mo</span></div>';
-        deviceLeftSpacers += '<div style="text-align:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);">&nbsp;</div>';
-      }
+      if (coreRight && deviceRightHTML) coreRight.innerHTML += deviceRightHTML;
+      if (coreLeft && deviceLeftHTML) coreLeft.innerHTML += deviceLeftHTML;
 
-      // Append device rows to core comparison
-      if (coreRight && deviceRightRows) coreRight.innerHTML += deviceRightRows;
-      if (coreLeft && deviceLeftSpacers) coreLeft.innerHTML += deviceLeftSpacers;
-
-      // Update right-side bill to include devices
+      const hpLineCost = getVoiceToXMCost();
       if (coreBillDisp) {
-        const newTotal = coreRebundleVal + totalDeviceCost + hpLineCost2;
+        const newTotal = coreRebundleVal + totalDeviceCost + hpLineCost;
         coreBillDisp.textContent = '$' + newTotal.toFixed(2) + '/mo';
       }
-
       const coreBillSub = document.getElementById('coreNewBillSub');
       if (coreBillSub) coreBillSub.textContent = 'Xfinity + Devices';
 
-      // Hide core savings in devices-only mode
       if (coreMonthSav) coreMonthSav.parentElement.style.display = 'none';
       if (coreYearSav) coreYearSav.parentElement.style.display = 'none';
 
