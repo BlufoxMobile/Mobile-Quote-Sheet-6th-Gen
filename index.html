@@ -4813,8 +4813,9 @@ function renderDevicesOnlyQuote() {
         if (dType === 'phone') return;
         const dPrice = parseFloat(row.dataset.devicePrice) || 0;
         const dPromo = parseFloat(row.dataset.promoAmount) || 0;
-        const dMonthly = Math.max(0, dPrice - dPromo);
-        totalDeviceCost += dMonthly;
+        const dMonthly = Math.max(0, dPrice - dPromo) / 36;
+        const lineFee = dType === 'watch' ? 10 : 20;
+        totalDeviceCost += dMonthly + lineFee;
         const tLabel = dType === 'watch' ? 'WATCH' : 'TABLET';
         deviceRightHTML += '<div style="' + itemStyle + '"><div style="' + nameStyle + 'color:var(--xfinity-purple);">' + dName + '</div><div style="' + lblStyle + 'color:var(--text-secondary);">' + tLabel + '</div></div>';
         deviceLeftHTML += '<div style="' + itemStyle + '"><div style="' + nameStyle + 'color:var(--text-primary);">&nbsp;</div><div style="' + lblStyle + 'color:var(--text-secondary);">&nbsp;</div></div>';
