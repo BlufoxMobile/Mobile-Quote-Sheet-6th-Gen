@@ -2319,7 +2319,6 @@
     display: none !important;
   }
   body.devices-only .tables-side-by-side-grid { grid-template-columns: 100% !important; }
-    body.devices-only #homePhoneToXM { display: block !important; }
     #homePhoneToXM select { width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
   /* Decline button in comparison footer */
   .btn-footer-decline {
@@ -2952,20 +2951,6 @@
         <button type="button" class="dob-link" onclick="exitDevicesOnlyMode()">Re-enable Mobile Offer</button>
       </div>
 
-      <!-- Home Phone To XM — only visible in devices-only mode -->
-      <div class="intake-section" id="homePhoneToXM" style="display:none;">
-        <div class="section-header"><span>📞 Home Phone To XM</span></div>
-        <p style="font-size:0.9rem;color:#555;margin:0.5rem 0;">Customer wants to move their home phone to a cell phone line. Select a plan for the single line:</p>
-        <div class="form-group">
-          <label for="homePhonePlan">Plan for Home Phone Line</label>
-          <select id="homePhonePlan" onchange="updateHomePhonePlan()">
-            <option value="">— None —</option>
-            <option value="select">Mobile Select (Free - Introductory)</option>
-            <option value="plus">Mobile Plus ($15/mo - Introductory)</option>
-          </select>
-        </div>
-      </div>
-
       <!-- Rep Info — shown first -->
       <div class="intake-section" id="sec-rep">
         <div class="intake-section-title">👤 Rep Information</div>
@@ -3260,6 +3245,24 @@
             </div>
           </div>
           <div id="tabletFinancingRows"></div>
+        </div>
+
+        <!-- Xfinity Voice to XM -->
+        <div style="grid-column: 1 / -1; margin-top: 1rem;">
+          <div class="wt-header" style="justify-content:center; gap:0.5rem;">
+            <span style="font-size:1.3rem;">📞</span>
+            <div style="text-align:center;">
+              <div class="wt-title">XFINITY VOICE TO XM</div>
+              <div class="wt-sub">Move home phone to a mobile line</div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:center; gap:1rem; padding:0.8rem 1rem;">
+            <select id="voiceToXMPlan" onchange="updateVoiceToXM()" style="width:300px;max-width:100%;padding:0.6rem;border-radius:8px;border:2px solid var(--xfinity-purple);font-size:1rem;text-align:center;">
+              <option value="">— None —</option>
+              <option value="select">Mobile Select (Free)</option>
+              <option value="plus">Mobile Plus ($15/mo)</option>
+            </select>
+          </div>
         </div>
       </div><!-- /wt-side-by-side -->
 
@@ -4731,11 +4734,11 @@ function renderDevicesOnlyQuote() {
   document.getElementById('compTotalAmount').textContent = '$0/mo';
 
   // Xfinity side (right) — devices summary
-  document.getElementById('xfPlanNameDisplay').textContent = getHomePhoneLineCost() > 0 ? 'Home Phone to XM' : 'Devices Only';
+  document.getElementById('xfPlanNameDisplay').textContent = getVoiceToXMCost() > 0 ? 'Home Phone to XM' : 'Devices Only';
   const summaryParts = [];
   if (watchCount > 0) summaryParts.push(watchCount + ' Watch' + (watchCount > 1 ? 'es' : ''));
   if (tabletCount > 0) summaryParts.push(tabletCount + ' Tablet' + (tabletCount > 1 ? 's' : ''));
-    const hpPlan = document.getElementById('homePhonePlan');
+    const hpPlan = document.getElementById('voiceToXMPlan');
     if (hpPlan && hpPlan.value) summaryParts.push('1 Home Phone (' + (hpPlan.value === 'plus' ? 'Plus $15/mo' : 'Select Free') + ')');
   document.getElementById('xfLineSummary').textContent = summaryParts.join(' · ') || 'No devices added yet';
 
@@ -4763,7 +4766,7 @@ function renderDevicesOnlyQuote() {
   // Build/refresh the device summary (planMonthly = 0 in devices-only mode)
   // buildDeviceSummary internally calls updateSavingsBanners with (0 + deviceTotal, 0),
   // which makes monthly savings = coreSavings − deviceTotal.
-  const hpCost = getHomePhoneLineCost();
+  const hpCost = getVoiceToXMCost();
     buildDeviceSummary(hpCost, 0);
   updateTotalWithDevices(hpCost);
 
@@ -5078,8 +5081,9 @@ function updateSavingsBanners(xfinityTotal, compBill) {
   const coreCurrent  = parseFloat(document.getElementById('coreCurrentHidden').value) || 0;
   const coreRebundle = parseFloat(document.getElementById('coreRebundleHidden').value) || 0;
   const coreSavings  = Math.max(0, coreCurrent - coreRebundle);
+    const voiceToXMCost = getVoiceToXMCost();
 
-  const monthly = (compBill - xfinityTotal) + coreSavings;
+  const monthly = (compBill - xfinityTotal) + coreSavings - voiceToXMCost;
   const yearly  = monthly * 12;
   document.getElementById('monthlySavings').textContent = monthly >= 0 ? `$${monthly.toFixed(0)}` : `-$${Math.abs(monthly).toFixed(0)}`;
   document.getElementById('yearlySavings').textContent  = yearly  >= 0 ? `$${yearly.toFixed(0)}`  : `-$${Math.abs(yearly).toFixed(0)}`;
@@ -5119,7 +5123,7 @@ function updateTotalWithDevices(planMonthly) {
   if (intakeSelectedPlan !== 'now_mobile') totalLineFees = Math.min(totalLineFees, 35);
   deviceTotal += totalLineFees;
 
-  const grandTotal = planMonthly + deviceTotal;
+  const grandTotal = planMonthly + deviceTotal + getVoiceToXMCost();
   document.getElementById('xtwd-amount').textContent = `$${grandTotal.toFixed(2)}/mo`;
   document.getElementById('xtwd-sub').textContent = `Plan $${planMonthly}/mo + Devices $${deviceTotal.toFixed(2)}/mo`;
   document.getElementById('xfinityTotalWithDevices').style.display = 'block';
@@ -6163,7 +6167,7 @@ function updateIntakeSavingsPreview() {
   deviceMonthly += previewLineFees;
 
 
-  const xfinityTotal = planMonthly + deviceMonthly;
+  const xfinityTotal = planMonthly + deviceMonthly + getVoiceToXMCost();
   const mobileSavings = competitorBill - xfinityTotal;
   const totalMonthly  = mobileSavings + coreSavings;
   const totalYearly   = totalMonthly * 12;
@@ -6202,6 +6206,7 @@ function updateIntakeSavingsPreview() {
   if (coreSavings > 0) addPill('🏠', 'Core Rebundle', coreSavings);
   if (deviceMonthly > 0) addPill('💳', 'Device Financing', -deviceMonthly);
   addPill('🏢', `Competitor Bill`, competitorBill);
+    if (isVoiceToXMActive()) addPill('📞', 'Voice to XM', -getVoiceToXMCost());
   addPill('💜', `Xfinity Total`, -xfinityTotal);
 }
 
@@ -6711,7 +6716,7 @@ function declineMobileOffer() {
     });
 
     // Reset home phone plan dropdown
-    const hpSelect = document.getElementById('homePhonePlan');
+    const hpSelect = document.getElementById('voiceToXMPlan');
     if (hpSelect) hpSelect.value = '';
 
     // Navigate back to intake
@@ -6727,26 +6732,30 @@ function exitDevicesOnlyMode() {
   const banner = document.getElementById('devicesOnlyBanner');
   if (banner) banner.classList.remove('visible');
   // Reset home phone dropdown
-    const hpSelect = document.getElementById('homePhonePlan');
+    const hpSelect = document.getElementById('voiceToXMPlan');
     if (hpSelect) hpSelect.value = '';
     setTimeout(updateIntakeSavingsPreview, 50);
 }
 
-    function updateHomePhonePlan() {
-      // Called when the Home Phone To XM dropdown changes
-      // Triggers a recalculation of savings preview
+    function updateVoiceToXM() {
+      // Called when Voice to XM dropdown changes — recalculate savings
       if (typeof updateIntakeSavingsPreview === 'function') {
         setTimeout(updateIntakeSavingsPreview, 100);
       }
     }
 
-    function getHomePhoneLineCost() {
-      // Returns the monthly cost for the home phone line (if selected)
-      const sel = document.getElementById('homePhonePlan');
+    function getVoiceToXMCost() {
+      // Returns the monthly cost for the Voice to XM line
+      const sel = document.getElementById('voiceToXMPlan');
       if (!sel || !sel.value) return 0;
       if (sel.value === 'select') return 0;  // Free introductory rate
       if (sel.value === 'plus') return 15;   // $15 introductory rate
       return 0;
+    }
+
+    function isVoiceToXMActive() {
+      const sel = document.getElementById('voiceToXMPlan');
+      return sel && sel.value !== '';
     }
 
 
