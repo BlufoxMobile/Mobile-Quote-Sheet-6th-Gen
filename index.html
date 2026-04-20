@@ -2319,6 +2319,7 @@
     display: none !important;
   }
   body.devices-only .tables-side-by-side-grid { grid-template-columns: 100% !important; }
+    body.devices-only #voiceToXMSection { display: block !important; }
     #homePhoneToXM select { width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
   /* Decline button in comparison footer */
   .btn-footer-decline {
@@ -3248,7 +3249,7 @@
         </div>
 
         <!-- Xfinity Voice to XM -->
-        <div style="grid-column: 1 / -1; margin-top: 1rem;">
+        <div id="voiceToXMSection" style="grid-column: 1 / -1; margin-top: 1rem; display: none;">
           <div class="wt-header" style="justify-content:center; gap:0.5rem;">
             <span style="font-size:1.3rem;">📞</span>
             <div style="text-align:center;">
@@ -4713,6 +4714,7 @@ function updateQuote() {
 
   buildLinesTable(activePlan, lines, activePrice);
   buildFeatures(activePlan);
+    document.querySelectorAll('.savings-card-stacked').forEach(el => el.style.display = '');
   buildDeviceSummary(activePrice, compBill);
   updateTotalWithDevices(activePrice);
 }
@@ -4739,7 +4741,7 @@ function renderDevicesOnlyQuote() {
   if (watchCount > 0) summaryParts.push(watchCount + ' Watch' + (watchCount > 1 ? 'es' : ''));
   if (tabletCount > 0) summaryParts.push(tabletCount + ' Tablet' + (tabletCount > 1 ? 's' : ''));
     const hpPlan = document.getElementById('voiceToXMPlan');
-    if (hpPlan && hpPlan.value) summaryParts.push('1 Home Phone (' + (hpPlan.value === 'plus' ? 'Plus $15/mo' : 'Select Free') + ')');
+    if (hpPlan && hpPlan.value) summaryParts.push('1 Home Phone');
   document.getElementById('xfLineSummary').textContent = summaryParts.join(' · ') || 'No devices added yet';
 
   // Default bill (will be overridden by updateTotalWithDevices if devices exist)
@@ -4769,6 +4771,11 @@ function renderDevicesOnlyQuote() {
   const hpCost = getVoiceToXMCost();
     buildDeviceSummary(hpCost, 0);
   updateTotalWithDevices(hpCost);
+
+    // Hide savings banners in devices-only mode — only show devices/home phone
+    document.getElementById('monthlySavings').textContent = '';
+    document.getElementById('yearlySavings').textContent = '';
+    document.querySelectorAll('.savings-card-stacked').forEach(el => el.style.display = 'none');
 
   // If no devices at all, show $0 savings so the UI doesn’t read “—”
   if (document.querySelectorAll('.df-row').length === 0) {
