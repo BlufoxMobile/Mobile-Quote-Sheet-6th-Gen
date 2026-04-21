@@ -6780,6 +6780,12 @@ function declineMobileOffer() {
   const ok = confirm('Switch to Devices-Only Mode? The customer declined the mobile offer. Mobile carrier/lines/bill/plan fields become optional and the plan comparison will be hidden on the quote. You can still add watches and tablets.');
   if (!ok) return;
   devicesOnlyMode = true;
+  // Reset watches to None (watches need a phone line)
+  watchCount = 0;
+  rebuildWatchRows();
+  document.querySelectorAll('.wt-count-btn[data-type="watches"]').forEach(b => b.classList.remove('active'));
+  const watchNoneBtn = document.querySelector('.wt-count-btn[data-type="watches"][data-val="0"]');
+  if (watchNoneBtn) watchNoneBtn.classList.add('active');
   document.body.classList.add('devices-only');
   const banner = document.getElementById('devicesOnlyBanner');
   if (banner) banner.classList.add('visible');
