@@ -6770,7 +6770,7 @@ try {
   if (tallyBar) tallyBar.classList.remove('visible');
   // Hide TOTAL CURRENT COST bar in devices-only mode
   const currentTotalBar = document.getElementById('coreCurrentTotalBar');
-  if (currentTotalBar) currentTotalBar.style.display = window.devicesOnlyMode ? 'none' : '';
+  if (currentTotalBar) currentTotalBar.style.display = devicesOnlyMode ? 'none' : '';
   document.body.classList.remove('tally-active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -6779,7 +6779,7 @@ try {
 
 // ── DEVICES-ONLY MODE ──
 function declineMobileOffer() {
-  window.devicesOnlyMode = true;
+  devicesOnlyMode = true;
   // Reset watches to None (watches need a phone line)
   watchCount = 0;
   rebuildWatchRows();
