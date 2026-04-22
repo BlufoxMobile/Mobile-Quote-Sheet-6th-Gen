@@ -5448,6 +5448,7 @@ async function handleSubmit() {
     btn.innerHTML = orig;
     btn.disabled = false;
     alert('Submission failed. Please check your Zapier webhook URL is configured.\n\nError: ' + err.message);
+    resetToIntake();
   }
 }
 
@@ -6820,6 +6821,9 @@ function declineMobileOffer() {
     if (hpSelect) hpSelect.value = '';
 
     // Navigate back to intake
+  // Hide the red TOTAL CURRENT COST bar
+  const ctb = document.getElementById('coreCurrentTotalBar');
+  if (ctb) ctb.style.display = 'none';
   document.getElementById('comparisonScreen').style.display = 'none';
   document.getElementById('intakeScreen').style.display = 'block';
   setTimeout(updateIntakeSavingsPreview, 50);
