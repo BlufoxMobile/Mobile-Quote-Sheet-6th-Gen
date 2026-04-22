@@ -6767,6 +6767,9 @@ try {
   // Hide tally bar on comparison screen
   const tallyBar = document.getElementById('savingsTallyBar');
   if (tallyBar) tallyBar.classList.remove('visible');
+  // Hide TOTAL CURRENT COST bar in devices-only mode
+  const currentTotalBar = document.getElementById('coreCurrentTotalBar');
+  if (currentTotalBar) currentTotalBar.style.display = window.devicesOnlyMode ? 'none' : '';
   document.body.classList.remove('tally-active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
