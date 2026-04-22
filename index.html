@@ -6117,7 +6117,8 @@ function recalcRow(row) {
   } else if (type === 'watch') {
     let discount = 0;
     const watchEliteActive = isPromoActiveByTag('watch_elite');
-    if ((intakeSelectedTier === 'diamond' || intakeSelectedTier === 'platinum') && watchEliteActive) {
+    // Only first 2 watches get the $300 discount
+    if ((intakeSelectedTier === 'diamond' || intakeSelectedTier === 'platinum') && watchEliteActive && parseInt(lineNum) <= 2) {
       discount = DIAMOND_WATCH_DISCOUNT;
     }
     const netPrice = Math.max(0, devicePrice - discount);
