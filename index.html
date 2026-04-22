@@ -3513,10 +3513,6 @@
               <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;" id="coreNewBillSub"></div>
             </div>
           </div>
-                    <div id="savingsComparisonBox" style="display:none;background:var(--xfinity-purple,#6B2FA0);color:#fff;text-align:center;padding:14px 20px;margin:10px 12px 0;">
-            <div class="scb-amount" id="scbAmount" style="font-size:28px;font-weight:700;letter-spacing:-0.5px;"></div>
-            <div class="scb-label" id="scbLabel" style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-top:2px;opacity:0.9;"></div>
-          </div>
 <div class="savings-stack">
             <div class="savings-card-stacked">
               <div class="savings-amount" id="coreMonthSavingsDisplay">—</div>
@@ -6826,27 +6822,6 @@ function declineMobileOffer() {
   document.getElementById('intakeScreen').style.display = 'block';
   setTimeout(updateIntakeSavingsPreview, 50);
   window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  // Show savings comparison box (decline mobile view)
-  const coreCurrent = parseFloat(document.getElementById('coreCurrentHidden').value) || 0;
-  const coreRebundle = parseFloat(document.getElementById('coreRebundleHidden').value) || 0;
-  const box = document.getElementById('savingsComparisonBox');
-  const amtEl = document.getElementById('scbAmount');
-  const lblEl = document.getElementById('scbLabel');
-  if (box && amtEl && lblEl && coreCurrent > 0 && coreRebundle > 0) {
-    const diff = coreCurrent - coreRebundle;
-    if (diff > 0) {
-      amtEl.textContent = 'Save $' + diff.toFixed(2) + '/mo';
-      lblEl.textContent = 'MONTHLY SAVINGS WITH XFINITY';
-    } else if (diff < 0) {
-      amtEl.textContent = '$' + Math.abs(diff).toFixed(2) + '/mo more';
-      lblEl.textContent = 'ADDITIONAL COST VS CURRENT';
-    } else {
-      amtEl.textContent = 'Same price!';
-      lblEl.textContent = 'NO CHANGE IN MONTHLY COST';
-    }
-    box.style.display = 'block';
-  }
 }
 
 function exitDevicesOnlyMode() {
