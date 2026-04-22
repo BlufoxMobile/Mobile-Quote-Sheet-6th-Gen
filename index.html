@@ -4975,9 +4975,9 @@ function buildFeatures(plan) {
     const xmcEnabled = row.dataset.xmcEnabled === 'true';
 
     // Determine brand of the DEVICE BEING PURCHASED
-    const isSamsungDevice   = deviceName.startsWith('samsung');
-    const isAppleDevice     = deviceName.startsWith('apple');
-    const isGoogleDevice    = deviceName.startsWith('google');
+    const isSamsungDevice   = deviceName.toLowerCase().startsWith('samsung');
+    const isAppleDevice     = deviceName.toLowerCase().startsWith('apple');
+    const isGoogleDevice    = deviceName.toLowerCase().startsWith('google');
     const isMotoDevice      = deviceName.startsWith('motorola');
     const isNonSamsungDevice = isAppleDevice || isGoogleDevice || isMotoDevice;
     const isIphone17e        = deviceName.includes('iphone 17e') || deviceName.includes('iphone17e');
@@ -5099,14 +5099,10 @@ function buildFeatures(plan) {
 
     let discLabel = '';
     if (type === 'phone') {
-      if (isSamsungDevice && tradeValue >= 1100) {
-        discLabel = `Samsung TIPS Trade-In: -$1,100 off`;
-      } else if (isSamsungDevice && noTrade && isPremiumPlan) {
-        discLabel = `Samsung No-Trade Promo: -$${promoAmt.toFixed(0)} off w/ Premium Unlimited`;
-      } else if (isSamsungDevice && noTrade) {
-        discLabel = `Samsung No-Trade Promo: -$${promoAmt.toFixed(0)} off w/ Unlimited`;
-      } else if (isSamsungDevice && tradeValue > 0) {
-        discLabel = `Samsung TIPS Trade-In: -$${promoAmt.toFixed(0)} off`;
+      if (isSamsungDevice && tradeValue > 0 && !noTrade) {
+        discLabel = `Samsung TIPS -$${promoAmt.toFixed(0)} (trade-in)`;
+      } else if (isSamsungDevice && (noTrade || tradeValue === 0)) {
+        discLabel = `Samsung No-Trade Promo: -$${promoAmt.toFixed(0)} off`;
       } else if (!isSamsungDevice && tradeValue > 0 && !noTrade) {
         discLabel = `TIPS Trade-In: -$${promoAmt.toFixed(0)} off (Apple/Google/Motorola)`;
       } else if (!isSamsungDevice && isPremiumPlan && promoAmt === 400) {
@@ -6066,7 +6062,7 @@ function recalcRow(row) {
 
   if (type === 'phone') {
     const isSamsungEligible = SAMSUNG_TIPS_PHONES.some(s => deviceName.toLowerCase().includes(s.toLowerCase()));
-    if (isSamsungEligible && isPremiumPlan) {
+    if (isSamsungEligible) {
       // Samsung devices: any trade-in → $1,100 off; no trade-in → $500 off
       if (tradeValue > 0 && !noTrade) {
         promoApplied = 1100;
@@ -6095,7 +6091,7 @@ function recalcRow(row) {
     // Build a clear promo description label
     let promoDesc = '';
     if (promoApplied > 0) {
-      if (isSamsungEligible && isPremiumPlan) {
+      if (isSamsungEligible) {
         if (tradeValue > 0 && !noTrade) {
           promoDesc = `Samsung TIPS -$1,100 (trade-in)`;
         } else {
