@@ -6044,6 +6044,7 @@ function recalcRow(row) {
   const deviceName  = row.dataset.deviceName || '';
   const xmcEnabled  = row.dataset.xmcEnabled === 'true';
   const xmcRate     = parseFloat(row.dataset.xmcRate) || 0;
+    const lineNum     = row.dataset.line;
   const monthlyEl   = document.getElementById(`${row.id}-monthly`);
 
   if (devicePrice === 0 && deviceName !== 'BYOD (Bring Your Own Device)') {
