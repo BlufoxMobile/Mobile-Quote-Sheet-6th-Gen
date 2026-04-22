@@ -6797,6 +6797,16 @@ function declineMobileOffer() {
       row.dataset.deviceName = '';
       row.dataset.devicePrice = '0';
       row.dataset.promoAmount = '0';
+      row.dataset.tradeValue = '0';
+      row.dataset.tradeName = '';
+      row.dataset.tradeCondition = '';
+      row.dataset.tradeLabel = '';
+      row.dataset.noTrade = 'false';
+      // Clear trade-in input and checkbox
+      const tradeInput = document.getElementById(row.id + '-trade');
+      if (tradeInput) tradeInput.value = '';
+      const noTradeChk = document.getElementById(row.id + '-notrade');
+      if (noTradeChk) noTradeChk.checked = false;
       const input = row.querySelector('input[type="text"]');
       if (input) input.value = '';
       recalcRow(row);
