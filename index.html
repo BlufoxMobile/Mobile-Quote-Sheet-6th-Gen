@@ -5443,12 +5443,12 @@ async function handleSubmit() {
     // no-cors mode returns an opaque response, so we assume success if no error thrown
     btn.innerHTML = '✅ Submitted!';
       btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
-      setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.disabled = false; resetToIntake(); }, 3000);
+      setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.disabled = false; location.reload(); }, 3000);
   } catch (err) {
     btn.innerHTML = orig;
     btn.disabled = false;
     alert('Submission failed. Please check your Zapier webhook URL is configured.\n\nError: ' + err.message);
-    resetToIntake();
+    location.reload();
   }
 }
 
