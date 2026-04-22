@@ -458,31 +458,7 @@
     overflow: hidden;
   }
 
-  
-  .savings-comparison-box {
-    margin: 20px auto;
-    max-width: 680px;
-    padding: 18px 24px;
-    background: var(--xfinity-purple, #6B2FA0);
-    color: #fff;
-    border-radius: var(--radius, 12px);
-    text-align: center;
-    font-family: var(--font-family, 'XfinityStandard', Arial, sans-serif);
-  }
-  .savings-comparison-box .scb-amount {
-    font-size: 32px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-  .savings-comparison-box .scb-label {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-top: 4px;
-    opacity: 0.9;
-  }
-.savings-card-stacked {
+  .savings-card-stacked {
     padding: 14px 16px;
     text-align: center;
     background: linear-gradient(135deg, var(--xfinity-purple-dark), var(--xfinity-purple));
@@ -3537,7 +3513,11 @@
               <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;" id="coreNewBillSub"></div>
             </div>
           </div>
-          <div class="savings-stack">
+                    <div id="savingsComparisonBox" style="display:none;background:var(--xfinity-purple,#6B2FA0);color:#fff;text-align:center;padding:14px 20px;margin:10px 12px 0;">
+            <div class="scb-amount" id="scbAmount" style="font-size:28px;font-weight:700;letter-spacing:-0.5px;"></div>
+            <div class="scb-label" id="scbLabel" style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-top:2px;opacity:0.9;"></div>
+          </div>
+<div class="savings-stack">
             <div class="savings-card-stacked">
               <div class="savings-amount" id="coreMonthSavingsDisplay">—</div>
               <div class="savings-label">MONTHLY SAVINGS</div>
@@ -3552,12 +3532,6 @@
       </div>
       <div class="xfinity-disclaimer">* Estimate only. Taxes &amp; fees not included.</div>
     </div>
-    <!-- Monthly Savings / Cost Comparison Box -->
-    <div class="savings-comparison-box" id="savingsComparisonBox" style="display:none;">
-      <div class="scb-amount" id="scbAmount"></div>
-      <div class="scb-label" id="scbLabel"></div>
-    </div>
-
 
     <!-- Features & Benefits -->
     <div class="features-section" id="featuresSection" style="display:none">
@@ -5225,29 +5199,7 @@ function updateTotalWithDevices(planMonthly) {
   const grandTotal = planMonthly + deviceTotal + getVoiceToXMCost();
   document.getElementById('xtwd-amount').textContent = `$${grandTotal.toFixed(2)}/mo`;
   document.getElementById('xtwd-sub').textContent = `Plan $${planMonthly}/mo + Devices $${deviceTotal.toFixed(2)}/mo`;
-  document.getElementById('xfinityTotalWithDevices').style.display = 'block';
-
-  // Update savings comparison box
-  const coreCurrent = parseFloat(document.getElementById('coreCurrentHidden').value) || 0;
-  if (coreCurrent > 0) {
-    const diff = coreCurrent - grandTotal;
-    const box = document.getElementById('savingsComparisonBox');
-    const amtEl = document.getElementById('scbAmount');
-    const lblEl = document.getElementById('scbLabel');
-    if (box && amtEl && lblEl) {
-      if (diff > 0) {
-        amtEl.textContent = 'Save $' + diff.toFixed(2) + '/mo';
-        lblEl.textContent = 'MONTHLY SAVINGS WITH XFINITY';
-      } else if (diff < 0) {
-        amtEl.textContent = '$' + Math.abs(diff).toFixed(2) + '/mo more';
-        lblEl.textContent = 'ADDITIONAL COST VS CURRENT';
-      } else {
-        amtEl.textContent = 'Same price!';
-        lblEl.textContent = 'NO CHANGE IN MONTHLY COST';
-      }
-      box.style.display = 'block';
-    }
-  }
+  document.getElementById('xfinityTotalWithDevices').style.display = 'block';  }
 
 
   // Update the Xfinity total bar at the bottom of the column
@@ -6874,6 +6826,27 @@ function declineMobileOffer() {
   document.getElementById('intakeScreen').style.display = 'block';
   setTimeout(updateIntakeSavingsPreview, 50);
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Show savings comparison box (decline mobile view)
+  const coreCurrent = parseFloat(document.getElementById('coreCurrentHidden').value) || 0;
+  const coreRebundle = parseFloat(document.getElementById('coreRebundleHidden').value) || 0;
+  const box = document.getElementById('savingsComparisonBox');
+  const amtEl = document.getElementById('scbAmount');
+  const lblEl = document.getElementById('scbLabel');
+  if (box && amtEl && lblEl && coreCurrent > 0 && coreRebundle > 0) {
+    const diff = coreCurrent - coreRebundle;
+    if (diff > 0) {
+      amtEl.textContent = 'Save $' + diff.toFixed(2) + '/mo';
+      lblEl.textContent = 'MONTHLY SAVINGS WITH XFINITY';
+    } else if (diff < 0) {
+      amtEl.textContent = '$' + Math.abs(diff).toFixed(2) + '/mo more';
+      lblEl.textContent = 'ADDITIONAL COST VS CURRENT';
+    } else {
+      amtEl.textContent = 'Same price!';
+      lblEl.textContent = 'NO CHANGE IN MONTHLY COST';
+    }
+    box.style.display = 'block';
+  }
 }
 
 function exitDevicesOnlyMode() {
