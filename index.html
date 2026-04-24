@@ -5365,9 +5365,11 @@ function handleSavePDF() {
   window.print();
 }
 
-// ── SUBMIT TO ZAPIER ──
-// ⚠️ REPLACE THE URL BELOW WITH YOUR ZAPIER WEBHOOK URL WHEN READY
+// ── SUBMIT TO ZAPIER + GOOGLE APPS SCRIPT ──
+// During parallel-run phase we post to BOTH so we have a safety net.
+// After ~1 week of confirmed working, remove the Zapier call.
 const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/20441079/up242h1/';
+const APPS_SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbyQaa1yvggLJuw5dcme74vwAW3hSB3BvzCK40IhLThy-F8KZDFOF6gcyl8psNMd3yD-Cg/exec';
 
 async function handleSubmit() {
   const repName   = document.getElementById('repName').value.trim();
@@ -5430,16 +5432,52 @@ async function handleSubmit() {
   btn.innerHTML = '⏳ Submitting...';
   btn.disabled = true;
 
+  // Build a payload in the schema the Apps Script doPost handler expects
+  // (snake_case keys matching the Current Month columns in the Google Sheet).
+  const watchesCount = deviceRows.filter(d => /watch/i.test(d.type || '')).length;
+  const tabletsCount = deviceRows.filter(d => /tablet/i.test(d.type || '')).length;
+  const appsScriptPayload = {
+    store:             payload.storeName,
+    rep_name:          payload.repName,
+    rep_email:         payload.repEmail,
+    rep_phone:         payload.repPhone,
+    customer_name:     payload.customerName,
+    customer_phone:    payload.customerPhone,
+    membership_tier:   payload.rewardsTier,
+    current_carrier:   payload.carrier,
+    lines:             payload.lines,
+    current_bill:      payload.monthlyBill,
+    plan_selected:     payload.xfinityPlan,
+    core_bill_current: payload.coreCurrent,
+    core_bill_after:   payload.coreRebundle,
+    core_savings:      payload.coreSavings,
+    watches:           watchesCount,
+    tablets:           tabletsCount,
+    xv_to_xm:          '',
+    monthly_savings:   payload.monthlySavings,
+    annual_savings:    payload.yearlySavings,
+    devices_only:      !payload.xfinityPlan || payload.xfinityPlan === 'N/A',
+    device_count:      deviceRows.length,
+  };
+
   try {
     if (ZAPIER_WEBHOOK_URL.includes('YOUR_HOOK_ID_HERE')) {
       throw new Error('Zapier webhook URL has not been configured yet. Please update ZAPIER_WEBHOOK_URL in the script.');
     }
-    await fetch(ZAPIER_WEBHOOK_URL, {
+    // Parallel submit: Apps Script (new) + Zapier (safety net)
+    const zapierCall = fetch(ZAPIER_WEBHOOK_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    });
+    }).catch(err => console.error('Zapier submission failed:', err));
+    const appsScriptCall = fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appsScriptPayload),
+    }).catch(err => console.error('Apps Script submission failed:', err));
+    await Promise.all([zapierCall, appsScriptCall]);
     // no-cors mode returns an opaque response, so we assume success if no error thrown
     btn.innerHTML = '✅ Submitted!';
       btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
@@ -5447,7 +5485,7 @@ async function handleSubmit() {
   } catch (err) {
     btn.innerHTML = orig;
     btn.disabled = false;
-    alert('Submission failed. Please check your Zapier webhook URL is configured.\n\nError: ' + err.message);
+    alert('Submission failed.\n\nError: ' + err.message);
     location.reload();
   }
 }
