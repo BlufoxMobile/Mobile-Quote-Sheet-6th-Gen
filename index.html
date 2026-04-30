@@ -1335,7 +1335,9 @@
     .ipp-sub  { font-size: 12px; }
     .wt-toggle-row { flex-direction: column; gap: 16px; }
     .wt-toggle-block { min-width: unset; width: 100%; }
-    .wt-count-btns { gap: 8px; }
+    .wt-count-btns { display: flex; flex-direction: column; gap: 8px; }
+    .wt-btn-row { display: flex; gap: 8px; flex-wrap: nowrap; }
+    .wt-btn-spacer { width: 56px; min-width: 56px; flex-shrink: 0; }
     .wt-count-btn { padding: 9px 16px; font-size: 14px; }
     .df-row-body { padding: 14px; }
     .df-autocomplete-wrap input { font-size: 16px; padding: 12px 14px; }
@@ -3216,12 +3218,22 @@
               </div>
             </div>
             <div class="wt-count-btns">
-              <button class="wt-count-btn active" data-type="watches" data-val="0" onclick="setWTCount(&#39;watches&#39;,0,this)">None</button>
-              <button class="wt-count-btn" data-type="watches" data-val="1" onclick="setWTCount(&#39;watches&#39;,1,this)">1</button>
-              <button class="wt-count-btn" data-type="watches" data-val="2" onclick="setWTCount(&#39;watches&#39;,2,this)">2</button>
-              <button class="wt-count-btn" data-type="watches" data-val="3" onclick="setWTCount(&#39;watches&#39;,3,this)">3</button>
-              <button class="wt-count-btn" data-type="watches" data-val="4" onclick="setWTCount(&#39;watches&#39;,4,this)">4</button>
-              <button class="wt-count-btn" data-type="watches" data-val="5" onclick="setWTCount(&#39;watches&#39;,5,this)">5</button><button class="wt-count-btn" data-type="watches" data-val="6" onclick="setWTCount(&#39;watches&#39;,6,this)">6</button><button class="wt-count-btn" data-type="watches" data-val="7" onclick="setWTCount(&#39;watches&#39;,7,this)">7</button><button class="wt-count-btn" data-type="watches" data-val="8" onclick="setWTCount(&#39;watches&#39;,8,this)">8</button><button class="wt-count-btn" data-type="watches" data-val="9" onclick="setWTCount(&#39;watches&#39;,9,this)">9</button><button class="wt-count-btn" data-type="watches" data-val="10" onclick="setWTCount(&#39;watches&#39;,10,this)">10</button>
+              <div class="wt-btn-row">
+                <button class="wt-count-btn active" data-type="watches" data-val="0" onclick="setWTCount(&#39;watches&#39;,0,this)">None</button>
+                <button class="wt-count-btn" data-type="watches" data-val="1" onclick="setWTCount(&#39;watches&#39;,1,this)">1</button>
+                <button class="wt-count-btn" data-type="watches" data-val="2" onclick="setWTCount(&#39;watches&#39;,2,this)">2</button>
+                <button class="wt-count-btn" data-type="watches" data-val="3" onclick="setWTCount(&#39;watches&#39;,3,this)">3</button>
+                <button class="wt-count-btn" data-type="watches" data-val="4" onclick="setWTCount(&#39;watches&#39;,4,this)">4</button>
+                <button class="wt-count-btn" data-type="watches" data-val="5" onclick="setWTCount(&#39;watches&#39;,5,this)">5</button>
+              </div>
+              <div class="wt-btn-row">
+                <span class="wt-btn-spacer"></span>
+                <button class="wt-count-btn" data-type="watches" data-val="6" onclick="setWTCount(&#39;watches&#39;,6,this)">6</button>
+                <button class="wt-count-btn" data-type="watches" data-val="7" onclick="setWTCount(&#39;watches&#39;,7,this)">7</button>
+                <button class="wt-count-btn" data-type="watches" data-val="8" onclick="setWTCount(&#39;watches&#39;,8,this)">8</button>
+                <button class="wt-count-btn" data-type="watches" data-val="9" onclick="setWTCount(&#39;watches&#39;,9,this)">9</button>
+                <button class="wt-count-btn" data-type="watches" data-val="10" onclick="setWTCount(&#39;watches&#39;,10,this)">10</button>
+              </div>
             </div>
           </div>
           <div id="watchFinancingRows"></div>
@@ -3239,12 +3251,22 @@
               </div>
             </div>
             <div class="wt-count-btns">
-              <button class="wt-count-btn active" data-type="tablets" data-val="0" onclick="setWTCount(&#39;tablets&#39;,0,this)">None</button>
-              <button class="wt-count-btn" data-type="tablets" data-val="1" onclick="setWTCount(&#39;tablets&#39;,1,this)">1</button>
-              <button class="wt-count-btn" data-type="tablets" data-val="2" onclick="setWTCount(&#39;tablets&#39;,2,this)">2</button>
-              <button class="wt-count-btn" data-type="tablets" data-val="3" onclick="setWTCount(&#39;tablets&#39;,3,this)">3</button>
-              <button class="wt-count-btn" data-type="tablets" data-val="4" onclick="setWTCount(&#39;tablets&#39;,4,this)">4</button>
-              <button class="wt-count-btn" data-type="tablets" data-val="5" onclick="setWTCount(&#39;tablets&#39;,5,this)">5</button><button class="wt-count-btn" data-type="tablets" data-val="6" onclick="setWTCount(&#39;tablets&#39;,6,this)">6</button><button class="wt-count-btn" data-type="tablets" data-val="7" onclick="setWTCount(&#39;tablets&#39;,7,this)">7</button><button class="wt-count-btn" data-type="tablets" data-val="8" onclick="setWTCount(&#39;tablets&#39;,8,this)">8</button><button class="wt-count-btn" data-type="tablets" data-val="9" onclick="setWTCount(&#39;tablets&#39;,9,this)">9</button><button class="wt-count-btn" data-type="tablets" data-val="10" onclick="setWTCount(&#39;tablets&#39;,10,this)">10</button>
+              <div class="wt-btn-row">
+                <button class="wt-count-btn active" data-type="tablets" data-val="0" onclick="setWTCount(&#39;tablets&#39;,0,this)">None</button>
+                <button class="wt-count-btn" data-type="tablets" data-val="1" onclick="setWTCount(&#39;tablets&#39;,1,this)">1</button>
+                <button class="wt-count-btn" data-type="tablets" data-val="2" onclick="setWTCount(&#39;tablets&#39;,2,this)">2</button>
+                <button class="wt-count-btn" data-type="tablets" data-val="3" onclick="setWTCount(&#39;tablets&#39;,3,this)">3</button>
+                <button class="wt-count-btn" data-type="tablets" data-val="4" onclick="setWTCount(&#39;tablets&#39;,4,this)">4</button>
+                <button class="wt-count-btn" data-type="tablets" data-val="5" onclick="setWTCount(&#39;tablets&#39;,5,this)">5</button>
+              </div>
+              <div class="wt-btn-row">
+                <span class="wt-btn-spacer"></span>
+                <button class="wt-count-btn" data-type="tablets" data-val="6" onclick="setWTCount(&#39;tablets&#39;,6,this)">6</button>
+                <button class="wt-count-btn" data-type="tablets" data-val="7" onclick="setWTCount(&#39;tablets&#39;,7,this)">7</button>
+                <button class="wt-count-btn" data-type="tablets" data-val="8" onclick="setWTCount(&#39;tablets&#39;,8,this)">8</button>
+                <button class="wt-count-btn" data-type="tablets" data-val="9" onclick="setWTCount(&#39;tablets&#39;,9,this)">9</button>
+                <button class="wt-count-btn" data-type="tablets" data-val="10" onclick="setWTCount(&#39;tablets&#39;,10,this)">10</button>
+              </div>
             </div>
           </div>
           <div id="tabletFinancingRows"></div>
