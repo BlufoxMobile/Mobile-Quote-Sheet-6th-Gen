@@ -5507,15 +5507,31 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
     // Force-reflow so getBoundingClientRect reflects the B&W layout
     target.offsetHeight;
 
-    // Determine where to force a page break — at the "Plan Features & Promotions"
-    // section. This guarantees page 1 = headline savings + customer/rep info,
-    // and page 2 = features + promotions + line breakdown + device financing.
+    // Determine where to force a page break — between the "* Estimate only.
+    // Taxes & fees not included." disclaimer and the "Plan Features &
+    // Promotions" section. The disclaimer is the last thing on page 1; page 2
+    // starts with the features header. This way an employee printing only
+    // page 1 still sees the disclaimer.
     let breakOffsetCss = -1;
     const featuresEl = document.getElementById('featuresSection');
     if (featuresEl && featuresEl.offsetParent !== null) {
       const tRect = target.getBoundingClientRect();
       const fRect = featuresEl.getBoundingClientRect();
-      breakOffsetCss = fRect.top - tRect.top;
+      // Find the last visible disclaimer that sits above the features section
+      let lastDisclaimerBottom = -1;
+      document.querySelectorAll('.xfinity-disclaimer').forEach(d => {
+        if (d.offsetParent === null) return; // hidden
+        const r = d.getBoundingClientRect();
+        if (r.bottom <= fRect.top && r.bottom > lastDisclaimerBottom) {
+          lastDisclaimerBottom = r.bottom;
+        }
+      });
+      // Break ~6px BELOW the disclaimer so it stays on page 1, but BEFORE
+      // the features header so page 2 starts cleanly with features.
+      const breakAnchorPx = lastDisclaimerBottom > -1
+        ? lastDisclaimerBottom + 6
+        : fRect.top;
+      breakOffsetCss = Math.min(breakAnchorPx, fRect.top) - tRect.top;
     }
 
     const canvas = await html2canvas(target, {
