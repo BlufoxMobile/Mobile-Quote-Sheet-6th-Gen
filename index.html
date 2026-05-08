@@ -2927,6 +2927,9 @@
 .rpkg-select{width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:13px;color:var(--text-primary);margin-bottom:8px;appearance:auto;}
 .rpkg-select:focus{border-color:var(--xfinity-purple);outline:none;}
 </style>
+<!-- PDF generation libs (used by handleSavePDF / handlePrint for iPad-friendly downloads) -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -5371,7 +5374,92 @@ function buildDeviceSummary(planMonthly, compBill) {
   updateSavingsBanners(xfinityTotal, compBill);
 }
 
-// ── SAVE AS PDF ──
+// ── PDF GENERATION (iPad-friendly: no reliance on window.print) ──
+// Renders the comparison screen to a canvas, then builds a multi-page Letter PDF
+// and either downloads it or opens it in a new tab for printing via Safari Share.
+async function _buildQuotePdf({ openInNewTab = false } = {}) {
+  const target = document.getElementById('comparisonScreen');
+  if (!target || !window.html2canvas || !window.jspdf) {
+    alert('PDF library not loaded yet. Please wait a moment and try again.');
+    return;
+  }
+
+  // Hide elements not meant for the printed copy (the no-print buttons,
+  // any tearsheet iframe with broken src, etc.) just for the duration of capture.
+  const hiddenEls = [];
+  target.querySelectorAll('.no-print, #pdfPage, #savingsTallyBar').forEach(el => {
+    hiddenEls.push([el, el.style.display]);
+    el.style.display = 'none';
+  });
+  // Also hide the global tally bar if it overlaps
+  const tally = document.getElementById('savingsTallyBar');
+  if (tally) { hiddenEls.push([tally, tally.style.display]); tally.style.display = 'none'; }
+
+  // Track previous body styles so we can restore them
+  const prevBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'visible';
+
+  // Show a quick "generating…" toast on the triggering button
+  const allBtns = document.querySelectorAll('.btn-footer-save, .btn-footer-print');
+  const origLabels = [];
+  allBtns.forEach(b => { origLabels.push([b, b.innerHTML, b.disabled]); b.disabled = true; });
+
+  try {
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      windowWidth: target.scrollWidth,
+      windowHeight: target.scrollHeight,
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter' });
+    const pageWidth  = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    // Scale the canvas image to fit the page width
+    const imgWidth   = pageWidth;
+    const imgHeight  = canvas.height * (imgWidth / canvas.width);
+
+    // Multi-page: slice the canvas into page-height chunks
+    let position = 0;
+    let remaining = imgHeight;
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, position, imgWidth, imgHeight);
+    remaining -= pageHeight;
+    while (remaining > 0) {
+      position -= pageHeight;
+      pdf.addPage();
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, position, imgWidth, imgHeight);
+      remaining -= pageHeight;
+    }
+
+    // Build a friendly filename
+    const repName = (document.getElementById('repName').value || 'Quote').trim();
+    const customerName = (document.getElementById('customerName').textContent || '').trim();
+    const datePart = new Date().toISOString().slice(0, 10);
+    const filename = `Xfinity-Quote_${customerName || 'Customer'}_${datePart}.pdf`
+      .replace(/[^A-Za-z0-9._-]/g, '_');
+
+    if (openInNewTab) {
+      // Opens the PDF in a new tab so the rep can use the iPad Safari Share → Print
+      const blobUrl = pdf.output('bloburl');
+      window.open(blobUrl, '_blank');
+    } else {
+      // Triggers a real download — saves to Files on iPad
+      pdf.save(filename);
+    }
+  } catch (err) {
+    console.error('PDF generation failed:', err);
+    alert('PDF generation failed: ' + err.message);
+  } finally {
+    // Restore everything we hid
+    hiddenEls.forEach(([el, d]) => { el.style.display = d; });
+    document.body.style.overflow = prevBodyOverflow;
+    origLabels.forEach(([b, label, disabled]) => { b.innerHTML = label; b.disabled = disabled; });
+  }
+}
+
+// ── SAVE AS PDF — triggers a download ──
 function handleSavePDF() {
   const repName  = document.getElementById('repName').value.trim();
   const storeName = document.getElementById('storeName').value;
@@ -5379,15 +5467,12 @@ function handleSavePDF() {
     alert('Please fill in Rep Name and Store Name before saving.');
     return;
   }
-  // Populate contact footer
   document.getElementById('pcf-custName').textContent  = document.getElementById('customerName').textContent || '—';
   document.getElementById('pcf-custPhone').textContent = document.getElementById('customerPhone').textContent || '—';
   document.getElementById('pcf-repName').textContent   = repName;
   document.getElementById('pcf-repPhone').textContent  = document.getElementById('repPhone').value || '—';
   document.getElementById('pcf-repEmail').textContent  = document.getElementById('repEmail').value || '—';
-
-  // Save as PDF via print dialog (user selects "Save as PDF" in print dialog)
-  window.print();
+  _buildQuotePdf({ openInNewTab: false });
 }
 
 // ── SUBMIT TO ZAPIER + GOOGLE APPS SCRIPT ──
@@ -5515,7 +5600,7 @@ async function handleSubmit() {
   }
 }
 
-// ── PRINT VALIDATION ──
+// ── PRINT — opens PDF in a new tab so rep can use Safari Share → Print on iPad ──
 function handlePrint() {
   const repName  = document.getElementById('repName').value.trim();
   const storeName = document.getElementById('storeName').value;
@@ -5537,14 +5622,13 @@ function handlePrint() {
     return;
   }
 
-  // Populate print contact footer
   document.getElementById('pcf-custName').textContent  = document.getElementById('customerName').textContent  || '—';
   document.getElementById('pcf-custPhone').textContent = document.getElementById('customerPhone').textContent || '—';
   document.getElementById('pcf-repName').textContent   = repName;
   document.getElementById('pcf-repPhone').textContent  = document.getElementById('repPhone').value  || '—';
   document.getElementById('pcf-repEmail').textContent  = document.getElementById('repEmail').value  || '—';
 
-  window.print();
+  _buildQuotePdf({ openInNewTab: true });
 }
 
 // ── AUTO DATE ──
