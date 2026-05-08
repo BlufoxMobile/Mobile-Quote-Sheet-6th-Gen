@@ -5404,51 +5404,48 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
   const origLabels = [];
   allBtns.forEach(b => { origLabels.push([b, b.innerHTML, b.disabled]); b.disabled = true; });
 
-  // Inject a temporary style block that forces full-saturation colors on every
-  // element during capture — html2canvas otherwise dulls gradients and rgba.
+  // Apply the existing @media print rules as live screen styles during capture.
+  // This makes html2canvas see the same vibrant colors / layout as a native
+  // print preview — without using foreignObjectRendering (which fails on iPad).
+  let printCssText = '';
+  try {
+    for (const sheet of document.styleSheets) {
+      try {
+        for (const rule of sheet.cssRules) {
+          if (rule.type === CSSRule.MEDIA_RULE &&
+              /\bprint\b/.test(rule.conditionText || (rule.media && rule.media.mediaText) || '')) {
+            for (const inner of rule.cssRules) {
+              printCssText += inner.cssText + '\n';
+            }
+          }
+        }
+      } catch (_) { /* cross-origin stylesheet — skip */ }
+    }
+  } catch (_) {}
   const captureCss = document.createElement('style');
   captureCss.id = '__pdf_capture_css__';
   captureCss.textContent = `
-    /* Preserve the on-screen vibrant Xfinity colors during PDF capture */
-    .pdf-capturing, .pdf-capturing * {
+    /* Force browser to preserve printable colors (no auto-tone-down) */
+    html, body, ${'#comparisonScreen'} * {
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
-    /* Lock in saturated brand colors (avoid CSS-var resolution issues) */
-    .pdf-capturing .header,
-    .pdf-capturing #comparisonScreen .header { background: #673AB7 !important; }
-    .pdf-capturing .header h1, .pdf-capturing .header p { color: #ffffff !important; }
+    /* Inline all @media print rules so they apply during screen capture */
+    ${printCssText}
   `;
   document.head.appendChild(captureCss);
-  target.classList.add('pdf-capturing');
 
   try {
-    // Try foreignObject rendering first (full SVG fidelity for gradients/colors).
-    // Fall back to default canvas rendering if Safari/iPadOS rejects it.
-    let canvas;
-    try {
-      canvas = await html2canvas(target, {
-        scale: 2.5,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        foreignObjectRendering: true,
-        letterRendering: true,
-        windowWidth: target.scrollWidth,
-        windowHeight: target.scrollHeight,
-      });
-    } catch (e) {
-      console.warn('foreignObject capture failed, falling back to canvas mode:', e);
-      canvas = await html2canvas(target, {
-        scale: 2.5,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        letterRendering: true,
-        windowWidth: target.scrollWidth,
-        windowHeight: target.scrollHeight,
-      });
-    }
+    const canvas = await html2canvas(target, {
+      scale: 2.5,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      letterRendering: true,
+      logging: false,
+      windowWidth: target.scrollWidth,
+      windowHeight: target.scrollHeight,
+    });
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter' });
@@ -5496,7 +5493,6 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
     hiddenEls.forEach(([el, d]) => { el.style.display = d; });
     document.body.style.overflow = prevBodyOverflow;
     origLabels.forEach(([b, label, disabled]) => { b.innerHTML = label; b.disabled = disabled; });
-    target.classList.remove('pdf-capturing');
     const tmp = document.getElementById('__pdf_capture_css__');
     if (tmp) tmp.remove();
   }
