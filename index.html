@@ -5404,34 +5404,102 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
   const origLabels = [];
   allBtns.forEach(b => { origLabels.push([b, b.innerHTML, b.disabled]); b.disabled = true; });
 
-  // Apply the existing @media print rules as live screen styles during capture.
-  // This makes html2canvas see the same vibrant colors / layout as a native
-  // print preview — without using foreignObjectRendering (which fails on iPad).
-  let printCssText = '';
-  try {
-    for (const sheet of document.styleSheets) {
-      try {
-        for (const rule of sheet.cssRules) {
-          if (rule.type === CSSRule.MEDIA_RULE &&
-              /\bprint\b/.test(rule.conditionText || (rule.media && rule.media.mediaText) || '')) {
-            for (const inner of rule.cssRules) {
-              printCssText += inner.cssText + '\n';
-            }
-          }
-        }
-      } catch (_) { /* cross-origin stylesheet — skip */ }
-    }
-  } catch (_) {}
+  // Inject a B&W "PDF mode" stylesheet — every quote sheet is printed on B&W
+  // hardware, so we drop colored backgrounds entirely and use bold borders +
+  // type weight to convey structure. This avoids html2canvas's color-fade
+  // issues completely and produces a crisp, ink-efficient print.
   const captureCss = document.createElement('style');
   captureCss.id = '__pdf_capture_css__';
   captureCss.textContent = `
-    /* Force browser to preserve printable colors (no auto-tone-down) */
-    html, body, ${'#comparisonScreen'} * {
+    /* Wipe every background image, gradient, and color throughout the capture */
+    #comparisonScreen, #comparisonScreen * {
+      color: #000000 !important;
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      background-image: none !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+      filter: none !important;
+      opacity: 1 !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
-    /* Inline all @media print rules so they apply during screen capture */
-    ${printCssText}
+
+    /* Hide interactive controls + tally bar + the broken iframe block */
+    #comparisonScreen .no-print,
+    #comparisonScreen .back-btn,
+    #savingsTallyBar,
+    .savings-tally-bar,
+    .pdf-page,
+    .yr-toggle-wrap,
+    .actions-footer,
+    .footer-btn-row,
+    .financing-toggle-sub,
+    .financing-toggle-arrow { display: none !important; }
+
+    /* Show device financing fully expanded regardless of toggle state */
+    #comparisonScreen .financing-collapse {
+      max-height: none !important;
+      overflow: visible !important;
+      padding: 16px 18px !important;
+      display: block !important;
+    }
+
+    /* Strong black borders on all structural containers so the layout reads
+       clearly without colored fills */
+    #comparisonScreen .card,
+    #comparisonScreen .info-bar-grid,
+    #comparisonScreen .info-display-grid,
+    #comparisonScreen .cmp-block,
+    #comparisonScreen .cmp-side,
+    #comparisonScreen .cmp-section,
+    #comparisonScreen .cost-card,
+    #comparisonScreen .savings-card,
+    #comparisonScreen .promotions-card,
+    #comparisonScreen .feat-list,
+    #comparisonScreen .breakdown-table,
+    #comparisonScreen .lbl-table {
+      border: 1.5px solid #000000 !important;
+      border-radius: 4px !important;
+    }
+
+    /* Internal cells / rows: thin gridlines */
+    #comparisonScreen .info-bar-block,
+    #comparisonScreen .info-display-block,
+    #comparisonScreen .device-row,
+    #comparisonScreen .breakdown-row,
+    #comparisonScreen .lbl-row,
+    #comparisonScreen td,
+    #comparisonScreen th {
+      border: 1px solid #000000 !important;
+    }
+
+    /* Heading bars / section titles get heavier weight + thicker bottom rule */
+    #comparisonScreen .header,
+    #comparisonScreen .header h1,
+    #comparisonScreen .header p,
+    #comparisonScreen .section-title,
+    #comparisonScreen .cmp-block-title,
+    #comparisonScreen .cmp-side-header,
+    #comparisonScreen .cost-label,
+    #comparisonScreen .savings-label,
+    #comparisonScreen .lb-header,
+    #comparisonScreen th {
+      font-weight: 700 !important;
+    }
+    #comparisonScreen .header { border-bottom: 2.5px solid #000000 !important; padding: 14px 18px !important; }
+    #comparisonScreen .cmp-side-header,
+    #comparisonScreen .cost-label,
+    #comparisonScreen .savings-label { border-bottom: 1.5px solid #000000 !important; padding: 8px 12px !important; }
+
+    /* Keep large numeric values prominent */
+    #comparisonScreen .price-large,
+    #comparisonScreen .cmp-amount,
+    #comparisonScreen .savings-amount,
+    #comparisonScreen .cost-amount { font-weight: 800 !important; }
+
+    /* Preserve italics for footnotes ("* Estimate only…") */
+    #comparisonScreen em, #comparisonScreen i { font-style: italic !important; }
   `;
   document.head.appendChild(captureCss);
 
