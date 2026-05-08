@@ -5504,6 +5504,20 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
   document.head.appendChild(captureCss);
 
   try {
+    // Force-reflow so getBoundingClientRect reflects the B&W layout
+    target.offsetHeight;
+
+    // Determine where to force a page break — at the "Plan Features & Promotions"
+    // section. This guarantees page 1 = headline savings + customer/rep info,
+    // and page 2 = features + promotions + line breakdown + device financing.
+    let breakOffsetCss = -1;
+    const featuresEl = document.getElementById('featuresSection');
+    if (featuresEl && featuresEl.offsetParent !== null) {
+      const tRect = target.getBoundingClientRect();
+      const fRect = featuresEl.getBoundingClientRect();
+      breakOffsetCss = fRect.top - tRect.top;
+    }
+
     const canvas = await html2canvas(target, {
       scale: 2.5,
       useCORS: true,
@@ -5519,23 +5533,50 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
     const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter' });
     const pageWidth  = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    // Scale the canvas image to fit the page width
-    const imgWidth   = pageWidth;
-    const imgHeight  = canvas.height * (imgWidth / canvas.width);
 
-    // Use PNG for max color fidelity (was JPEG which compresses gradients).
-    const imgData = canvas.toDataURL('image/png');
+    // Helper — slices the master canvas vertically and adds it to the PDF,
+    // auto-paginating if a single slice is taller than one PDF page.
+    let isFirstPage = true;
+    const addCanvasSegment = (srcY, srcHeight) => {
+      if (srcHeight <= 0) return;
+      const slice = document.createElement('canvas');
+      slice.width  = canvas.width;
+      slice.height = srcHeight;
+      const sctx = slice.getContext('2d');
+      sctx.fillStyle = '#ffffff';
+      sctx.fillRect(0, 0, slice.width, slice.height);
+      sctx.drawImage(canvas, 0, -srcY);
+      const data = slice.toDataURL('image/png');
 
-    // Multi-page: slice the canvas into page-height chunks
-    let position = 0;
-    let remaining = imgHeight;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    remaining -= pageHeight;
-    while (remaining > 0) {
-      position -= pageHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      const imgWidth  = pageWidth;
+      const imgHeight = srcHeight * (imgWidth / canvas.width);
+      if (!isFirstPage) pdf.addPage();
+      isFirstPage = false;
+
+      let pos = 0;
+      let remaining = imgHeight;
+      pdf.addImage(data, 'PNG', 0, pos, imgWidth, imgHeight);
       remaining -= pageHeight;
+      while (remaining > 0) {
+        pos -= pageHeight;
+        pdf.addPage();
+        pdf.addImage(data, 'PNG', 0, pos, imgWidth, imgHeight);
+        remaining -= pageHeight;
+      }
+    };
+
+    // Map our CSS break offset to canvas pixels (canvas.width / target.scrollWidth = effective scale)
+    const effScale = canvas.width / target.scrollWidth;
+    const breakY = breakOffsetCss > 0 ? Math.round(breakOffsetCss * effScale) : -1;
+
+    if (breakY > 0 && breakY < canvas.height) {
+      // Page 1: top → just before features section
+      addCanvasSegment(0, breakY);
+      // Page 2+: features section → end (auto-paginates further if needed)
+      addCanvasSegment(breakY, canvas.height - breakY);
+    } else {
+      // Fallback if features section not found — single multi-page flow
+      addCanvasSegment(0, canvas.height);
     }
 
     // Build a friendly filename
