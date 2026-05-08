@@ -4420,98 +4420,100 @@ function getTabletDataset() {
 // tag: used to conditionally show promos based on what's selected
 // endDate: YYYY-MM-DD — promo auto-hides on or after this date (null = always active)
 const PROMO_DEFINITIONS = [
-  // ════════════════════════════════════════════════
-  // MAY 11 – JUNE 21, 2026 PROMOTIONS
-  // ════════════════════════════════════════════════
-
-  // ── Prepaid Mastercard (events only) ──
+  // ── Prepaid Mastercard promos ──
   {
-    tag:       'mc_event',
-    text:      '💳 $100–$500 Prepaid Mastercard when adding multiple new lines — Retail & Field Sales Events only',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  // ── Waived activation fee for new XM customers ──
-  {
-    tag:       'xm_act_fee_waived',
-    text:      '✅ Waived $25 line activation fee for new XM customers',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  // ── TIPs trade-in headline promos ──
-  {
-    tag:       'tips_pixel10_proxl_fold_1200',
-    text:      '📱 TIPs — Up to $1,200 off Pixel 10 Pro XL and Pro Fold',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  {
-    tag:       'tips_pixel10_pro_1000',
-    text:      '📱 TIPs — Up to $1,000 off Pixel 10 Pro',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  {
-    tag:       'tips_samsung_900',
-    text:      '📱 TIPs — Up to $900 off select Samsung',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  {
-    tag:       'tips_nonsam_830',
-    text:      '📱 TIPs — Up to $830 off select Apple, Google, or Motorola',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  // ── Trade-in additional discounts (stack with TIPs trade-in value) ──
-  {
-    tag:       'tradein_samsung_google_450',
-    text:      '🔁 Additional $450 off + your trade-in value towards a new Samsung or Google device',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  {
-    tag:       'tradein_apple_moto_200',
-    text:      '🔁 Additional $200 off + your trade-in value towards a new Apple or Motorola device',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  // ── No-trade discounts ──
-  {
-    tag:       'samsung_notrade',
-    text:      '💰 $500 off select Samsung devices',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  {
-    tag:       'premium_400',
-    text:      '💰 $400 off select Apple, Google, and Motorola',
-    startDate: '2026-05-11',
-    endDate:   '2026-06-21',
-  },
-  // ── Watch promo (drives Diamond/Platinum $300 discount via tag in pricing logic) ──
-  // Kept continuously active so the $300 watch discount keeps working through the transition.
-  {
-    tag:       'watch_elite',
-    text:      '⌚ Diamond members can get $300 off Apple, Samsung, and Google smartwatches',
+    tag:       'mc_200',
+    text:      '💳 $200 Prepaid Mastercard when adding 2+ new lines (phones, watches, or tablets) — Retail & Field Sales event teams only',
     startDate: '2026-04-15',
-    endDate:   '2026-06-21',
+    endDate:   '2026-05-10',
   },
-
-  // ════════════════════════════════════════════════
-  // EXTENDED PROMOTIONS
-  // ════════════════════════════════════════════════
+  {
+    tag:       'mc_400',
+    text:      '💳 $400 Prepaid Mastercard when adding 2+ new lines (phones, watches, or tablets) AND financing at least one phone or tablet — Retail & Field Sales event teams only',
+    startDate: '2026-04-15',
+    endDate:   '2026-05-10',
+  },
+  // ── Samsung TIPS trade-in ($1,100 off Samsung devices) ──
+  {
+    tag:     'tips_samsung_1100',
+    text:    '📱 TIPS Trade-In: Up to $1,100 off select Samsung devices w/ Premium Unlimited — New Line or Elite Upgrade',
+    endDate: '2026-05-10',
+  },
+  // ── Non-Samsung TIPS trade-in ($830 off Apple/Google/Motorola) ──
+  {
+    tag:     'tips_nonsam_830',
+    text:    '📱 TIPS Trade-In: Up to $830 off select Apple, Google, or Motorola devices w/ Premium Unlimited — New Line or Elite Upgrade',
+    endDate: '2026-05-10',
+  },
+  // ── Samsung no-trade promo ($500 off) ──
+  {
+    tag:     'samsung_notrade',
+    text:    '💰 $500 off select Samsung devices w/ Premium Unlimited — New Line or Elite Upgrade (no trade-in required)',
+    endDate: '2026-05-10',
+  },
+  // ── Samsung Unlimited trade-in ($500 TIPS) ──
+  {
+    tag:     'tips_samsung_500',
+    text:    '📱 TIPS Trade-In: Up to $500 off select Samsung devices w/ Unlimited — New Line or Upgrade',
+    endDate: '2026-05-10',
+  },
+  // ── Premium plan $400 off (non-Samsung, no qualifying trade) ──
+  {
+    tag:     'premium_400',
+    text:    '💰 $400 off select Apple, Samsung, Google, or Motorola devices w/ Premium Unlimited — New Line or Elite Upgrade',
+    endDate: '2026-05-10',
+  },
+  // ── $200 off Samsung w/ Unlimited (non-TIPS) ──
+  {
+    tag:     'samsung_200_unlimited',
+    text:    '💰 $200 off select Samsung devices w/ Unlimited — New Line or Upgrade',
+    endDate: '2026-05-10',
+  },
+  // ── iPhone 17e specific promos ──
+  {
+    tag:     'iphone17e_onus',
+    text:    '🍎 iPhone 17e "On Us" w/ TIPs & Premium Unlimited',
+    endDate: '2026-05-10',
+  },
+  {
+    tag:     'iphone17e_50off',
+    text:    '🍎 50% off iPhone 17e w/ TIPs & Unlimited',
+    endDate: '2026-05-10',
+  },
+  {
+    tag:     'iphone17e_400off',
+    text:    '🍎 $400 off iPhone 17e w/ Premium Unlimited',
+    endDate: '2026-05-10',
+  },
+  // ── Watch promos ──
+  {
+    tag:     'watch_elite',
+    text:    '⌚ $300 off select smartwatches for Diamond & Platinum Xfinity Membership customers',
+    startDate: '2026-04-15',
+    endDate: '2026-05-10',
+  },
+  {
+    tag:     'xmc_50_watch',
+    text:    '🛡️ 50% off XMC for first 3 months on new watch line',
+    endDate: '2026-05-10',
+  },
+  // ── Tablet promos ──
+  {
+    tag:     'xmc_50_tablet',
+    text:    '🛡️ 50% off XMC for first 3 months on new tablet line',
+    endDate: '2026-05-10',
+  },
+  {
+    tag:       'a11_50off',
+    text:      '📲 50% off Samsung Galaxy Tab A11+ 5G',
+    startDate: '2026-04-15',
+    endDate:   '2026-05-10',
+  },
   {
     tag:       'ipad_a16_50off',
-    text:      '📲 50% off iPad A16 (128 GB)',
-    startDate: '2026-04-20',
-    endDate:   '2026-06-21',
-  },
-  {
-    tag:       'xpe_watch_300',
-    text:      '⌚ $300 off Apple, Samsung, and Google smartwatches — XPE employee accounts only',
-    startDate: '2026-01-21',
-    endDate:   '2026-06-21',
+    text:      '📲 50% off iPad (A16) — 11th gen',
+    startDate: '2026-04-15',
+    endDate:   '2026-05-10',
   },
 ];
 
