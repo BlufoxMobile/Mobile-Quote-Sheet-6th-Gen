@@ -12890,12 +12890,9 @@ const PROMO_DEFINITIONS = [
     text:    '🛡️ 50% off XMC for first 3 months on new tablet line',
     endDate: '2026-05-10',
   },
-  {
-    tag:       'a11_50off',
-    text:      '📲 50% off Samsung Galaxy Tab A11+ 5G',
-    startDate: '2026-04-15',
-    endDate:   '2026-05-10',
-  },
+  // a11_50off — Galaxy Tab A11+ 50% off was discontinued 2026-05-10.
+  // Removed entirely (not just expired) since Jeff confirmed the offer
+  // is gone going forward.
   {
     tag:       'ipad_a16_50off',
     text:      '📲 50% off iPad (A16) — 11th gen, 128 GB',
@@ -12925,12 +12922,11 @@ function isPromoActiveByTag(tag) {
   return promo ? isPromoActive(promo) : false;
 }
 
-// Returns the current tablet promo discount (in dollars) for a given device
+// Returns the current tablet promo discount (in dollars) for a given device.
+// Galaxy Tab A11+ 50% off was discontinued 2026-05-10, so only the iPad
+// (A16) discount is checked here.
 function getTabletPromoDiscount(deviceName, devicePrice) {
   const name = (deviceName || '').toLowerCase();
-  if (name.includes('a11') && isPromoActiveByTag('a11_50off')) {
-    return devicePrice * 0.5;
-  }
   if ((name.includes('ipad (a16)') || name.includes('ipad a16')) && isPromoActiveByTag('ipad_a16_50off')) {
     return devicePrice * 0.5;
   }
@@ -13373,7 +13369,6 @@ function buildFeatures(plan) {
   let hasWatchDiamond    = false;
   let hasWatchXmc        = false;
   let hasTabletXmc       = false;
-  let hasA11             = false;
   let hasIpadA16         = false;
 
   const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
@@ -13442,7 +13437,7 @@ function buildFeatures(plan) {
     if (type === 'tablet') {
       if (xmcEnabled) hasTabletXmc = true;
       const nameLower = (deviceName || '').toLowerCase();
-      if (nameLower.includes('a11')) hasA11 = true;
+      // a11 detection removed — Galaxy Tab A11+ 50% off discontinued 2026-05-10
       if (nameLower.includes('ipad (a16)') || nameLower.includes('ipad a16')) hasIpadA16 = true;
     }
   });
@@ -13460,7 +13455,7 @@ function buildFeatures(plan) {
   if (hasWatchDiamond)    activeTags.add('watch_elite'); // now includes Platinum + Diamond
   if (hasWatchXmc)        activeTags.add('xmc_50_watch');
   if (hasTabletXmc)       activeTags.add('xmc_50_tablet');
-  if (hasA11)             activeTags.add('a11_50off');
+  // a11_50off removed — Galaxy Tab A11+ 50% off discontinued 2026-05-10
   if (hasIpadA16)         activeTags.add('ipad_a16_50off');
 
   // ── XMC Plus included (account-wide) ──
