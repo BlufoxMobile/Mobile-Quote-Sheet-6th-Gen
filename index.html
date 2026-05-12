@@ -12863,13 +12863,15 @@ const PROMO_DEFINITIONS = [
     endDate: '2026-05-10',
   },
   // ── Watch promos ──
-  // watch_elite is a perpetual Xfinity Membership reward (Diamond/Platinum
-  // tier benefit), NOT a time-limited promo. Leaving endDate null keeps
-  // the $300 watch discount always-active for qualifying customers; the
-  // tier check in recalcRow is the real eligibility gate.
+  // watch_elite is a perpetual Xfinity Membership reward (Diamond tier
+  // benefit), NOT a time-limited promo. Leaving endDate null keeps the
+  // $300 watch discount always-active for qualifying customers; the tier
+  // check in recalcRow is the real eligibility gate.
+  // Note: Platinum was eligible previously but was dropped — only Diamond
+  // members get the $300 off going forward.
   {
     tag:     'watch_elite',
-    text:    '⌚ $300 off select smartwatches for Diamond & Platinum Xfinity Membership customers',
+    text:    '⌚ $300 off select smartwatches for Diamond Xfinity Membership customers',
     endDate: null,
   },
   {
@@ -13430,7 +13432,8 @@ function buildFeatures(plan) {
     }
 
     if (type === 'watch') {
-      if ((intakeSelectedTier === 'diamond' || intakeSelectedTier === 'platinum') && deviceName) hasWatchDiamond = true;
+      // Diamond-only — Platinum no longer earns the $300 watch discount
+      if (intakeSelectedTier === 'diamond' && deviceName) hasWatchDiamond = true;
       if (xmcEnabled) hasWatchXmc = true;
     }
 
@@ -13452,7 +13455,7 @@ function buildFeatures(plan) {
   if (hasIphone17eOnUs)   activeTags.add('iphone17e_onus');
   if (hasIphone17e50off)  activeTags.add('iphone17e_50off');
   if (hasIphone17e400off) activeTags.add('iphone17e_400off');
-  if (hasWatchDiamond)    activeTags.add('watch_elite'); // now includes Platinum + Diamond
+  if (hasWatchDiamond)    activeTags.add('watch_elite'); // Diamond only — Platinum dropped
   if (hasWatchXmc)        activeTags.add('xmc_50_watch');
   if (hasTabletXmc)       activeTags.add('xmc_50_tablet');
   // a11_50off removed — Galaxy Tab A11+ 50% off discontinued 2026-05-10
@@ -14860,16 +14863,16 @@ function recalcRow(row) {
   } else if (type === 'watch') {
     let discount = 0;
     const watchEliteActive = isPromoActiveByTag('watch_elite');
-    // Only first 2 watches get the $300 discount
-    if ((intakeSelectedTier === 'diamond' || intakeSelectedTier === 'platinum') && watchEliteActive && parseInt(lineNum) <= 2) {
+    // Diamond tier only — Platinum no longer qualifies for the $300 watch discount.
+    // Only the first 2 watches on the quote get the discount.
+    if (intakeSelectedTier === 'diamond' && watchEliteActive && parseInt(lineNum) <= 2) {
       discount = DIAMOND_WATCH_DISCOUNT;
     }
     const netPrice = Math.max(0, devicePrice - discount);
     const monthly  = netPrice / 36 + 10 + xmcAdd;
     row.dataset.promoAmount = discount.toFixed(2);
-    const tierLabel = intakeSelectedTier === 'platinum' ? 'Platinum' : 'Diamond';
     monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo`
-      + (discount > 0 ? `<span class="df-mo-promo">${tierLabel} -$${discount}</span>` : '')
+      + (discount > 0 ? `<span class="df-mo-promo">Diamond -$${discount}</span>` : '')
       + (xmcEnabled ? `<span class="df-mo-promo" style="color:var(--xfinity-accent);">+XMC $${xmcRate}/mo</span>` : '');
 
   } else if (type === 'tablet') {
