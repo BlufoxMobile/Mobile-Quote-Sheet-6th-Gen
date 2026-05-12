@@ -12792,7 +12792,7 @@ const PROMO_DEFINITIONS = [
   // total number of qualifying lines on the quote.
   {
     tag:       'mc_plus_scaled',
-    text:      '💳 ${{AMOUNT}} Prepaid Mastercard — qualifying for {{COUNT}} of 6 financed lines (2+ financed Plus phone lines required, +$100 per additional financed Plus line, watch, or tablet; BYOD lines do not qualify; capped at $500)',
+    text:      '💳 ${{AMOUNT}} Prepaid Mastercard — {{MOBILE}} mobile line(s) on the quote ({{DPP}} financed). $100 base + $100 per financed phone + $100 per mobile line beyond the 2nd. Watches and tablets count toward the 2-line minimum but don\'t add to the payout. Capped at $500.',
     startDate: '2026-05-11',
     endDate:   '2026-06-21',
   },
@@ -13478,40 +13478,53 @@ function buildFeatures(plan) {
     }
   }
 
-  // ── Prepaid Mastercard qualification (sliding scale) ──
-  // Rules:
-  //   • Requires 2+ FINANCED Plus phone lines (Mobile Plus plan +
-  //     a non-BYOD device with a price > 0). BYOD lines do not qualify
-  //     because the customer must finance a new device to earn the $100.
-  //   • $100 for the qualifying 2nd financed Plus line.
-  //   • +$100 per additional financed Plus phone line, watch, or tablet.
-  //   • Hard cap at $500 (total of 6 financed lines).
-  //   • Without 2 financed Plus phone lines → $0 (not eligible).
-  // mcAmount / mcCount are stashed in the closure scope so the promo
-  // banner renderer below can substitute the actual dollar amount + count
-  // into the {{AMOUNT}} / {{COUNT}} placeholders.
-  let mcAmount = 0;
-  let mcCount  = 0;
+  // ── Prepaid Mastercard qualification ──
+  // Rules (per Jeff's clarification):
+  //   • QUALIFY: 2+ total lines on the quote AND at least 1 mobile (phone)
+  //     line. Watches and tablets count toward the 2-line minimum but only
+  //     in the edge case where the customer has 1 mobile + 1 watch/tablet.
+  //     With 2+ mobile lines, watches/tablets are ignored entirely.
+  //   • $100 base on qualifying.
+  //   • +$100 per DPP MOBILE PHONE LINE (financed phones only — BYOD does
+  //     not add this bonus).
+  //   • +$100 per MOBILE LINE beyond the 2nd (BYOD or DPP, doesn't matter).
+  //   • Watches and tablets NEVER add to the bonus.
+  //   • Hard cap at $500.
+  //
+  // Examples (matching Jeff's confirmed rule):
+  //   • 1 BYOD phone + 1 tablet              → $100 (base only, 1 mobile)
+  //   • 1 BYOD phone + 1 DPP smartwatch      → $100 (base only)
+  //   • 1 DPP phone + 1 tablet               → $200 (base + 1 DPP)
+  //   • 2 DPP phones                         → $300 (base + 2 DPP)
+  //   • 4 DPP mobile lines                   → cap $500
+  //   • 4 BYOD mobile lines                  → $300 (base + 2 extra mobile)
+  //   • 4 lines, 2 financed (all mobile)     → $500 (base + 2 DPP + 2 extra)
+  //   • 6 BYOD mobile lines                  → $500 (base + 4 extra, cap)
+  let mcAmount      = 0;
+  let mcTotalLines  = 0;
+  let mcMobileLines = 0;
+  let mcDppPhones   = 0;
   {
-    const isPlusPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
-    let plusPhoneLines = 0, mcWatches = 0, mcTablets = 0;
     document.querySelectorAll('.df-row').forEach(row => {
       const t      = row.dataset.type;
       const dName  = row.dataset.deviceName || '';
       const dPrice = parseFloat(row.dataset.devicePrice) || 0;
-      // Financed = device selected, not BYOD, with a non-zero price
-      const isFinanced = !!dName
-        && dName !== 'BYOD (Bring Your Own Device)'
-        && dPrice > 0;
-      if (!isFinanced) return;
-      if (t === 'phone' && isPlusPlan) plusPhoneLines++;
-      else if (t === 'watch')          mcWatches++;
-      else if (t === 'tablet')         mcTablets++;
+      if (!dName) return; // empty row — not a real line
+      mcTotalLines++;
+      if (t === 'phone') {
+        mcMobileLines++;
+        if (dName !== 'BYOD (Bring Your Own Device)' && dPrice > 0) {
+          mcDppPhones++;
+        }
+      }
     });
-    if (plusPhoneLines >= 2) {
-      mcCount  = plusPhoneLines + mcWatches + mcTablets;
-      // First financed Plus line is qualifying-only; lines 2+ each pay $100
-      mcAmount = Math.min((mcCount - 1) * 100, 500);
+    // Qualify: 2+ total lines AND at least 1 mobile line on the quote
+    if (mcTotalLines >= 2 && mcMobileLines >= 1) {
+      // Extra mobile lines = mobile lines beyond the 2nd mobile line.
+      // Clamp to 0 when the customer only has 1 mobile line (which means
+      // their 2nd line is a watch/tablet helping them hit the minimum).
+      const extraMobile = Math.max(0, mcMobileLines - 2);
+      mcAmount = Math.min(100 + mcDppPhones * 100 + extraMobile * 100, 500);
       if (mcAmount > 0) activeTags.add('mc_plus_scaled');
     }
   }
@@ -13528,7 +13541,10 @@ function buildFeatures(plan) {
         : '';
       let text = p.text;
       if (p.tag === 'mc_plus_scaled') {
-        text = text.replace('{{AMOUNT}}', String(mcAmount)).replace('{{COUNT}}', String(mcCount));
+        text = text
+          .replace('{{AMOUNT}}', String(mcAmount))
+          .replace('{{MOBILE}}', String(mcMobileLines))
+          .replace('{{DPP}}',    String(mcDppPhones));
       }
       return `<li>${text}${urgency}</li>`;
     })
