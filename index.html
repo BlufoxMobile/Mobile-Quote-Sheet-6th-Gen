@@ -13356,124 +13356,79 @@ function buildFeatures(plan) {
   const featureItems = plan.features.map(f => `<li>${f}</li>`).join('');
 
   // ── Determine which promo tags apply based on current selections ──
+  // Promotions surface as soon as the rep sets a plan + line counts, so the
+  // banner acts as a "what's available" advertisement for everything the
+  // customer could qualify for on this plan — even before specific devices,
+  // trade-ins, or no-trade toggles have been chosen. Per-device discount
+  // dollar amounts that are actually applied to the quote are tallied
+  // separately below in the "Discounts Applied to This Quote" section.
+  //
+  // Per Jeff (2026-05-20): "anytime a promotion is applicable, I want it
+  // to display in that banner — just clicking on the number of lines
+  // should start to trigger any promotions that are applicable."
   const activeTags = new Set(['always']);
 
-  let hasTipsSamsung900 = false;
-  let hasTipsPixel1200 = false; // Samsung TIPS w/ Premium Unlimited — $1,100
-  let hasTipsSamsung500  = false; // Samsung TIPS w/ Unlimited — $500
-  let hasTipsNonSam830   = false; // Non-Samsung TIPS (Apple/Google/Motorola) — $830
-  let hasSamsungNoTrade  = false; // Samsung no-trade $500 off w/ Premium
-  let hasSamsung200Unl   = false; // Samsung $200 off w/ Unlimited (no trade)
-  let hasPremium400      = false; // $400 off non-Samsung w/ Premium (no qualifying trade)
-  let hasIphone17eOnUs   = false;
-  let hasIphone17e50off  = false;
-  let hasIphone17e400off = false;
-  let hasWatchDiamond    = false;
-  let hasWatchXmc        = false;
-  let hasTabletXmc       = false;
-  let hasIpadA16         = false;
-
   const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
-  const isUnlimitedOrHigher = isPremiumPlan; // Only Mobile Plus gets device promos
+  const isUnlimitedTierPlan = (intakeSelectedPlan === 'unlimited_std' || intakeSelectedPlan === 'mobile_select_promo');
+
+  // Count line types from the .df-row scaffolding. rebuildPhoneRows() and
+  // friends create one row per line as soon as the rep picks a count, so
+  // these counts are accurate even before any device model has been chosen.
+  // The model-specific flags (iPad A16, XMC toggles) still require an
+  // actual selection because those promos only apply to that exact pick.
+  let phoneLineCount  = 0;
+  let watchLineCount  = 0;
+  let tabletLineCount = 0;
+  let hasIpadA16      = false;
+  let hasWatchXmc     = false;
+  let hasTabletXmc    = false;
 
   document.querySelectorAll('.df-row').forEach(row => {
     const type       = row.dataset.type;
     const deviceName = (row.dataset.deviceName || '').toLowerCase();
-    const tradeValue = parseFloat(row.dataset.tradeValue) || 0;
-    const tradeLabel = (row.dataset.tradeLabel || '').toLowerCase();
-    const noTrade    = row.dataset.noTrade === 'true';
     const xmcEnabled = row.dataset.xmcEnabled === 'true';
 
-    // Determine brand of the DEVICE BEING PURCHASED
-    const isSamsungDevice   = deviceName.toLowerCase().startsWith('samsung');
-    const isAppleDevice     = deviceName.toLowerCase().startsWith('apple');
-    const isGoogleDevice    = deviceName.toLowerCase().startsWith('google');
-    const isMotoDevice      = deviceName.startsWith('motorola');
-    const isNonSamsungDevice = isAppleDevice || isGoogleDevice || isMotoDevice;
-    const isIphone17e        = deviceName.includes('iphone 17e') || deviceName.includes('iphone17e');
-
-    // Determine which TIPS promo bucket the new phone purchase routes to.
-    // The trade-in row carries its own promoTag (set in getTipsTradeInsForPurchase),
-    // but for no-trade scenarios we still need to identify the active bucket.
-    const tipsPromoForPhone = getTipsPromoForNewPhone(deviceName);
-    const isPixelTopTierPhone = tipsPromoForPhone.promo_tag === 'tips_pixel_1200';
-    const hasAnyTrade = tradeValue > 0 && !noTrade;
-
-    if (type === 'phone' && deviceName && deviceName !== 'byod (bring your own device)') {
-      if (isPixelTopTierPhone) {
-        // Pixel 10 Pro XL / Pro Fold → $1,200 promo (requires trade-in)
-        if (hasAnyTrade) hasTipsPixel1200 = true;
-      } else if (isSamsungDevice) {
-        if (hasAnyTrade && isPremiumPlan) {
-          hasTipsSamsung900 = true;           // $900 off Samsung w/ Premium + trade
-        } else if (hasAnyTrade && isUnlimitedOrHigher) {
-          hasTipsSamsung500 = true;            // $500 off Samsung w/ Unlimited + trade
-        } else if (noTrade && isPremiumPlan) {
-          hasSamsungNoTrade = true;            // $500 off Samsung no trade w/ Premium
-        } else if (noTrade && isUnlimitedOrHigher) {
-          hasSamsung200Unl = true;             // $200 off Samsung no trade w/ Unlimited
-        }
-      } else if (isNonSamsungDevice) {
-        if (hasAnyTrade) {
-          hasTipsNonSam830 = true;             // Apple/Google/Motorola TIPS — up to $830
-        } else if (isPremiumPlan) {
-          hasPremium400 = true;                // $400 off non-Samsung w/ Premium, no trade
-        }
-        // iPhone 17e specific promos
-        if (isIphone17e) {
-          if (tradeValue > 0 && !noTrade) {
-            hasIphone17eOnUs  = true;          // On Us w/ TIPs + Premium
-            hasIphone17e50off = true;          // 50% off w/ TIPs + Unlimited
-          } else if (isPremiumPlan) {
-            hasIphone17e400off = true;         // $400 off w/ Premium
-          }
-        }
-      }
-    }
-
+    if (type === 'phone')  phoneLineCount++;
     if (type === 'watch') {
-      // Diamond-only — Platinum no longer earns the $300 watch discount
-      if (intakeSelectedTier === 'diamond' && deviceName) hasWatchDiamond = true;
+      watchLineCount++;
       if (xmcEnabled) hasWatchXmc = true;
     }
-
     if (type === 'tablet') {
+      tabletLineCount++;
       if (xmcEnabled) hasTabletXmc = true;
-      const nameLower = (deviceName || '').toLowerCase();
-      // a11 detection removed — Galaxy Tab A11+ 50% off discontinued 2026-05-10
-      if (nameLower.includes('ipad (a16)') || nameLower.includes('ipad a16')) hasIpadA16 = true;
+      if (deviceName.includes('ipad (a16)') || deviceName.includes('ipad a16')) hasIpadA16 = true;
     }
   });
 
-  if (hasTipsSamsung900)  activeTags.add('tips_samsung_900');
-  if (hasTipsPixel1200)   activeTags.add('tips_pixel_1200');
-  if (hasTipsSamsung500)  activeTags.add('tips_samsung_500');
-  if (hasTipsNonSam830)   activeTags.add('tips_nonsam_830');
-  if (hasSamsungNoTrade)  activeTags.add('samsung_notrade');
-  if (hasSamsung200Unl)   activeTags.add('samsung_200_unlimited');
-  if (hasPremium400)      activeTags.add('premium_400');
-  if (hasIphone17eOnUs)   activeTags.add('iphone17e_onus');
-  if (hasIphone17e50off)  activeTags.add('iphone17e_50off');
-  if (hasIphone17e400off) activeTags.add('iphone17e_400off');
-  if (hasWatchDiamond)    activeTags.add('watch_elite'); // Diamond only — Platinum dropped
-  if (hasWatchXmc)        activeTags.add('xmc_50_watch');
-  if (hasTabletXmc)       activeTags.add('xmc_50_tablet');
-  // a11_50off removed — Galaxy Tab A11+ 50% off discontinued 2026-05-10
-  if (hasIpadA16)         activeTags.add('ipad_a16_50off');
-
-  // ── XMC Plus included (account-wide) ──
-  // When the customer is on the Mobile Plus plan AND has at least one phone
-  // line with a real (non-empty) device, XMC Plus is included for free and
-  // extends to any watches/tablets on the account. Surface this as a banner
-  // so reps consistently mention the protection benefit.
-  if (isPremiumPlan) {
-    const phoneRows = document.querySelectorAll('.df-row[data-type="phone"]');
-    for (const r of phoneRows) {
-      if ((r.dataset.deviceName || '').trim()) {
-        activeTags.add('xmc_plus_included');
-        break;
-      }
+  // ── Phone-line promos: surface every variant the customer could pick on
+  // this plan as soon as a phone line exists. The rep can then steer the
+  // conversation toward whichever combo (TIPS w/ trade vs. no-trade) fits.
+  if (phoneLineCount > 0) {
+    if (isPremiumPlan) {
+      activeTags.add('tips_pixel_1200');    // $1,200 off Pixel 10 Pro XL / Pro Fold w/ trade
+      activeTags.add('tips_samsung_900');   // $900 off Samsung w/ trade
+      activeTags.add('tips_nonsam_830');    // $830 off Apple/Google/Moto w/ trade
+      activeTags.add('samsung_notrade');    // $500 off Samsung, no trade required
+      activeTags.add('premium_400');        // $400 off non-Samsung, no trade required
+      activeTags.add('xmc_plus_included');  // XMC Plus included free on Mobile Plus
+    } else if (isUnlimitedTierPlan) {
+      activeTags.add('tips_samsung_500');     // $500 off Samsung w/ trade (Unlimited)
+      activeTags.add('samsung_200_unlimited'); // $200 off Samsung no trade (Unlimited)
     }
+    // iPhone 17e specific promos auto-hide via their endDate (2026-05-10).
+    // When that promo cycle is renewed, surface them here under isPremiumPlan.
+  }
+
+  // ── Watch promos: surface as soon as a watch line exists ──
+  if (watchLineCount > 0) {
+    if (intakeSelectedTier === 'diamond') activeTags.add('watch_elite'); // $300 off watch for Diamond
+    if (hasWatchXmc) activeTags.add('xmc_50_watch'); // 50% off XMC on new watch line
+  }
+
+  // ── Tablet promos: surface as soon as a tablet line exists ──
+  if (tabletLineCount > 0) {
+    if (hasTabletXmc) activeTags.add('xmc_50_tablet'); // 50% off XMC on new tablet line
+    if (hasIpadA16)   activeTags.add('ipad_a16_50off'); // 50% off iPad A16 (model-specific)
   }
 
   // ── Prepaid Mastercard qualification ──
@@ -13507,11 +13462,15 @@ function buildFeatures(plan) {
       const t      = row.dataset.type;
       const dName  = row.dataset.deviceName || '';
       const dPrice = parseFloat(row.dataset.devicePrice) || 0;
-      if (!dName) return; // empty row — not a real line
+      // Count the row as a line as soon as it exists (i.e., the rep has
+      // picked a line count on intake). This lets the Mastercard promo
+      // surface in the banner before any specific device is chosen — the
+      // dollar amount will reflect "no financed phones yet" but the promo
+      // is correctly advertised as applicable.
       mcTotalLines++;
       if (t === 'phone') {
         mcMobileLines++;
-        if (dName !== 'BYOD (Bring Your Own Device)' && dPrice > 0) {
+        if (dName && dName !== 'BYOD (Bring Your Own Device)' && dPrice > 0) {
           mcDppPhones++;
         }
       }
@@ -14207,7 +14166,12 @@ async function handleSubmit() {
   }
 }
 
-// ── PRINT — opens PDF in a new tab so rep can use Safari Share → Print on iPad ──
+// ── PRINT — saves the B&W PDF to the iPad so the rep can print it from Files ──
+// Previous behavior opened the PDF in a new tab via window.open(blobUrl) so the
+// rep could use Safari's Share → Print sheet. On iPad that tab was closing
+// before the rep could interact with the share menu (Safari aggressively
+// reclaims blob URLs / new tabs), so per Jeff's request (2026-05-20) we now
+// just save the PDF and let the rep open it from Files to print.
 function handlePrint() {
   const repName  = document.getElementById('repName').value.trim();
   const storeName = document.getElementById('storeName').value;
@@ -14235,7 +14199,9 @@ function handlePrint() {
   document.getElementById('pcf-repPhone').textContent  = document.getElementById('repPhone').value  || '—';
   document.getElementById('pcf-repEmail').textContent  = document.getElementById('repEmail').value  || '—';
 
-  _buildQuotePdf({ openInNewTab: true });
+  // Save the PDF directly (same path as "Save as PDF"). The rep can then
+  // open the saved file from the Files app → Downloads → Share → Print.
+  _buildQuotePdf({ openInNewTab: false });
 }
 
 // ── AUTO DATE ──
