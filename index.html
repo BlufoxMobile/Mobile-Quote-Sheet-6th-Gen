@@ -3099,7 +3099,7 @@
         <div class="intake-grid-2" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:700px; margin:14px auto 0;">
           <div class="intake-field">
             <label># of Watches on Current Plan</label>
-            <select id="i_currentWatches" autocomplete="off">
+            <select id="i_currentWatches" autocomplete="off" onchange="syncCurrentCountToFinancing('watches')">
               <option value="0">None</option>
               <option value="1">1 Watch</option>
               <option value="2">2 Watches</option>
@@ -3115,7 +3115,7 @@
           </div>
           <div class="intake-field">
             <label># of Tablets on Current Plan</label>
-            <select id="i_currentTablets" autocomplete="off">
+            <select id="i_currentTablets" autocomplete="off" onchange="syncCurrentCountToFinancing('tablets')">
               <option value="0">None</option>
               <option value="1">1 Tablet</option>
               <option value="2">2 Tablets</option>
@@ -14433,6 +14433,30 @@ function setWTCount(type, val, btn) {
   if (type === 'watches') { watchCount = val; rebuildWatchRows(); }
   else                    { tabletCount = val; rebuildTabletRows(); }
   updateIntakeSavingsPreview();
+}
+
+// ── Sync "Current Carrier" watch/tablet count → device financing pills ──
+// When the rep records how many watches/tablets the customer has on their
+// current carrier, default them into the Xfinity quote by auto-selecting
+// the matching pill in the Device Financing section. This is a one-way
+// sync (top → bottom) so reps can still manually drop a row from the
+// quote without erasing what was recorded on the current-carrier side.
+// Per Jeff (2026-05-20): "the top watches and tablets, when selected,
+// would automatically select watches and tablets under the financing
+// options as well... if a customer already has watches and tablets, but
+// they don't want to bring them over to Xfinity, we could remove them
+// on our side if needed."
+function syncCurrentCountToFinancing(type) {
+  const selEl = document.getElementById(type === 'watches' ? 'i_currentWatches' : 'i_currentTablets');
+  if (!selEl) return;
+  // Cap at the max value the financing pills support (10)
+  const val = Math.min(parseInt(selEl.value, 10) || 0, 10);
+  const pill = document.querySelector(`.wt-count-btn[data-type="${type}"][data-val="${val}"]`);
+  if (!pill) return;
+  // Re-use the existing pill handler so all downstream side-effects
+  // (active-class update, rebuildWatch/TabletRows, savings preview) fire
+  // exactly as if the rep had tapped the pill themselves.
+  setWTCount(type, val, pill);
 }
 
 // ── AUTOCOMPLETE HELPER ──
