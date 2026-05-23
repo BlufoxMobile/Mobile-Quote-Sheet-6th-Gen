@@ -3016,8 +3016,8 @@
         <div class="rep-info-rows">
           <div class="rep-info-row">
             <div class="rep-info-field">
-              <label>Customer Name <span style="color:#e53935;">*</span></label>
-              <input type="text" id="i_customerName" name="customer-name" autocomplete="off" placeholder="Full name">
+              <label>Customer Name</label>
+              <input type="text" id="i_customerName" name="customer-name" autocomplete="off" placeholder="Full name (optional)">
             </div>
             <div class="rep-info-field">
               <label>Phone Number</label>
@@ -3093,6 +3093,43 @@
             </div>
           </div>
         </div>
+        <!-- Optional: watches & tablets on the customer's CURRENT carrier
+             (display-only — does not feed into the Xfinity device quote
+             below; that's done separately under "Device Financing"). -->
+        <div class="intake-grid-2" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:700px; margin:14px auto 0;">
+          <div class="intake-field">
+            <label># of Watches on Current Plan</label>
+            <select id="i_currentWatches" autocomplete="off">
+              <option value="0">None</option>
+              <option value="1">1 Watch</option>
+              <option value="2">2 Watches</option>
+              <option value="3">3 Watches</option>
+              <option value="4">4 Watches</option>
+              <option value="5">5 Watches</option>
+              <option value="6">6 Watches</option>
+              <option value="7">7 Watches</option>
+              <option value="8">8 Watches</option>
+              <option value="9">9 Watches</option>
+              <option value="10">10 Watches</option>
+            </select>
+          </div>
+          <div class="intake-field">
+            <label># of Tablets on Current Plan</label>
+            <select id="i_currentTablets" autocomplete="off">
+              <option value="0">None</option>
+              <option value="1">1 Tablet</option>
+              <option value="2">2 Tablets</option>
+              <option value="3">3 Tablets</option>
+              <option value="4">4 Tablets</option>
+              <option value="5">5 Tablets</option>
+              <option value="6">6 Tablets</option>
+              <option value="7">7 Tablets</option>
+              <option value="8">8 Tablets</option>
+              <option value="9">9 Tablets</option>
+              <option value="10">10 Tablets</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- Plan Selection -->
@@ -3111,6 +3148,16 @@
             <div class="ipp-name">NOW Mobile</div>
             <div class="ipp-sub">Prepaid · Max 5 lines</div>
           </button>
+        </div>
+        <!-- Year 1 discount toggle. When checked, swaps the selected plan
+             from its _promo variant to its _std variant so the quote
+             reflects standard pricing (adds $30/mo back). Disabled for
+             NOW Mobile since it has no Year 1 promo to remove. -->
+        <div id="i_removeDiscountWrap" style="text-align:center; margin-top:14px;">
+          <label style="display:inline-flex; align-items:center; gap:10px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text-secondary); padding:8px 14px; border:1.5px solid var(--border); border-radius:8px; background:#fff;">
+            <input type="checkbox" id="i_removeDiscount" onchange="applyDiscountToggle()" style="width:18px; height:18px; cursor:pointer; accent-color:var(--xfinity-purple);">
+            Remove $30/mo Year 1 discount (quote standard pricing)
+          </label>
         </div>
       </div>
 
@@ -14250,10 +14297,82 @@ function selectIntakeReward(btn) {
 }
 
 // ── INTAKE PLAN SELECTION ──
+// ── REMOVE $30 YEAR 1 DISCOUNT TOGGLE ──
+// The plan pills always set intakeSelectedPlan to a _promo variant. When the
+// rep checks "Remove $30/mo Year 1 discount" we swap intakeSelectedPlan to
+// the matching _std variant so the quote uses standard pricing. NOW Mobile
+// is excluded — it has no Year 1 promo to remove.
+const PROMO_TO_STD_MAP = {
+  mobile_plus_promo:   'mobile_plus_std',
+  mobile_select_promo: 'mobile_select_std',
+};
+const STD_TO_PROMO_MAP = {
+  mobile_plus_std:   'mobile_plus_promo',
+  mobile_select_std: 'mobile_select_promo',
+};
+
+function applyDiscountToggle() {
+  const chk = document.getElementById('i_removeDiscount');
+  if (!chk) return;
+  if (chk.checked) {
+    const stdKey = PROMO_TO_STD_MAP[intakeSelectedPlan];
+    if (stdKey) intakeSelectedPlan = stdKey;
+  } else {
+    const promoKey = STD_TO_PROMO_MAP[intakeSelectedPlan];
+    if (promoKey) intakeSelectedPlan = promoKey;
+  }
+  // Live update for the intake tally bar and any already-rendered comparison.
+  if (typeof updateIntakeSavingsPreview === 'function') updateIntakeSavingsPreview();
+  // If the comparison screen is already up, sync the hidden plan input
+  // (updateQuote reads from xfinityPlan, not intakeSelectedPlan) and
+  // re-render so the price reflects the toggle change immediately.
+  const compScreen = document.getElementById('comparisonScreen');
+  if (compScreen && compScreen.style.display !== 'none') {
+    const xfPlanEl = document.getElementById('xfinityPlan');
+    if (xfPlanEl) xfPlanEl.value = intakeSelectedPlan;
+    // Also refresh the plan name + discount strings on the comparison header
+    const planNames = {
+      mobile_plus_promo: 'Mobile Plus',
+      mobile_select_promo: 'Mobile Select',
+      now_mobile: 'NOW Mobile',
+      mobile_plus_std: 'Mobile Plus',
+      mobile_select_std: 'Mobile Select',
+      unlimited_std: 'Unlimited',
+    };
+    const planDiscounts = {
+      mobile_plus_promo: '$30/mo Year 1 discount applied',
+      mobile_select_promo: '$30/mo Year 1 discount applied',
+      now_mobile: 'Prepaid · No contract',
+      mobile_plus_std: 'Standard pricing (Year 1 discount removed)',
+      mobile_select_std: 'Standard pricing (Year 1 discount removed)',
+      unlimited_std: 'Standard pricing',
+    };
+    const nameEl = document.getElementById('planDisplayName');
+    const discEl = document.getElementById('planDisplayDiscount');
+    if (nameEl) nameEl.textContent = planNames[intakeSelectedPlan] || intakeSelectedPlan;
+    if (discEl) discEl.textContent = planDiscounts[intakeSelectedPlan] || '';
+    if (typeof updateQuote === 'function') updateQuote();
+  }
+}
+
 function selectIntakePlan(btn) {
   document.querySelectorAll('.intake-plan-pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   intakeSelectedPlan = btn.dataset.plan;
+  // Honor the "Remove $30 discount" toggle when switching plans — keeps the
+  // _std/_promo state in sync with the checkbox the rep already set.
+  applyDiscountToggle();
+  // NOW Mobile has no Year 1 promo, so the toggle has no effect — disable
+  // and dim the checkbox so it doesn't look interactive.
+  const chk = document.getElementById('i_removeDiscount');
+  const wrap = document.getElementById('i_removeDiscountWrap');
+  const planIsNowMobile = (intakeSelectedPlan === 'now_mobile');
+  if (chk && wrap) {
+    chk.disabled = planIsNowMobile;
+    wrap.style.opacity = planIsNowMobile ? '0.4' : '';
+    wrap.style.pointerEvents = planIsNowMobile ? 'none' : '';
+    if (planIsNowMobile) chk.checked = false;
+  }
   rebuildPhoneRows(); // refresh promos when plan changes
   updateIntakeSavingsPreview(); // update tally bar live when plan changes
 
@@ -15317,9 +15436,10 @@ try {
   const bill    = document.getElementById('i_bill').value.trim();
 
   // Validate required (mobile fields only required when NOT in devices-only mode)
+  // Customer Name is OPTIONAL per Jeff (2026-05-20) — clear any stale red
+  // border in case the field was previously flagged before being made optional.
   let errors = [];
-  if (!name)    { errors.push('Customer Name'); document.getElementById('i_customerName').style.border = '2px solid #e53935'; }
-  else            document.getElementById('i_customerName').style.border = '';
+  document.getElementById('i_customerName').style.border = '';
   if (!devicesOnlyMode) {
     if (!carrier) { errors.push('Current Carrier'); document.getElementById('i_carrier').style.border = '2px solid #e53935'; }
     else            document.getElementById('i_carrier').style.border = '';
@@ -15339,7 +15459,9 @@ try {
   }
 
   // ── Populate display fields ──
-  document.getElementById('customerName').textContent  = name;
+  // Customer Name is optional — fall back to em-dash so the comparison
+  // sheet doesn't render with an empty value when it isn't filled in.
+  document.getElementById('customerName').textContent  = name || '—';
   document.getElementById('customerPhone').textContent = document.getElementById('i_customerPhone').value || '—';
 
   // Date: format nicely
@@ -15367,8 +15489,18 @@ try {
 
   // Competitor display cards
   document.getElementById('dispCarrier').textContent = carrier;
-  const lineLabel = lines === '1' ? '1 Line' : lines + ' Lines';
-  document.getElementById('dispLines').textContent = lineLabel;
+  // Build a "3 Lines · 2 Watches · 1 Tablet" style summary so the comparison
+  // reflects everything on the customer's CURRENT carrier account. These
+  // counts are display-only and intentionally do not feed into the Xfinity
+  // device-financing section below — per Jeff (2026-05-20), reps want to
+  // capture them so the quote reflects the customer's real footprint
+  // without forcing those lines into the Xfinity quote.
+  const currentWatchCount  = parseInt(document.getElementById('i_currentWatches')?.value)  || 0;
+  const currentTabletCount = parseInt(document.getElementById('i_currentTablets')?.value) || 0;
+  const dispLinesParts = [lines === '1' ? '1 Line' : lines + ' Lines'];
+  if (currentWatchCount > 0)  dispLinesParts.push(currentWatchCount + (currentWatchCount === 1 ? ' Watch'  : ' Watches'));
+  if (currentTabletCount > 0) dispLinesParts.push(currentTabletCount + (currentTabletCount === 1 ? ' Tablet' : ' Tablets'));
+  document.getElementById('dispLines').textContent = dispLinesParts.join(' · ');
   document.getElementById('dispBill').textContent = '$' + parseFloat(bill).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) + '/mo';
 
   // Store raw values for updateQuote()
@@ -15433,18 +15565,20 @@ try {
   // Set plan key into hidden input and update plan display
   document.getElementById('xfinityPlan').value = intakeSelectedPlan;
   const planNames = {
-    mobile_plus_promo: 'Mobile Plus',
-    mobile_select_promo:   'Mobile Select',
-    now_mobile:    'NOW Mobile',
-    mobile_plus_std:   'Mobile Plus',
-    unlimited_std: 'Unlimited',
+    mobile_plus_promo:   'Mobile Plus',
+    mobile_select_promo: 'Mobile Select',
+    now_mobile:          'NOW Mobile',
+    mobile_plus_std:     'Mobile Plus',
+    mobile_select_std:   'Mobile Select',
+    unlimited_std:       'Unlimited',
   };
   const planDiscounts = {
-    mobile_plus_promo: '$40/mo Year 1 discount applied',
-    mobile_select_promo:   '$40/mo Year 1 discount applied',
-    now_mobile:    'Prepaid · No contract',
-    mobile_plus_std:   'Standard pricing',
-    unlimited_std: 'Standard pricing',
+    mobile_plus_promo:   '$30/mo Year 1 discount applied',
+    mobile_select_promo: '$30/mo Year 1 discount applied',
+    now_mobile:          'Prepaid · No contract',
+    mobile_plus_std:     'Standard pricing (Year 1 discount removed)',
+    mobile_select_std:   'Standard pricing (Year 1 discount removed)',
+    unlimited_std:       'Standard pricing',
   };
   document.getElementById('planDisplayName').textContent = planNames[intakeSelectedPlan] || intakeSelectedPlan;
   const discEl = document.getElementById('planDisplayDiscount');
@@ -15593,6 +15727,14 @@ function resetToIntake() {
   document.getElementById('i_carrier').value = '';
   document.getElementById('i_lines').value = '';
   document.getElementById('i_bill').value = '';
+  // Reset the current-carrier watch/tablet counts back to "None" so a
+  // fresh quote doesn't inherit the previous customer's footprint.
+  const curW = document.getElementById('i_currentWatches');  if (curW) curW.value = '0';
+  const curT = document.getElementById('i_currentTablets'); if (curT) curT.value = '0';
+  // Reset the "Remove $30 discount" toggle so a new quote starts with the
+  // Year 1 discount applied (the default).
+  const rd = document.getElementById('i_removeDiscount');
+  if (rd) { rd.checked = false; }
   document.getElementById('i_coreCurrent').value = '';
   document.getElementById('i_coreRebundle').value = '';
 
