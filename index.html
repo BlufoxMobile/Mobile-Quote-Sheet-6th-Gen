@@ -14362,16 +14362,20 @@ function selectIntakePlan(btn) {
   // Honor the "Remove $30 discount" toggle when switching plans — keeps the
   // _std/_promo state in sync with the checkbox the rep already set.
   applyDiscountToggle();
-  // NOW Mobile has no Year 1 promo, so the toggle has no effect — disable
-  // and dim the checkbox so it doesn't look interactive.
+  // NOW Mobile is prepaid and has no Year 1 promo at all, so the
+  // "Remove $30 discount" toggle doesn't apply — hide it entirely (and
+  // clear it) so reps aren't shown an irrelevant option.
   const chk = document.getElementById('i_removeDiscount');
   const wrap = document.getElementById('i_removeDiscountWrap');
   const planIsNowMobile = (intakeSelectedPlan === 'now_mobile');
   if (chk && wrap) {
-    chk.disabled = planIsNowMobile;
-    wrap.style.opacity = planIsNowMobile ? '0.4' : '';
-    wrap.style.pointerEvents = planIsNowMobile ? 'none' : '';
-    if (planIsNowMobile) chk.checked = false;
+    wrap.style.display = planIsNowMobile ? 'none' : '';
+    if (planIsNowMobile) {
+      chk.checked = false;
+      chk.disabled = true;
+    } else {
+      chk.disabled = false;
+    }
   }
   rebuildPhoneRows(); // refresh promos when plan changes
   updateIntakeSavingsPreview(); // update tally bar live when plan changes
