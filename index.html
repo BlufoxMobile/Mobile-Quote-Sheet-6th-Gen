@@ -13416,7 +13416,11 @@ function buildFeatures(plan) {
   const activeTags = new Set(['always']);
 
   const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
-  const isUnlimitedTierPlan = (intakeSelectedPlan === 'unlimited_std' || intakeSelectedPlan === 'mobile_select_promo');
+  // Note: the legacy "Unlimited" plan (unlimited_std) is a distinct tier
+  // from "Mobile Select" — only the legacy Unlimited plan qualifies for
+  // the $200/$500 Samsung discounts in PROMO_DEFINITIONS. Mobile Select
+  // customers do NOT get any device promos per Jeff (2026-05-20).
+  const isUnlimitedTierPlan = (intakeSelectedPlan === 'unlimited_std');
 
   // Count line types from the .df-row scaffolding. rebuildPhoneRows() and
   // friends create one row per line as soon as the rep picks a count, so
@@ -14932,19 +14936,27 @@ function recalcRow(row) {
     const activePromo = getTipsPromoForNewPhone(deviceName);
     const isSamsungEligible = activePromo.promo_tag === 'tips_samsung_900';
     const isPixelTopTier    = activePromo.promo_tag === 'tips_pixel_1200';
-    if (tradeValue > 0 && !noTrade) {
-      // Any TIPS promo: pay the actual trade-in value from the routed promo
-      // table. tradeValue comes from row.dataset (set when the rep picked
-      // the trade-in row) and reflects the per-model amount in that promo.
-      promoApplied = tradeValue;
-    } else if (noTrade || tradeValue === 0) {
-      if (isSamsungEligible) {
-        promoApplied = SAMSUNG_NO_TRADE_PROMO; // $500 off Samsung w/ Premium, no trade
-      } else if (!isPixelTopTier && (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std')) {
-        promoApplied = 400; // $400 off Apple/Google/Motorola w/ Premium, no trade
+    // Per Jeff (2026-05-20): all device-level promos (TIPS trade-in values
+    // AND the no-trade $400/$500 discounts) ONLY apply on Mobile Plus
+    // (Premium Unlimited). Mobile Select and NOW Mobile customers pay
+    // full device price with no carrier discount.
+    const isPremiumPlanForDevice = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
+    if (isPremiumPlanForDevice) {
+      if (tradeValue > 0 && !noTrade) {
+        // Any TIPS promo: pay the actual trade-in value from the routed
+        // promo table. tradeValue comes from row.dataset (set when the
+        // rep picked the trade-in row) and reflects the per-model amount.
+        promoApplied = tradeValue;
+      } else if (noTrade || tradeValue === 0) {
+        if (isSamsungEligible) {
+          promoApplied = SAMSUNG_NO_TRADE_PROMO; // $500 off Samsung w/ Premium, no trade
+        } else if (!isPixelTopTier) {
+          promoApplied = 400; // $400 off Apple/Google/Motorola w/ Premium, no trade
+        }
+        // Pixel 10 Pro XL/Fold ($1,200 promo) requires a trade-in to discount
       }
-      // Pixel 10 Pro XL/Fold ($1,200 promo) requires a trade-in to discount
     }
+    // Mobile Select / NOW Mobile / Unlimited fall through with promoApplied = 0
 
     // Cap promo at full device price — never discount more than the phone costs
     promoApplied = Math.min(promoApplied, devicePrice);
