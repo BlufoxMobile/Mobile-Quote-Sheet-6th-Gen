@@ -2501,9 +2501,17 @@
     border-radius: 0 0 var(--radius-sm) var(--radius-sm);
     max-height: 220px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;   /* momentum scroll on iOS */
+    touch-action: pan-y;                 /* allow native vertical scroll */
+    overscroll-behavior: contain;        /* don't bleed scroll to page */
     z-index: 100;
     display: none;
     box-shadow: 0 8px 24px rgba(103,19,210,0.15);
+  }
+  /* iPad/mobile: taller list, bigger tap targets */
+  @media (hover: none) and (pointer: coarse) {
+    .df-dropdown-list { max-height: 50vh; }
+    .df-dropdown-item { min-height: 48px; padding: 12px 14px; }
   }
   .df-dropdown-list.open { display: block; }
   .df-dropdown-item {
@@ -14561,8 +14569,7 @@ function makeAutocomplete(inputEl, listEl, datasetOrFn, onSelect, maxInitial) {
       // Use both mousedown AND touchstart so it works on iOS
       let itemSelected = false;
       const selectItem = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        if (e) { try { e.preventDefault(); } catch(_){} try { e.stopPropagation(); } catch(_){} }
         if (itemSelected) return; // guard against double-fire (touch + synthetic click)
         itemSelected = true;
         suppressBlur = true;
@@ -14573,18 +14580,50 @@ function makeAutocomplete(inputEl, listEl, datasetOrFn, onSelect, maxInitial) {
       };
       div.addEventListener('mousedown', selectItem);
       div.addEventListener('click', selectItem);
-      // Touch: only select on tap — finger movement (scroll) cancels selection
-      div.addEventListener('touchstart', (e) => { div._tsY = e.touches[0].clientY; div._tsMoved = false; }, { passive: true });
-      div.addEventListener('touchmove',  () => { div._tsMoved = true; }, { passive: true });
-      div.addEventListener('touchend',   (e) => { if (!div._tsMoved) selectItem(e); }, { passive: false });
+      // Touch: only select on tap — finger movement past ~10px (scroll) cancels.
+      // Tracking both X and Y so a horizontal swipe doesn't fire either.
+      // 10px threshold tolerates normal finger jitter on a tap.
+      const TAP_THRESHOLD = 10;
+      div.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        div._tsX = t.clientX; div._tsY = t.clientY; div._tsMoved = false;
+      }, { passive: true });
+      div.addEventListener('touchmove', (e) => {
+        if (div._tsMoved) return;
+        const t = e.touches[0];
+        if (Math.abs(t.clientY - div._tsY) > TAP_THRESHOLD ||
+            Math.abs(t.clientX - div._tsX) > TAP_THRESHOLD) {
+          div._tsMoved = true;
+        }
+      }, { passive: true });
+      div.addEventListener('touchend', (e) => {
+        if (!div._tsMoved) {
+          // Prevent the synthetic click/mousedown from re-firing selectItem
+          try { e.preventDefault(); } catch(_) {}
+          selectItem(e);
+        }
+      }, { passive: false });
       listEl.appendChild(div);
     });
     listEl.classList.add('open');
   }
 
-  // Prevent input blur when clicking anywhere in dropdown (fixes click-to-select)
+  // Desktop: prevent input blur when clicking anywhere in dropdown.
+  // (Do NOT preventDefault on pointerdown here — that kills native scroll on iOS.)
   listEl.addEventListener('mousedown', (e) => { e.preventDefault(); });
-  listEl.addEventListener('pointerdown', (e) => { e.preventDefault(); });
+  // Touch: keep dropdown open while the user is interacting with the list
+  // (scrolling, etc.) so input.blur doesn't close it mid-scroll.
+  listEl.addEventListener('touchstart', () => { suppressBlur = true; }, { passive: true });
+  const releaseSuppress = () => { setTimeout(() => { suppressBlur = false; }, 300); };
+  listEl.addEventListener('touchend',    releaseSuppress, { passive: true });
+  listEl.addEventListener('touchcancel', releaseSuppress, { passive: true });
+  // Close on outside tap (iPad/mobile) — input.blur alone isn't reliable when
+  // the user taps a non-focusable element like a button or empty space.
+  document.addEventListener('touchstart', (e) => {
+    if (!listEl.classList.contains('open')) return;
+    if (listEl.contains(e.target) || e.target === inputEl) return;
+    listEl.classList.remove('open');
+  }, { passive: true });
 
   inputEl.addEventListener('input', () => { try { renderList(inputEl.value); } catch(e) {} });
 
@@ -15302,9 +15341,19 @@ document.addEventListener('DOMContentLoaded', () => {
       border-top:none; border-radius:0 0 10px 10px;
       list-style:none; margin:0; padding:4px 0;
       box-shadow:0 4px 16px rgba(103,19,210,0.15);
-      display:none; max-height:200px; overflow-y:auto;
+      display:none; max-height:50vh; overflow-y:auto;
+      -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain;
     `;
     wrapper.appendChild(dropdown);
+
+    let repSuppressBlur = false;
+
+    function pickRep(name) {
+      repNameEl.value = name;
+      loadRepFields(name);
+      safeStorage.setItem(REP_LAST_KEY, name);
+      dropdown.style.display = 'none';
+    }
 
     function showDropdown(filter) {
       const names = getSavedRepNames().filter(n => n.toLowerCase().startsWith(filter.toLowerCase()));
@@ -15313,20 +15362,38 @@ document.addEventListener('DOMContentLoaded', () => {
       names.forEach(name => {
         const li = document.createElement('li');
         li.textContent = name;
-        li.style.cssText = 'padding:10px 16px; cursor:pointer; font-size:14px; color:var(--text-primary);';
-        li.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          repNameEl.value = name;
-          loadRepFields(name);
-          safeStorage.setItem(REP_LAST_KEY, name);
-          dropdown.style.display = 'none';
-        });
+        li.style.cssText = 'padding:12px 16px; min-height:44px; cursor:pointer; font-size:14px; color:var(--text-primary); box-sizing:border-box;';
+        // Desktop
+        li.addEventListener('mousedown', (e) => { e.preventDefault(); pickRep(name); });
         li.addEventListener('mouseover', () => li.style.background = 'var(--surface-2)');
         li.addEventListener('mouseout',  () => li.style.background = '');
+        // Touch: only select on a real tap, not when scrolling
+        const TAP_THRESHOLD = 10;
+        li.addEventListener('touchstart', (e) => {
+          const t = e.touches[0];
+          li._tsX = t.clientX; li._tsY = t.clientY; li._tsMoved = false;
+        }, { passive: true });
+        li.addEventListener('touchmove', (e) => {
+          if (li._tsMoved) return;
+          const t = e.touches[0];
+          if (Math.abs(t.clientY - li._tsY) > TAP_THRESHOLD ||
+              Math.abs(t.clientX - li._tsX) > TAP_THRESHOLD) {
+            li._tsMoved = true;
+          }
+        }, { passive: true });
+        li.addEventListener('touchend', (e) => {
+          if (!li._tsMoved) { try { e.preventDefault(); } catch(_){} pickRep(name); }
+        }, { passive: false });
         dropdown.appendChild(li);
       });
       dropdown.style.display = 'block';
     }
+
+    // Keep dropdown open while finger is on it
+    dropdown.addEventListener('touchstart', () => { repSuppressBlur = true; }, { passive: true });
+    const repRelease = () => { setTimeout(() => { repSuppressBlur = false; }, 300); };
+    dropdown.addEventListener('touchend',    repRelease, { passive: true });
+    dropdown.addEventListener('touchcancel', repRelease, { passive: true });
 
     repNameEl.addEventListener('input', () => {
       const pos = repNameEl.selectionStart;
@@ -15335,7 +15402,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showDropdown(repNameEl.value);
     });
     repNameEl.addEventListener('focus', () => { if (repNameEl.value === '') showDropdown(''); });
-    repNameEl.addEventListener('blur',  () => setTimeout(() => { dropdown.style.display = 'none'; }, 150));
+    repNameEl.addEventListener('blur',  () => setTimeout(() => {
+      if (!repSuppressBlur) dropdown.style.display = 'none';
+    }, 200));
   }
 
   // ── Save all rep data when any rep field changes ──
