@@ -3831,19 +3831,19 @@ const PHONES_FOR_SALE = [
   { name: "Motorola razr - 2025",    price: 599.99, storage: [
       { gb: "256GB", price: 599.99 },
   ]},
-  { name: "moto g stylus - 2026",    price: 499.99, storage: [
+  { name: "Motorola moto g stylus - 2026", price: 499.99, storage: [
       { gb: "128GB", price: 499.99 },
   ]},
   { name: "Motorola edge",           price: 399.99, storage: [
       { gb: "256GB", price: 399.99 },
   ]},
-  { name: "moto g stylus - 2025",    price: 289.99, storage: [
+  { name: "Motorola moto g stylus - 2025", price: 289.99, storage: [
       { gb: "128GB", price: 289.99 },
   ]},
-  { name: "moto g - 2026",           price: 249.99, storage: [
+  { name: "Motorola moto g - 2026",  price: 249.99, storage: [
       { gb: "128GB", price: 249.99 },
   ]},
-  { name: "moto g play - 2026",      price: 179.99, storage: [
+  { name: "Motorola moto g play - 2026", price: 179.99, storage: [
       { gb: "64GB",  price: 179.99 },
   ]},
 ];
@@ -3854,7 +3854,7 @@ const PHONES_FOR_SALE = [
 // Three current TIPS promos, each keyed by the NEW phone being purchased:
 //   tips_nonsam_830  → select Apple, Google, Motorola devices  (up to $830)
 //   tips_samsung_900 → select Samsung devices                  (up to $900)
-//   tips_pixel_1200  → Pixel 10 Pro XL or Pixel 10 Pro Fold    (up to $1,200)
+//   tips_pixel_1200  → Pixel 10 Pro / Pro XL / Pro Fold        (up to $1,200)
 //
 // Each promo carries its own trade-in value table (one row per
 // model + condition). Trade-in values pay out as 36-month DPP bill credits.
@@ -12714,12 +12714,12 @@ const TIPS_PROMOS = {
 
 // Which TIPS promo applies for the new phone being purchased?
 // Routing rule:
-//   • Pixel 10 Pro XL / Pro Fold → $1,200 promo (exclusive)
+//   • Pixel 10 Pro family (Pro / Pro XL / Pro Fold) → $1,200 promo (exclusive)
 //   • Any Samsung device          → $900 promo
 //   • All other Apple/Google/Moto → $830 promo
 function getTipsPromoForNewPhone(deviceName) {
   const name = (deviceName || '').toLowerCase();
-  if (name.includes('pixel 10 pro xl') || name.includes('pixel 10 pro fold')) {
+  if (name.includes('pixel 10 pro')) {
     return TIPS_PROMOS.tips_pixel_1200;
   }
   if (name.includes('samsung') || name.includes('galaxy')) {
@@ -12764,16 +12764,16 @@ const SAMSUNG_TIPS_PHONES = [
 const WATCHES_FOR_SALE = [
   { name: "Apple Watch Ultra 3 49mm",             price: 799.99 },
   { name: "Apple Watch Ultra 2 49mm",             price: 799.99 },
-  { name: "Galaxy Watch Ultra 47mm",              price: 649.99 },
-  { name: "Galaxy Watch8 Classic",                price: 549.99 },
+  { name: "Samsung Galaxy Watch Ultra 47mm",      price: 649.99 },
+  { name: "Samsung Galaxy Watch8 Classic",        price: 549.99 },
   { name: "Apple Watch Series 11 Aluminum 46mm",  price: 529.99 },
   { name: "Apple Watch Series 10 Aluminum 46mm",  price: 529.99 },
   { name: "Apple Watch Series 11 Aluminum 42mm",  price: 499.99 },
   { name: "Apple Watch Series 10 Aluminum 42mm",  price: 499.99 },
-  { name: "Pixel Watch 4 45mm",                   price: 499.99 },
-  { name: "Pixel Watch 4 41mm",                   price: 449.99 },
-  { name: "Galaxy Watch8 44mm",                   price: 429.99 },
-  { name: "Galaxy Watch8 40mm",                   price: 399.99 },
+  { name: "Google Pixel Watch 4 45mm",            price: 499.99 },
+  { name: "Google Pixel Watch 4 41mm",            price: 449.99 },
+  { name: "Samsung Galaxy Watch8 44mm",           price: 429.99 },
+  { name: "Samsung Galaxy Watch8 40mm",           price: 399.99 },
   { name: "Apple Watch SE 3 Aluminum 44mm",       price: 329.99 },
   { name: "Apple Watch SE 3 Aluminum 40mm",       price: 299.99 },
 ];
@@ -12845,7 +12845,7 @@ function getWatchDataset() {
   } else if (brand === 'Samsung') {
     filtered = WATCHES_FOR_SALE.filter(w => w.name.startsWith('Galaxy') || w.name.startsWith('Samsung'));
   } else if (brand === 'Google') {
-    filtered = WATCHES_FOR_SALE.filter(w => w.name.startsWith('Pixel'));
+    filtered = WATCHES_FOR_SALE.filter(w => w.name.startsWith('Pixel') || w.name.startsWith('Google'));
   } else {
     // Motorola (no Motorola watches on Xfinity) or unknown — show all
     filtered = WATCHES_FOR_SALE;
@@ -12888,10 +12888,10 @@ const PROMO_DEFINITIONS = [
     startDate: '2026-05-11',
     endDate:   '2026-06-21',
   },
-  // ── Pixel TIPS trade-in ($1,200 off Pixel 10 Pro XL / Pro Fold) ──
+  // ── Pixel TIPS trade-in ($1,200 off Pixel 10 Pro / Pro XL / Pro Fold) ──
   {
     tag:       'tips_pixel_1200',
-    text:      '📱 TIPS Trade-In: Up to $1,200 off Pixel 10 Pro XL or Pixel 10 Pro Fold w/ Premium Unlimited — New Line or Elite Upgrade',
+    text:      '📱 TIPS Trade-In: Up to $1,200 off Pixel 10 Pro, Pixel 10 Pro XL, or Pixel 10 Pro Fold w/ Premium Unlimited — New Line or Elite Upgrade',
     startDate: '2026-05-11',
     endDate:   '2026-06-21',
   },
@@ -13501,7 +13501,7 @@ function buildFeatures(plan) {
   // conversation toward whichever combo (TIPS w/ trade vs. no-trade) fits.
   if (phoneLineCount > 0) {
     if (isPremiumPlan) {
-      activeTags.add('tips_pixel_1200');    // $1,200 off Pixel 10 Pro XL / Pro Fold w/ trade
+      activeTags.add('tips_pixel_1200');    // $1,200 off Pixel 10 Pro / Pro XL / Pro Fold w/ trade
       activeTags.add('tips_samsung_900');   // $900 off Samsung w/ trade
       activeTags.add('tips_nonsam_830');    // $830 off Apple/Google/Moto w/ trade
       activeTags.add('samsung_notrade');    // $500 off Samsung, no trade required
@@ -14880,7 +14880,7 @@ function buildDeviceRow(lineNum, type) {
 
     // Build the trade-in dataset for the current purchased device.
     // The new phone the rep selected determines which TIPS promo applies:
-    //   • Pixel 10 Pro XL / Pro Fold → $1,200 promo
+    //   • Pixel 10 Pro / Pro XL / Pro Fold → $1,200 promo
     //   • Any Samsung                → $900 promo
     //   • Apple / Google / Motorola  → $830 promo
     // The dropdown then surfaces the per-model trade-in values from that promo.
