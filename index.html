@@ -12888,6 +12888,11 @@ const PROMO_DEFINITIONS = [
     startDate: '2026-05-11',
     endDate:   '2026-06-21',
   },
+  // ── Waived activation fee — first line only, shown when activating a single line ──
+  {
+    tag:       'waived_activation_first_line',
+    text:      '✅ Waived Activation Fee For First Line - A $25 Value',
+  },
   // ── Pixel TIPS trade-in ($1,200 off Pixel 10 Pro / Pro XL / Pro Fold) ──
   {
     tag:       'tips_pixel_1200',
@@ -13495,6 +13500,15 @@ function buildFeatures(plan) {
       if (deviceName.includes('ipad (a16)') || deviceName.includes('ipad a16')) hasIpadA16 = true;
     }
   });
+
+  // ── Waived activation fee — only when the customer is activating a single
+  // line. We waive the $25 activation fee on the first line; surface it as a
+  // selling point only on single-line quotes (with more lines, bigger promos
+  // lead the conversation).
+  const totalLineCount = phoneLineCount + watchLineCount + tabletLineCount;
+  if (totalLineCount === 1) {
+    activeTags.add('waived_activation_first_line');
+  }
 
   // ── Phone-line promos: surface every variant the customer could pick on
   // this plan as soon as a phone line exists. The rep can then steer the
@@ -15063,8 +15077,8 @@ function recalcRow(row) {
     let discount = 0;
     const watchEliteActive = isPromoActiveByTag('watch_elite');
     // Diamond tier only — Platinum no longer qualifies for the $300 watch discount.
-    // Only the first 2 watches on the quote get the discount.
-    if (intakeSelectedTier === 'diamond' && watchEliteActive && parseInt(lineNum) <= 2) {
+    // Up to 5 watches on the quote get the $300 discount.
+    if (intakeSelectedTier === 'diamond' && watchEliteActive && parseInt(lineNum) <= 5) {
       discount = DIAMOND_WATCH_DISCOUNT;
     }
     const netPrice = Math.max(0, devicePrice - discount);
