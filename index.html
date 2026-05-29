@@ -12876,7 +12876,7 @@ function getTabletDataset() {
 // tag: used to conditionally show promos based on what's selected
 // endDate: YYYY-MM-DD — promo auto-hides on or after this date (null = always active)
 const PROMO_DEFINITIONS = [
-  // ── Prepaid Mastercard ($100 per qualifying line, $500 cap) ──
+  // ── Prepaid Mastercard ($100 base + $100 per financed phone, $500 cap) ──
   // Requires 2+ Plus phone lines to qualify. Each additional Plus line,
   // watch, or tablet adds $100 up to the $500 cap (6 things total).
   // The {{AMOUNT}} placeholder is filled in at render time with the
@@ -12884,7 +12884,7 @@ const PROMO_DEFINITIONS = [
   // total number of qualifying lines on the quote.
   {
     tag:       'mc_plus_scaled',
-    text:      '💳 ${{AMOUNT}} Prepaid Mastercard — {{MOBILE}} mobile line(s) on the quote ({{DPP}} financed). $100 base + $100 per financed phone + $100 per mobile line beyond the 2nd. Watches and tablets count toward the 2-line minimum but don\'t add to the payout. Capped at $500.',
+    text:      '💳 ${{AMOUNT}} Prepaid Mastercard — {{MOBILE}} mobile line(s) on the quote ({{DPP}} financed). $100 base for adding 2 lines + $100 per financed phone. Watches and tablets count toward the 2-line minimum but don\'t add to the payout. Capped at $500.',
     startDate: '2026-05-11',
     endDate:   '2026-06-21',
   },
@@ -13530,25 +13530,25 @@ function buildFeatures(plan) {
   // ── Prepaid Mastercard qualification ──
   // Rules (per Jeff's clarification):
   //   • QUALIFY: 2+ total lines on the quote AND at least 1 mobile (phone)
-  //     line. Watches and tablets count toward the 2-line minimum but only
-  //     in the edge case where the customer has 1 mobile + 1 watch/tablet.
-  //     With 2+ mobile lines, watches/tablets are ignored entirely.
+  //     line. Watches and tablets count toward the 2-line minimum (a watch
+  //     or tablet can be the 2nd line when the customer is signing up for a
+  //     single phone line just to unlock the base $100).
   //   • $100 base on qualifying.
-  //   • +$100 per DPP MOBILE PHONE LINE (financed phones only — BYOD does
-  //     not add this bonus).
-  //   • +$100 per MOBILE LINE beyond the 2nd (BYOD or DPP, doesn't matter).
-  //   • Watches and tablets NEVER add to the bonus.
+  //   • +$100 per DPP MOBILE PHONE (financed phones only — BYOD does NOT add
+  //     this bonus). The payout ONLY grows by financing a phone.
+  //   • Watches and tablets are NEVER financed-counted and NEVER add to the
+  //     payout. Extra (unfinanced) lines do NOT add to the payout either.
   //   • Hard cap at $500.
   //
   // Examples (matching Jeff's confirmed rule):
-  //   • 1 BYOD phone + 1 tablet              → $100 (base only, 1 mobile)
-  //   • 1 BYOD phone + 1 DPP smartwatch      → $100 (base only)
-  //   • 1 DPP phone + 1 tablet               → $200 (base + 1 DPP)
-  //   • 2 DPP phones                         → $300 (base + 2 DPP)
-  //   • 4 DPP mobile lines                   → cap $500
-  //   • 4 BYOD mobile lines                  → $300 (base + 2 extra mobile)
-  //   • 4 lines, 2 financed (all mobile)     → $500 (base + 2 DPP + 2 extra)
-  //   • 6 BYOD mobile lines                  → $500 (base + 4 extra, cap)
+  //   • 4 lines, none financed               → $100 (base only)
+  //   • 1 BYOD phone + 1 tablet              → $100 (base only)
+  //   • 1 BYOD phone + 1 DPP smartwatch      → $100 (base only; watch not counted)
+  //   • 1 DPP phone + 1 tablet               → $200 (base + 1 DPP phone)
+  //   • 2 DPP phones                         → $300 (base + 2 DPP phones)
+  //   • 4 DPP phones                         → $500 (base + 4, hits cap)
+  //   • 4 BYOD mobile lines                  → $100 (base only; nothing financed)
+  //   • 4 lines, 2 financed phones           → $300 (base + 2 DPP phones)
   let mcAmount      = 0;
   let mcTotalLines  = 0;
   let mcMobileLines = 0;
@@ -13571,13 +13571,11 @@ function buildFeatures(plan) {
         }
       }
     });
-    // Qualify: 2+ total lines AND at least 1 mobile line on the quote
+    // Qualify: 2+ total lines AND at least 1 mobile line on the quote.
+    // Payout = $100 base + $100 per financed (DPP) phone, capped at $500.
+    // Unfinanced extra lines and all watches/tablets add $0 to the payout.
     if (mcTotalLines >= 2 && mcMobileLines >= 1) {
-      // Extra mobile lines = mobile lines beyond the 2nd mobile line.
-      // Clamp to 0 when the customer only has 1 mobile line (which means
-      // their 2nd line is a watch/tablet helping them hit the minimum).
-      const extraMobile = Math.max(0, mcMobileLines - 2);
-      mcAmount = Math.min(100 + mcDppPhones * 100 + extraMobile * 100, 500);
+      mcAmount = Math.min(100 + mcDppPhones * 100, 500);
       if (mcAmount > 0) activeTags.add('mc_plus_scaled');
     }
   }
