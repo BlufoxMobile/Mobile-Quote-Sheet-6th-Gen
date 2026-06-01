@@ -16039,6 +16039,10 @@ function updateYrToggleVisibility(planKey) {
 
 
 
+
+
+
+
 <!-- BLUFOX_ROSTER_DROPDOWNS_V1 : roster-driven Store + Rep dropdowns (auto-added) -->
 <script>
 (function(){
@@ -16059,7 +16063,8 @@ function updateYrToggleVisibility(planKey) {
     var storeSel=document.getElementById(CFG.storeId);
     var repEl=document.getElementById(CFG.repId);
     if(!storeSel||!repEl) return;
-    var roster={}, ready=false;
+    var roster={}, ready=false, rosterLoaded=false;
+    var NEW_HIRE='New Hire';
     var lastStore = gL(CFG.lsStore) || storeSel.value || '';
     var lastRep   = gL(CFG.lsRep)   || (repEl.value||'').trim() || '';
     var repClass  = repEl.className || '';
@@ -16095,12 +16100,16 @@ function updateYrToggleVisibility(planKey) {
       var el=buildRep('<input id="'+CFG.repId+'"'+nameAttr()+' type="text" autocomplete="name" placeholder="Type your full name">');
       if(repClass) el.className=repClass; if(lastRep) el.value=lastRep; attach(el);
     }
+    function isSpecial(v){ return special.indexOf(v)!==-1; }
     function refreshRep(){
       var sv=storeSel.value;
       if(!sv){ repPlaceholder('— Select your store first —'); return; }
+      if(isSpecial(sv)){ repFree(); return; }              // e.g. "DM Submission"
       if(!ready){ repPlaceholder('— Loading names… —'); return; }
-      var reps = roster[toFull(sv)];
-      if(reps && reps.length){ repList(reps); } else { repFree(); }
+      if(!rosterLoaded){ repFree(); return; }              // data unreachable -> type exact name
+      var reps=(roster[toFull(sv)]||[]).slice();
+      if(reps.indexOf(NEW_HIRE)===-1) reps.push(NEW_HIRE); // always offer "New Hire"
+      repList(reps);
     }
     function fillStores(fullStores){
       var keep=storeSel.value;
@@ -16120,10 +16129,22 @@ function updateYrToggleVisibility(planKey) {
 
     var bust='?d='+new Date().toISOString().slice(0,10);
     jget(DIR+bust).then(function(d){ if(d&&d.stores&&d.stores.length){ fillStores(d.stores); refreshRep(); call(CFG.onStoreChange); } }).catch(function(){});
-    jget(RST+bust).then(function(r){ roster=(r&&r.byStore)||{}; ready=true; refreshRep(); call(CFG.onStoreChange); })
+    jget(RST+bust).then(function(r){ roster=(r&&r.byStore)||{}; ready=true; rosterLoaded=true; refreshRep(); call(CFG.onStoreChange); })
                   .catch(function(){ ready=true; refreshRep(); call(CFG.onStoreChange); });
   }
-  function boot(){ setTimeout(go, 250); }
+  // Put Store before Rep so reps pick their store first (runs immediately, no flicker).
+  function reorder(){
+    var storeSel=document.getElementById(CFG.storeId);
+    var repEl=document.getElementById(CFG.repId);
+    if(!storeSel||!repEl) return;
+    var sf=(storeSel.closest && storeSel.closest(CFG.fieldSel)) || storeSel.parentNode;
+    var rf=(repEl.closest && repEl.closest(CFG.fieldSel)) || repEl.parentNode;
+    if(sf && rf && sf!==rf && sf.parentNode && sf.parentNode===rf.parentNode){
+      rf.parentNode.insertBefore(sf, rf);   // store field now precedes rep field
+    }
+  }
+  try{ reorder(); }catch(e){}
+  function boot(){ try{ reorder(); }catch(e){} setTimeout(go, 250); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
