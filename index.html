@@ -3157,14 +3157,24 @@
             <div class="ipp-sub">Prepaid · Max 5 lines</div>
           </button>
         </div>
-        <!-- Year 1 discount toggle. When checked, swaps the selected plan
-             from its _promo variant to its _std variant so the quote
-             reflects standard pricing (adds $30/mo back). Disabled for
-             NOW Mobile since it has no Year 1 promo to remove. -->
-        <div id="i_removeDiscountWrap" style="text-align:center; margin-top:14px;">
+        <!-- Pricing toggles. Two sibling controls:
+             1) Year 1 discount toggle (existing). When checked, swaps the
+                selected plan from its _promo variant to its _std variant
+                so the quote reflects standard pricing (adds $30/mo back).
+             2) Internet Essentials Quote (new). When checked, swaps the
+                selected plan to its _ie variant: standard pricing PLUS a
+                $10/mo per-line surcharge (Plus → $55/line, Select →
+                $40/line). IE implies standard pricing, so toggling it on
+                auto-checks-and-disables the "Remove $30/mo" checkbox.
+             Both are no-ops for NOW Mobile (prepaid; not in IE program). -->
+        <div id="i_removeDiscountWrap" style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:14px;">
           <label style="display:inline-flex; align-items:center; gap:10px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text-secondary); padding:8px 14px; border:1.5px solid var(--border); border-radius:8px; background:#fff;">
             <input type="checkbox" id="i_removeDiscount" onchange="applyDiscountToggle()" style="width:18px; height:18px; cursor:pointer; accent-color:var(--xfinity-purple);">
             Remove $30/mo Year 1 discount (quote standard pricing)
+          </label>
+          <label style="display:inline-flex; align-items:center; gap:10px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text-secondary); padding:8px 14px; border:1.5px solid var(--border); border-radius:8px; background:#fff;">
+            <input type="checkbox" id="i_internetEssentials" onchange="applyInternetEssentialsToggle()" style="width:18px; height:18px; cursor:pointer; accent-color:var(--xfinity-purple);">
+            Internet Essentials Quote
           </label>
         </div>
       </div>
@@ -12713,13 +12723,17 @@ const TIPS_PROMOS = {
 };
 
 // Which TIPS promo applies for the new phone being purchased?
-// Routing rule:
-//   • Pixel 10 Pro family (Pro / Pro XL / Pro Fold) → $1,200 promo (exclusive)
-//   • Any Samsung device          → $900 promo
-//   • All other Apple/Google/Moto → $830 promo
+// Routing rule (per the Comcast promo PDFs dated May 11–June 21, 2026):
+//   • Pixel 10 Pro XL or Pixel 10 Pro Fold ONLY → $1,200 promo (narrow bucket)
+//   • Any Samsung device                        → $900 promo
+//   • All other Apple/Google/Moto, INCLUDING    → $830 promo
+//     base Pixel 10 and Pixel 10 Pro (not XL/Fold)
+// CHANGED 2026-06-03: previously routed the whole "Pixel 10 Pro family" to
+// the $1,200 bucket, but the PDF header only lists Pro XL + Pro Fold. Base
+// Pixel 10 Pro now correctly routes to the $830 bucket.
 function getTipsPromoForNewPhone(deviceName) {
   const name = (deviceName || '').toLowerCase();
-  if (name.includes('pixel 10 pro')) {
+  if (name.includes('pixel 10 pro xl') || name.includes('pixel 10 pro fold')) {
     return TIPS_PROMOS.tips_pixel_1200;
   }
   if (name.includes('samsung') || name.includes('galaxy')) {
@@ -12908,7 +12922,7 @@ const PROMO_MATRIX = {
       "tag": "tips_pixel_1200",
       "active": true,
       "category": "new_line_with_trade",
-      "marketing_name": "Up to $1,200 off Pixel 10 Pro / Pro XL / Pro Fold",
+      "marketing_name": "Up to $1,200 off Pixel 10 Pro XL and Pro Fold",
       "max_value_usd": 1200,
       "line_type": "new_line",
       "plan_eligibility": "plus_or_premium_unl",
@@ -12921,13 +12935,12 @@ const PROMO_MATRIX = {
         "Google"
       ],
       "device_models": [
-        "Google Pixel 10 Pro",
         "Google Pixel 10 Pro XL 5G",
         "Google Pixel 10 Pro Fold"
       ],
       "values_source": "xfinity-tips-promotions:promo-1200-pixel-pro-xl-fold.json",
       "ends": "2026-06-21",
-      "notes": "The Pixel 10 Pro family \u2014 Pro, Pro XL, and Pro Fold \u2014 all route to this $1,200 bucket. There is no separate $1,000 Pixel bucket this cycle."
+      "notes": "NARROW BUCKET: only Pixel 10 Pro XL and Pixel 10 Pro Fold route here per the Comcast PDF. Base Pixel 10 and base Pixel 10 Pro both route to tips_nonsam_830 instead. There is no separate $1,000 Pixel bucket this cycle."
     },
     {
       "tag": "tips_pixel_1000",
@@ -12990,7 +13003,7 @@ const PROMO_MATRIX = {
         "Google",
         "Motorola"
       ],
-      "device_models_note": "Select Apple, Google (excluding Pixel 10 Pro / Pro XL / Pro Fold), and Motorola devices",
+      "device_models_note": "Select Apple, Google (including base Pixel 10 and Pixel 10 Pro; EXCLUDING only Pixel 10 Pro XL and Pixel 10 Pro Fold), and Motorola devices",
       "values_source": "xfinity-tips-promotions:promo-830-apple-google-motorola.json",
       "ends": "2026-06-21"
     },
@@ -13289,7 +13302,8 @@ const PROMO_MATRIX = {
     "select_or_now_suppresses_new_line_device_promos": true,
     "upgrade_with_trade_prefer_plus_up": "If the customer is upgrading and has a trade-in, PLUS UP is the default since it works on any plan and stacks the bonus on top of trade value.",
     "upgrade_no_trade_requires_plus_or_premium": "anytime_upgrade_200 is only available on Plus or Premium Unlimited. Customers on Select with no trade-in have no current upgrade device promo.",
-    "pixel_pro_family_routes_to_1200": "The entire Pixel 10 Pro family \u2014 Pixel 10 Pro, Pixel 10 Pro XL, and Pixel 10 Pro Fold \u2014 routes to tips_pixel_1200 ($1,200 bucket), never to tips_nonsam_830. There is no separate $1,000 Pixel bucket.",
+    "pixel_pro_xl_and_fold_only_route_to_1200": "ONLY Pixel 10 Pro XL and Pixel 10 Pro Fold route to tips_pixel_1200 ($1,200 bucket). Base Pixel 10 and base Pixel 10 Pro route to tips_nonsam_830 ($830 bucket). There is no separate $1,000 Pixel bucket. Routing is by DESTINATION new phone, NOT trade-in phone \u2014 an iPhone trade toward a Samsung purchase uses tips_samsung_900, not tips_pixel_1200, regardless of how much the iPhone is worth in the Pixel bucket.",
+    "tips_routing_by_destination_phone": "TIPS bucket selection is keyed on the new phone the customer is BUYING, not the phone they're trading in. Quote-sheet UI must re-evaluate the trade-in value whenever the destination phone changes \u2014 the same trade-in model can be worth different amounts in different buckets (e.g., an iPhone 16 Plus is worth up to $1,200 in the Pixel bucket but only $900 in the Samsung bucket).",
     "samsung_new_line_with_trade_routes_to_900": "Samsung new-line with trade-in routes to tips_samsung_900. With no trade-in, routes to flat_samsung_500.",
     "upgrade_samsung_google_450_requires_trade": "On an upgrade, Samsung and Google devices get $450 ONLY when a trade-in is present (plus_up_upgrade_samsung_google_450, any plan, $450 + trade value). With no trade-in, a Samsung/Google upgrade falls back to anytime_upgrade_200 ($200, Plus/Premium). The $450 and $200 are alternatives \u2014 never stacked.",
     "upgrade_apple_motorola_200_always": "On an upgrade, Apple and Motorola devices get $200 regardless of trade-in: anytime_upgrade_200 with no trade (Plus/Premium), or plus_up_upgrade_apple_motorola_200 ($200 + trade value, any plan) when a trade is present.",
@@ -13299,7 +13313,6 @@ const PROMO_MATRIX = {
     "ipad_50_off_is_dpp_bill_credit": "The 'iPad 50% off' promo is actually $250 off the $499.99 MSRP delivered as $6.94/mo bill credits over a 36-month Tablet plan DPP, NOT a flat in-store discount. Customer who pays in full forfeits the discount. Requires new line activation on the Tablet plan."
   }
 };
-
 // ── CURRENT STORE PROMOTIONS (update monthly) ──
 // ── PROMOTION DEFINITIONS ──
 // SOURCE OF TRUTH: the `xfinity-mobile-promotions` skill at
@@ -13533,6 +13546,51 @@ const PLANS = {
     color: "#7B3FF2",
     maxLines: 12,
     pricing: [30,60,90,120,150,180,210,240,270,300,330,360],
+    yr2Plan: null,
+    features: [
+      "📺 HD video (720p) — defaults to 480p, customer can enable HD",
+      "🔋 50 GB premium data — speeds may slow during congestion after 50 GB",
+      "📶 15 GB mobile hotspot at 5G speeds, then unlimited at 3G speeds",
+      "🌎 Unlimited data in 215+ countries (10 GB high-speed per cycle)",
+      "📞 Unlimited international calls & texts in 250+ destinations",
+      "🔐 Advanced Security on the go",
+      "📡 WiFi PowerBoost — WiFi speeds up to a gig at home and on the go"
+    ]
+  },
+  // ── INTERNET ESSENTIALS variants ──
+  // Internet Essentials customers pay standard pricing (no $30/mo Year 1
+  // discount) AND an additional $10/mo per line surcharge:
+  //   • Mobile Plus IE:   $55/line (standard $45 + $10 IE)
+  //   • Mobile Select IE: $40/line (standard $30 + $10 IE)
+  // Toggle is the "Internet Essentials Quote" button next to the standard
+  // "Remove $30/mo Year 1 discount" checkbox. NOW Mobile is excluded — it
+  // is prepaid and not part of the Internet Essentials program.
+  mobile_plus_ie: {
+    name: "Mobile Plus",
+    badge: "Internet Essentials",
+    color: "#9B59F5",
+    maxLines: 12,
+    pricing: [55,110,165,220,275,330,385,440,495,550,605,660],
+    yr2Plan: null,
+    features: [
+      "📺 4K Ultra HD video streaming",
+      "🔋 Unlimited premium data at home and abroad — never deprioritized",
+      "📶 50 GB mobile hotspot at 5G speeds, then unlimited at 3G speeds",
+      "🛡️ XMC Plus device protection included (covers phone, all watches & tablets)",
+      "📱 Upgrade anytime — 60-day waiting period between upgrades",
+      "🌎 Unlimited data in 215+ countries (10 GB high-speed per cycle)",
+      "📞 Unlimited international calls & texts in 250+ destinations",
+      "🔒 Xfinity Call Guard included",
+      "🔐 Advanced Security on the go",
+      "📡 WiFi PowerBoost — WiFi speeds up to a gig at home and on the go"
+    ]
+  },
+  mobile_select_ie: {
+    name: "Mobile Select",
+    badge: "Internet Essentials",
+    color: "#7B3FF2",
+    maxLines: 12,
+    pricing: [40,80,120,160,200,240,280,320,360,400,440,480],
     yr2Plan: null,
     features: [
       "📺 HD video (720p) — defaults to 480p, customer can enable HD",
@@ -13895,7 +13953,7 @@ function buildFeatures(plan) {
   // should start to trigger any promotions that are applicable."
   const activeTags = new Set(['always']);
 
-  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
+  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
   // Note: the legacy "Unlimited" plan (unlimited_std) is a distinct tier
   // from "Mobile Select" — only the legacy Unlimited plan qualifies for
   // the $200/$500 Samsung discounts in PROMO_DEFINITIONS. Mobile Select
@@ -13996,8 +14054,10 @@ function buildFeatures(plan) {
     const isSelectOrPlusNewMobilePlan = (
       intakeSelectedPlan === 'mobile_select_promo' ||
       intakeSelectedPlan === 'mobile_select_std'   ||
+      intakeSelectedPlan === 'mobile_select_ie'    ||
       intakeSelectedPlan === 'mobile_plus_promo'   ||
-      intakeSelectedPlan === 'mobile_plus_std'
+      intakeSelectedPlan === 'mobile_plus_std'     ||
+      intakeSelectedPlan === 'mobile_plus_ie'
     );
     document.querySelectorAll('.df-row').forEach(row => {
       const t = row.dataset.type;
@@ -14037,7 +14097,7 @@ function buildFeatures(plan) {
     if (promoAmt <= 0) return;
 
     const isSamsungDevice = deviceName.toLowerCase().startsWith('samsung');
-    const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
+    const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
 
     let discLabel = '';
     if (type === 'phone') {
@@ -14563,110 +14623,184 @@ function handleSavePDF() {
 const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/20441079/up242h1/';
 const APPS_SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbyQaa1yvggLJuw5dcme74vwAW3hSB3BvzCK40IhLThy-F8KZDFOF6gcyl8psNMd3yD-Cg/exec';
 
+// ── HARDENED SUBMIT (2026-06-03) ─────────────────────────────────
+// Previous version had three failure modes that made reps see "nothing
+// happens" on click or believe a failed submission had succeeded:
+//   1) Payload construction (40 lines of DOM reads) ran BEFORE the try/
+//      catch and BEFORE the button state changed. ANY runtime error
+//      there silently aborted the click with no visible feedback.
+//   2) The code always showed "✅ Submitted!" even when the outbox
+//      returned { delivered:false } (timeout, offline, server error),
+//      so a failed submission looked identical to a successful one.
+//   3) The unconditional location.reload() 3 s after the click
+//      interrupted the outbox retry cycle and reset the in-memory
+//      busy[] table — items could end up "stranded" until the rep
+//      opened the sheet again.
+// This version:
+//   - Wraps the entire function in try/catch from the FIRST line so any
+//     thrown error is reported to the rep via alert + console.
+//   - Reads the delivered flag and only shows ✅ on confirmed delivery.
+//     Pending / failed deliveries show "✅ Saved — will deliver when
+//     online" and leave the page intact so the outbox can keep retrying.
+//   - Drops the destructive location.reload() entirely.
+//   - Removes the fire-and-forget fallback (which omitted the
+//     Content-Type header that the Apps Script doPost endpoint needs);
+//     refuses to send if the outbox isn't ready and surfaces a clear
+//     error instead.
 async function handleSubmit() {
-  const repName   = document.getElementById('repName').value.trim();
-  const storeName = document.getElementById('storeName').value;
-  if (!repName || !storeName) {
-    alert('Please fill in Rep Name and Store Name before submitting.');
-    return;
+  const btn  = document.querySelector('.btn-footer-submit');
+  const orig = btn ? btn.innerHTML : '';
+  // Helper to reset the button state from anywhere.
+  function resetBtn() {
+    if (!btn) return;
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    btn.style.background = '';
   }
-
-  // Gather all device rows for submission
-  const deviceRows = [];
-  document.querySelectorAll('.df-row').forEach(row => {
-    deviceRows.push({
-      type:          row.dataset.type,
-      line:          row.dataset.line,
-      device:        row.dataset.deviceName || 'BYOD',
-      devicePrice:   row.dataset.devicePrice,
-      tradeIn:       row.dataset.tradeName || '',
-      tradeCondition:row.dataset.tradeCondition || '',
-      promoAmount:   row.dataset.promoAmount,
-      xmcEnabled:    row.dataset.xmcEnabled,
-      xmcRate:       row.dataset.xmcRate,
-    });
-  });
-
-  const payload = {
-    // Customer info
-    customerName:   document.getElementById('customerName').textContent,
-    customerPhone:  document.getElementById('customerPhone').textContent,
-    date:           document.getElementById('quoteDate').textContent,
-    rewardsTier:    document.getElementById('rewardsTierDisplay').textContent,
-    // Rep info
-    repName,
-    repEmail:  document.getElementById('repEmail').value,
-    repPhone:  document.getElementById('repPhone').value,
-    storeName,
-    // Competitor info
-    carrier:   document.getElementById('dispCarrier').textContent,
-    lines:     document.getElementById('dispLines').textContent,
-    monthlyBill: document.getElementById('dispBill').textContent,
-    // Xfinity plan
-    xfinityPlan:   document.getElementById('planDisplayName').textContent,
-    planDiscount:  document.getElementById('planDisplayDiscount').textContent,
-    // Savings
-    monthlySavings: document.getElementById('monthlySavings').textContent,
-    yearlySavings:  document.getElementById('yearlySavings').textContent,
-    totalWithDevices: document.getElementById('xtwd-amount').textContent,
-    // Devices
-    devices: deviceRows,
-    // Core savings
-    coreCurrent:   document.getElementById('coreCurrentHidden').value,
-    coreRebundle:  document.getElementById('coreRebundleHidden').value,
-    coreSavings:   document.getElementById('coreSavingsAmount').textContent,
-    submittedAt: new Date().toISOString(),
-  };
-
-  // Show submitting state
-  const btn = document.querySelector('.btn-footer-submit');
-  const orig = btn.innerHTML;
-  btn.innerHTML = '⏳ Submitting...';
-  btn.disabled = true;
-
-  // Build a payload in the schema the Apps Script doPost handler expects
-  // (snake_case keys matching the Current Month columns in the Google Sheet).
-  const watchesCount = deviceRows.filter(d => /watch/i.test(d.type || '')).length;
-  const tabletsCount = deviceRows.filter(d => /tablet/i.test(d.type || '')).length;
-  const appsScriptPayload = {
-    store:             payload.storeName,
-    rep_name:          payload.repName,
-    rep_email:         payload.repEmail,
-    rep_phone:         payload.repPhone,
-    customer_name:     payload.customerName,
-    customer_phone:    payload.customerPhone,
-    membership_tier:   payload.rewardsTier,
-    current_carrier:   payload.carrier,
-    lines:             payload.lines,
-    current_bill:      payload.monthlyBill,
-    plan_selected:     payload.xfinityPlan,
-    core_bill_current: payload.coreCurrent,
-    core_bill_after:   payload.coreRebundle,
-    core_savings:      payload.coreSavings,
-    watches:           watchesCount,
-    tablets:           tabletsCount,
-    xv_to_xm:          '',
-    monthly_savings:   payload.monthlySavings,
-    annual_savings:    payload.yearlySavings,
-    devices_only:      !payload.xfinityPlan || payload.xfinityPlan === 'N/A',
-    device_count:      deviceRows.length,
-  };
-
+  // Helper to read a text element safely (returns '' if missing).
+  function tx(id) {
+    const el = document.getElementById(id);
+    return el ? (el.textContent || '').trim() : '';
+  }
+  function val(id) {
+    const el = document.getElementById(id);
+    return el ? (el.value || '') : '';
+  }
   try {
+    const repName   = val('repName').trim();
+    const storeName = val('storeName');
+    if (!repName || !storeName) {
+      alert('Please fill in Rep Name and Store Name before submitting.');
+      return;
+    }
+
+    // Show submitting state IMMEDIATELY so the rep sees the click
+    // register even if downstream payload construction or delivery is
+    // slow. Reverted in catch / finally.
+    if (btn) {
+      btn.innerHTML = '⏳ Submitting...';
+      btn.disabled = true;
+    }
+
+    // Gather all device rows for submission.
+    const deviceRows = [];
+    document.querySelectorAll('.df-row').forEach(row => {
+      deviceRows.push({
+        type:          row.dataset.type,
+        line:          row.dataset.line,
+        device:        row.dataset.deviceName || 'BYOD',
+        devicePrice:   row.dataset.devicePrice,
+        tradeIn:       row.dataset.tradeName || '',
+        tradeCondition:row.dataset.tradeCondition || '',
+        promoAmount:   row.dataset.promoAmount,
+        xmcEnabled:    row.dataset.xmcEnabled,
+        xmcRate:       row.dataset.xmcRate,
+      });
+    });
+
+    const payload = {
+      // Customer info
+      customerName:     tx('customerName'),
+      customerPhone:    tx('customerPhone'),
+      date:             tx('quoteDate'),
+      rewardsTier:      tx('rewardsTierDisplay'),
+      // Rep info
+      repName,
+      repEmail:         val('repEmail'),
+      repPhone:         val('repPhone'),
+      storeName,
+      // Competitor info
+      carrier:          tx('dispCarrier'),
+      lines:            tx('dispLines'),
+      monthlyBill:      tx('dispBill'),
+      // Xfinity plan
+      xfinityPlan:      tx('planDisplayName'),
+      planDiscount:     tx('planDisplayDiscount'),
+      // Savings
+      monthlySavings:   tx('monthlySavings'),
+      yearlySavings:    tx('yearlySavings'),
+      totalWithDevices: tx('xtwd-amount'),
+      // Devices
+      devices: deviceRows,
+      // Core savings
+      coreCurrent:      val('coreCurrentHidden'),
+      coreRebundle:     val('coreRebundleHidden'),
+      coreSavings:      tx('coreSavingsAmount'),
+      submittedAt:      new Date().toISOString(),
+    };
+
+    // Build a payload in the schema the Apps Script doPost handler expects
+    // (snake_case keys matching the Current Month columns in the Google Sheet).
+    const watchesCount = deviceRows.filter(d => /watch/i.test(d.type || '')).length;
+    const tabletsCount = deviceRows.filter(d => /tablet/i.test(d.type || '')).length;
+    const appsScriptPayload = {
+      store:             payload.storeName,
+      rep_name:          payload.repName,
+      rep_email:         payload.repEmail,
+      rep_phone:         payload.repPhone,
+      customer_name:     payload.customerName,
+      customer_phone:    payload.customerPhone,
+      membership_tier:   payload.rewardsTier,
+      current_carrier:   payload.carrier,
+      lines:             payload.lines,
+      current_bill:      payload.monthlyBill,
+      plan_selected:     payload.xfinityPlan,
+      core_bill_current: payload.coreCurrent,
+      core_bill_after:   payload.coreRebundle,
+      core_savings:      payload.coreSavings,
+      watches:           watchesCount,
+      tablets:           tabletsCount,
+      xv_to_xm:          '',
+      monthly_savings:   payload.monthlySavings,
+      annual_savings:    payload.yearlySavings,
+      devices_only:      !payload.xfinityPlan || payload.xfinityPlan === 'N/A',
+      device_count:      deviceRows.length,
+    };
+
     if (ZAPIER_WEBHOOK_URL.includes('YOUR_HOOK_ID_HERE')) {
       throw new Error('Zapier webhook URL has not been configured yet. Please update ZAPIER_WEBHOOK_URL in the script.');
     }
-    // Durable delivery: persist locally first, then send with auto-retry (Blufox outbox).
-    const __deliver = window.__blufoxDeliver || function(o){ try{fetch(o.zapierUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(o.zapierPayload)});}catch(e){} try{fetch(o.appsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(o.appsPayload)});}catch(e){} return Promise.resolve({delivered:true}); };
-    await __deliver({ appsUrl: APPS_SCRIPT_URL, appsPayload: appsScriptPayload, zapierUrl: ZAPIER_WEBHOOK_URL, zapierPayload: payload });
-    btn.innerHTML = '✅ Submitted!';
-      btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
-      setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.disabled = false; location.reload(); }, 3000);
+    if (typeof window.__blufoxDeliver !== 'function') {
+      // Outbox failed to initialize (the script at the bottom of the
+      // page didn't run for some reason). Bail out cleanly rather than
+      // firing a CORS-broken fallback fetch and pretending it worked.
+      throw new Error('Submission system not ready yet. Please refresh the page and try again — your work is safe.');
+    }
+    const result = await window.__blufoxDeliver({
+      appsUrl:       APPS_SCRIPT_URL,
+      appsPayload:   appsScriptPayload,
+      zapierUrl:     ZAPIER_WEBHOOK_URL,
+      zapierPayload: payload,
+    });
+    // result.delivered === true  → Apps Script confirmed the request
+    //                              completed (opaque response — counts).
+    // result.delivered === false → Apps Script POST is still pending or
+    //                              failed; the outbox will keep retrying
+    //                              in the background until it succeeds.
+    if (btn) {
+      if (result && result.delivered === true) {
+        btn.innerHTML = '✅ Submitted!';
+        btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
+        // Reset (no reload — the outbox tracks the submission and a
+        // reload would interrupt any in-flight retries for OTHER queued
+        // submissions). Rep can submit another quote without reloading.
+        setTimeout(() => { resetBtn(); }, 2500);
+      } else {
+        // Saved to outbox, not yet confirmed. Tell the rep the truth.
+        btn.innerHTML = '✅ Saved — will deliver when online';
+        btn.style.background = 'linear-gradient(135deg, #FFB300, #FFA000)';
+        const pending = (typeof window.__blufoxOutboxPending === 'function')
+          ? window.__blufoxOutboxPending() : 0;
+        console.warn('[handleSubmit] outbox pending count:', pending);
+        setTimeout(() => { resetBtn(); }, 4000);
+      }
+    }
   } catch (err) {
-    btn.innerHTML = orig;
-    btn.disabled = false;
-    alert('Submission failed.\n\nError: ' + err.message);
-    location.reload();
+    // Surface the real error so we can debug. Reps should see something
+    // actionable rather than a silent dead button.
+    console.error('[handleSubmit] failed:', err);
+    resetBtn();
+    alert('Submission failed.\n\n' + (err && err.message ? err.message : err) + '\n\nYour quote was NOT saved. Please try again or refresh the page.');
   }
 }
 
@@ -14759,6 +14893,12 @@ function selectIntakeReward(btn) {
 // rep checks "Remove $30/mo Year 1 discount" we swap intakeSelectedPlan to
 // the matching _std variant so the quote uses standard pricing. NOW Mobile
 // is excluded — it has no Year 1 promo to remove.
+//
+// "Internet Essentials Quote" (sibling toggle) swaps to the _ie variant,
+// which uses standard pricing PLUS a $10/mo per-line surcharge.
+// IE always implies standard pricing, so while IE is on the discount
+// checkbox is force-checked-and-disabled (the swap is handled by the IE
+// toggle and the discount toggle becomes a no-op).
 const PROMO_TO_STD_MAP = {
   mobile_plus_promo:   'mobile_plus_std',
   mobile_select_promo: 'mobile_select_std',
@@ -14767,10 +14907,24 @@ const STD_TO_PROMO_MAP = {
   mobile_plus_std:   'mobile_plus_promo',
   mobile_select_std: 'mobile_select_promo',
 };
+const ANY_TO_IE_MAP = {
+  mobile_plus_promo:   'mobile_plus_ie',
+  mobile_plus_std:     'mobile_plus_ie',
+  mobile_select_promo: 'mobile_select_ie',
+  mobile_select_std:   'mobile_select_ie',
+};
+const IE_TO_STD_MAP = {
+  mobile_plus_ie:   'mobile_plus_std',
+  mobile_select_ie: 'mobile_select_std',
+};
 
 function applyDiscountToggle() {
   const chk = document.getElementById('i_removeDiscount');
   if (!chk) return;
+  // If Internet Essentials is on, IE controls the plan — the discount
+  // checkbox is a no-op (it stays checked + disabled while IE is active).
+  const ieChk = document.getElementById('i_internetEssentials');
+  if (ieChk && ieChk.checked) return;
   if (chk.checked) {
     const stdKey = PROMO_TO_STD_MAP[intakeSelectedPlan];
     if (stdKey) intakeSelectedPlan = stdKey;
@@ -14794,6 +14948,8 @@ function applyDiscountToggle() {
       now_mobile: 'NOW Mobile',
       mobile_plus_std: 'Mobile Plus',
       mobile_select_std: 'Mobile Select',
+      mobile_plus_ie: 'Mobile Plus',
+      mobile_select_ie: 'Mobile Select',
       unlimited_std: 'Unlimited',
     };
     const planDiscounts = {
@@ -14802,6 +14958,81 @@ function applyDiscountToggle() {
       now_mobile: 'Prepaid · No contract',
       mobile_plus_std: 'Standard pricing (Year 1 discount removed)',
       mobile_select_std: 'Standard pricing (Year 1 discount removed)',
+      mobile_plus_ie: 'Internet Essentials pricing ($55/line)',
+      mobile_select_ie: 'Internet Essentials pricing ($40/line)',
+      unlimited_std: 'Standard pricing',
+    };
+    const nameEl = document.getElementById('planDisplayName');
+    const discEl = document.getElementById('planDisplayDiscount');
+    if (nameEl) nameEl.textContent = planNames[intakeSelectedPlan] || intakeSelectedPlan;
+    if (discEl) discEl.textContent = planDiscounts[intakeSelectedPlan] || '';
+    if (typeof updateQuote === 'function') updateQuote();
+  }
+}
+
+// ── INTERNET ESSENTIALS TOGGLE ──
+// IE customers pay standard pricing + $10/mo per line. Toggling on swaps
+// intakeSelectedPlan to the matching _ie variant; toggling off reverts to
+// the corresponding _promo (default) variant unless the standard discount
+// checkbox is still checked, in which case it reverts to _std.
+// While IE is on, the "Remove $30/mo Year 1 discount" checkbox is
+// force-checked and disabled so it can't drift out of sync.
+function applyInternetEssentialsToggle() {
+  const ieChk = document.getElementById('i_internetEssentials');
+  const discChk = document.getElementById('i_removeDiscount');
+  if (!ieChk) return;
+  if (ieChk.checked) {
+    // Swap to IE variant.
+    const ieKey = ANY_TO_IE_MAP[intakeSelectedPlan];
+    if (ieKey) {
+      intakeSelectedPlan = ieKey;
+    }
+    // Force-check + disable the discount checkbox so the UI honestly
+    // reflects that IE implies standard pricing.
+    if (discChk) {
+      discChk.checked = true;
+      discChk.disabled = true;
+      const lbl = discChk.closest('label');
+      if (lbl) lbl.style.opacity = '0.5';
+    }
+  } else {
+    // Leaving IE — fall back to standard if the discount checkbox is
+    // still checked, otherwise back to the promo variant.
+    const stdKey = IE_TO_STD_MAP[intakeSelectedPlan];
+    if (stdKey) {
+      intakeSelectedPlan = stdKey;
+      if (discChk && !discChk.checked) {
+        const promoKey = STD_TO_PROMO_MAP[intakeSelectedPlan];
+        if (promoKey) intakeSelectedPlan = promoKey;
+      }
+    }
+    // Re-enable the discount checkbox.
+    if (discChk) {
+      discChk.disabled = false;
+      const lbl = discChk.closest('label');
+      if (lbl) lbl.style.opacity = '1';
+    }
+  }
+  // Live update the tally + comparison screen (same flow as the discount toggle).
+  if (typeof updateIntakeSavingsPreview === 'function') updateIntakeSavingsPreview();
+  const compScreen = document.getElementById('comparisonScreen');
+  if (compScreen && compScreen.style.display !== 'none') {
+    const xfPlanEl = document.getElementById('xfinityPlan');
+    if (xfPlanEl) xfPlanEl.value = intakeSelectedPlan;
+    const planNames = {
+      mobile_plus_promo: 'Mobile Plus', mobile_select_promo: 'Mobile Select',
+      mobile_plus_std: 'Mobile Plus',   mobile_select_std: 'Mobile Select',
+      mobile_plus_ie: 'Mobile Plus',    mobile_select_ie: 'Mobile Select',
+      now_mobile: 'NOW Mobile',         unlimited_std: 'Unlimited',
+    };
+    const planDiscounts = {
+      mobile_plus_promo: '$30/mo Year 1 discount applied',
+      mobile_select_promo: '$30/mo Year 1 discount applied',
+      mobile_plus_std: 'Standard pricing (Year 1 discount removed)',
+      mobile_select_std: 'Standard pricing (Year 1 discount removed)',
+      mobile_plus_ie: 'Internet Essentials pricing ($55/line)',
+      mobile_select_ie: 'Internet Essentials pricing ($40/line)',
+      now_mobile: 'Prepaid · No contract',
       unlimited_std: 'Standard pricing',
     };
     const nameEl = document.getElementById('planDisplayName');
@@ -14816,12 +15047,34 @@ function selectIntakePlan(btn) {
   document.querySelectorAll('.intake-plan-pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   intakeSelectedPlan = btn.dataset.plan;
-  // Honor the "Remove $30 discount" toggle when switching plans — keeps the
-  // _std/_promo state in sync with the checkbox the rep already set.
-  applyDiscountToggle();
-  // NOW Mobile is prepaid and has no Year 1 promo at all, so the
-  // "Remove $30 discount" toggle doesn't apply — hide it entirely (and
-  // clear it) so reps aren't shown an irrelevant option.
+  // Honor the Internet Essentials toggle first — IE supersedes the Year 1
+  // discount toggle. If IE is on and the rep picked Plus or Select, swap
+  // directly to the matching _ie variant; if they picked NOW Mobile, IE
+  // doesn't apply, so clear the IE toggle.
+  const ieChk = document.getElementById('i_internetEssentials');
+  if (ieChk && ieChk.checked) {
+    const ieKey = ANY_TO_IE_MAP[intakeSelectedPlan];
+    if (ieKey) {
+      intakeSelectedPlan = ieKey;
+    } else {
+      // NOW Mobile — IE doesn't apply. Clear the IE toggle and re-enable
+      // the discount checkbox.
+      ieChk.checked = false;
+      const discChk2 = document.getElementById('i_removeDiscount');
+      if (discChk2) {
+        discChk2.disabled = false;
+        const lbl = discChk2.closest('label');
+        if (lbl) lbl.style.opacity = '1';
+      }
+    }
+  } else {
+    // Honor the "Remove $30 discount" toggle when switching plans — keeps the
+    // _std/_promo state in sync with the checkbox the rep already set.
+    applyDiscountToggle();
+  }
+  // NOW Mobile is prepaid and has no Year 1 promo at all, so neither
+  // toggle applies — hide them entirely (and clear them) so reps aren't
+  // shown irrelevant options.
   const chk = document.getElementById('i_removeDiscount');
   const wrap = document.getElementById('i_removeDiscountWrap');
   const planIsNowMobile = (intakeSelectedPlan === 'now_mobile');
@@ -14830,8 +15083,13 @@ function selectIntakePlan(btn) {
     if (planIsNowMobile) {
       chk.checked = false;
       chk.disabled = true;
+      if (ieChk) { ieChk.checked = false; ieChk.disabled = true; }
     } else {
-      chk.disabled = false;
+      // Only re-enable the discount checkbox if IE is NOT on (IE keeps
+      // it force-checked + disabled).
+      const ieOn = (ieChk && ieChk.checked);
+      chk.disabled = ieOn;
+      if (ieChk) ieChk.disabled = false;
     }
   }
   rebuildPhoneRows(); // refresh promos when plan changes
@@ -14839,7 +15097,7 @@ function selectIntakePlan(btn) {
 
 
   // Update XMC visibility/state for plan change
-  const planIsPremium = intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std';
+  const planIsPremium = intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie';
   const planIsNow = intakeSelectedPlan === 'now_mobile';
   document.querySelectorAll('.df-row').forEach(row => {
     const rowId = row.id;
@@ -15102,7 +15360,7 @@ function rebuildPhoneRows() {
 }
 
 function buildDeviceRow(lineNum, type) {
-  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
+  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
   const rowId = `${type}-row-${lineNum}`;
   const row = document.createElement('div');
   row.className = 'df-row';
@@ -15245,13 +15503,24 @@ function buildDeviceRow(lineNum, type) {
     recalcRow(row);
     // If Line 1 phone changes, note that watch/tablet dropdowns auto-refresh
     // (they call getWatchDataset/getTabletDataset fresh on each open)
-    // Re-init trade-in dropdown filtered for new device brand
+    // Re-init trade-in dropdown filtered for new device brand. The trade-in
+    // VALUE depends on which TIPS bucket the destination phone routes to
+    // ($1,200 / $900 / $830) — so when the destination phone changes, both
+    // the dropdown AND any already-selected trade-in must be re-priced.
+    //
+    // BUG-FIX 2026-06-03: previously the dropdown was rebuilt here but the
+    // existing row.dataset.tradeValue stayed at the OLD bucket's value. A
+    // rep who picked Pixel 10 Pro XL → iPhone 16 trade ($1,200 from the
+    // Pixel bucket) → then switched the destination to a Samsung would
+    // still see $1,200 applied even though the Samsung bucket caps at $900.
+    // Comcast won't reimburse the $300 gap, so the store ate the loss.
     if (type === 'phone') {
       const tradeInEl  = document.getElementById(`${rowId}-trade`);
       const tradeListEl = tradeInEl && tradeInEl.parentNode && tradeInEl.parentNode.querySelector('.df-dropdown-list');
       if (tradeInEl && tradeListEl) {
-        // Any trade-in works for any device — just rebuild the full list
-        makeAutocomplete(tradeInEl, tradeListEl, getFilteredTradeIns(), (tradeItem) => {
+        const newBucket = getFilteredTradeIns();
+        // Rebuild the dropdown options against the new bucket
+        makeAutocomplete(tradeInEl, tradeListEl, newBucket, (tradeItem) => {
           const promoTag = tradeItem.label ? ` · ${tradeItem.label}` : '';
           const valueTag = tradeItem.value ? ` · $${tradeItem.value}` : '';
           tradeInEl.value = `${tradeItem.name} — ${tradeItem.condition}${promoTag}${valueTag}`;
@@ -15262,6 +15531,28 @@ function buildDeviceRow(lineNum, type) {
           row.dataset.noTrade        = 'false';
           recalcRow(row);
         });
+        // Re-price an already-selected trade-in against the new bucket.
+        const prevTradeName = row.dataset.tradeName || '';
+        const prevTradeCond = row.dataset.tradeCondition || '';
+        if (prevTradeName && prevTradeCond && row.dataset.noTrade !== 'true') {
+          const repriced = newBucket.find(r => r.name === prevTradeName && r.condition === prevTradeCond);
+          if (repriced) {
+            const promoTag = repriced.label ? ` · ${repriced.label}` : '';
+            const valueTag = repriced.value ? ` · $${repriced.value}` : '';
+            tradeInEl.value = `${repriced.name} — ${repriced.condition}${promoTag}${valueTag}`;
+            row.dataset.tradeValue = repriced.value;
+            row.dataset.tradeLabel = repriced.label || '';
+          } else {
+            // Model not in the new bucket (rare — both buckets have ~163 rows).
+            // Clear so the rep notices and re-picks.
+            tradeInEl.value = '';
+            row.dataset.tradeValue     = '0';
+            row.dataset.tradeName      = '';
+            row.dataset.tradeCondition = '';
+            row.dataset.tradeLabel     = '';
+          }
+          recalcRow(row);
+        }
       }
     }
   }, dropdownInitialMax);
@@ -15288,9 +15579,10 @@ function buildDeviceRow(lineNum, type) {
 
     // Build the trade-in dataset for the current purchased device.
     // The new phone the rep selected determines which TIPS promo applies:
-    //   • Pixel 10 Pro / Pro XL / Pro Fold → $1,200 promo
-    //   • Any Samsung                → $900 promo
-    //   • Apple / Google / Motorola  → $830 promo
+    //   • Pixel 10 Pro XL or Pro Fold ONLY → $1,200 promo
+    //   • Any Samsung                      → $900 promo
+    //   • Apple / Google / Motorola (incl. → $830 promo
+    //     base Pixel 10 and Pixel 10 Pro)
     // The dropdown then surfaces the per-model trade-in values from that promo.
     function getFilteredTradeIns() {
       const purchasedDevice = row.dataset.deviceName || '';
@@ -15424,7 +15716,7 @@ function recalcRow(row) {
     // AND the no-trade $400/$500 discounts) ONLY apply on Mobile Plus
     // (Premium Unlimited). Mobile Select and NOW Mobile customers pay
     // full device price with no carrier discount.
-    const isPremiumPlanForDevice = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std');
+    const isPremiumPlanForDevice = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
     if (isPremiumPlanForDevice) {
       if (tradeValue > 0 && !noTrade) {
         // Any TIPS promo: pay the actual trade-in value from the routed
@@ -16135,6 +16427,8 @@ try {
     now_mobile:          'NOW Mobile',
     mobile_plus_std:     'Mobile Plus',
     mobile_select_std:   'Mobile Select',
+    mobile_plus_ie:      'Mobile Plus',
+    mobile_select_ie:    'Mobile Select',
     unlimited_std:       'Unlimited',
   };
   const planDiscounts = {
@@ -16143,6 +16437,8 @@ try {
     now_mobile:          'Prepaid · No contract',
     mobile_plus_std:     'Standard pricing (Year 1 discount removed)',
     mobile_select_std:   'Standard pricing (Year 1 discount removed)',
+    mobile_plus_ie:      'Internet Essentials pricing ($55/line)',
+    mobile_select_ie:    'Internet Essentials pricing ($40/line)',
     unlimited_std:       'Standard pricing',
   };
   document.getElementById('planDisplayName').textContent = planNames[intakeSelectedPlan] || intakeSelectedPlan;
@@ -16458,8 +16754,8 @@ function updateYrToggleVisibility(planKey) {
 (function(){
   if (window.__blufoxOutboxReady) return; window.__blufoxOutboxReady = true;
   var KEY = 'blufox_outbox_v1';
-  var AWAIT_MS = 6000;       // how long a submit waits for confirmation before reloading
-  var COOLDOWN_MS = 15000;   // min gap before re-sending a still-pending item (avoids dupes)
+  var AWAIT_MS = 8000;       // how long a submit waits for confirmation (raised 2026-06-03 — 6s was cutting off slow connections too aggressively)
+  var COOLDOWN_MS = 5000;    // min gap before re-sending a still-pending item (lowered 2026-06-03 — 15s left stranded items waiting too long after the page reload removed busy[] state)
   function L(){ try { return window.localStorage; } catch(e){ return null; } }
   function load(){ try { return JSON.parse(L().getItem(KEY)) || []; } catch(e){ return []; } }
   function save(a){ try { L().setItem(KEY, JSON.stringify(a)); } catch(e){} }
@@ -16520,10 +16816,16 @@ function updateYrToggleVisibility(planKey) {
   };
   window.__blufoxOutboxPending = function(){ return load().length; };
 
-  // Retry triggers: shortly after load, when connectivity returns, and on a timer.
+  // Retry triggers: shortly after load, when connectivity returns, when
+  // the tab regains focus (rep reopens after a context switch), and on a
+  // timer. The visibility trigger (added 2026-06-03) catches the case
+  // where a rep closed the iPad mid-submit and reopens later.
   window.addEventListener('load', function(){ setTimeout(flushAll, 1500); });
   window.addEventListener('online', flushAll);
-  setInterval(flushAll, 20000);
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) flushAll();
+  });
+  setInterval(flushAll, 15000);
 })();
 </script>
 
