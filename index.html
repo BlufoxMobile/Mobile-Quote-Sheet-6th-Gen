@@ -14781,10 +14781,14 @@ async function handleSubmit() {
       if (result && result.delivered === true) {
         btn.innerHTML = '✅ Submitted!';
         btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
-        // Reset (no reload — the outbox tracks the submission and a
-        // reload would interrupt any in-flight retries for OTHER queued
-        // submissions). Rep can submit another quote without reloading.
-        setTimeout(() => { resetBtn(); }, 2500);
+        // Reset the form back to the intake screen (no full page reload —
+        // the outbox tracks any other in-flight submissions in localStorage
+        // and a reload would interrupt their retries). resetToIntake()
+        // handles screen swap + clearing all inputs/toggles.
+        setTimeout(() => {
+          resetBtn();
+          try { resetToIntake(); } catch(e) { console.error('resetToIntake failed:', e); }
+        }, 2000);
       } else {
         // Saved to outbox, not yet confirmed. Tell the rep the truth.
         btn.innerHTML = '✅ Saved — will deliver when online';
@@ -14792,7 +14796,12 @@ async function handleSubmit() {
         const pending = (typeof window.__blufoxOutboxPending === 'function')
           ? window.__blufoxOutboxPending() : 0;
         console.warn('[handleSubmit] outbox pending count:', pending);
-        setTimeout(() => { resetBtn(); }, 4000);
+        // Still reset so the rep can move on — the submission is durable
+        // in the outbox and will retry in the background.
+        setTimeout(() => {
+          resetBtn();
+          try { resetToIntake(); } catch(e) { console.error('resetToIntake failed:', e); }
+        }, 3500);
       }
     }
   } catch (err) {
@@ -16592,10 +16601,19 @@ function resetToIntake() {
   // fresh quote doesn't inherit the previous customer's footprint.
   const curW = document.getElementById('i_currentWatches');  if (curW) curW.value = '0';
   const curT = document.getElementById('i_currentTablets'); if (curT) curT.value = '0';
-  // Reset the "Remove $30 discount" toggle so a new quote starts with the
-  // Year 1 discount applied (the default).
+  // Reset the "Remove $30 discount" + "Internet Essentials Quote"
+  // toggles so a new quote starts with the Year 1 discount applied
+  // (the default) and IE off. Also re-enable the discount checkbox in
+  // case IE was on (which disabled it).
   const rd = document.getElementById('i_removeDiscount');
-  if (rd) { rd.checked = false; }
+  if (rd) {
+    rd.checked = false;
+    rd.disabled = false;
+    const lbl = rd.closest('label');
+    if (lbl) lbl.style.opacity = '1';
+  }
+  const ie = document.getElementById('i_internetEssentials');
+  if (ie) { ie.checked = false; ie.disabled = false; }
   document.getElementById('i_coreCurrent').value = '';
   document.getElementById('i_coreRebundle').value = '';
 
