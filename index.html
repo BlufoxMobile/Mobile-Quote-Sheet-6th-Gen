@@ -12721,7 +12721,6 @@ const TIPS_PROMOS = {
     ]
   }
 };
-
 // Which TIPS promo applies for the new phone being purchased?
 // Routing rule (per the Comcast promo PDFs dated May 11–June 21, 2026):
 //   • Pixel 10 Pro XL or Pixel 10 Pro Fold ONLY → $1,200 promo (narrow bucket)
@@ -15219,30 +15218,38 @@ function makeAutocomplete(inputEl, listEl, datasetOrFn, onSelect, maxInitial) {
       return qi === query.length ? 10 : 0;
     }
 
-    // ── Value search: query like "$450", "450", "$1,200", "1200" matches
-    // every dataset item whose `value` equals that number. Useful for the
-    // trade-in dropdown where reps want to see "all phones worth $450" etc.
-    // Strip $ , . and whitespace, then check if what's left is a pure number.
+    // ── Search behavior (revised 2026-06-03):
+    // Name search ALWAYS runs first. Value search runs only as a fallback
+    // when no name matches AND the query is purely numeric. This fixes the
+    // bug where typing "17" returned an empty list because the autocomplete
+    // tried to find trade-ins worth $17 (none exist) instead of phones
+    // named "iPhone 17". For explicit value searches that match the name
+    // of zero phones, this still works — e.g. "450" → fuzzy finds no phone
+    // named "450" → falls through to value search → returns all $450 rows.
     const numericPart = query.replace(/[$,\s]/g, '');
     const isValueQuery = numericPart.length > 0 && /^\d+(\.\d+)?$/.test(numericPart);
 
     let matches;
     if (query.length === 0) {
       matches = dataset.slice(0, maxInitial);
-    } else if (isValueQuery) {
-      const target = parseFloat(numericPart);
-      // Exact-value match. Sort by name so the list is browseable.
-      matches = dataset
-        .filter(d => d.value != null && Number(d.value) === target)
-        .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-        .slice(0, 200);
     } else {
+      // 1) Always try fuzzy name match first.
       matches = dataset
           .map(d => ({ item: d, score: fuzzyScore(d.name, query) }))
           .filter(x => x.score > 0)
           .sort((a, b) => b.score - a.score)
-          .slice(0, 50)  // search results: show full 50 for typed queries
+          .slice(0, 50)
           .map(x => x.item);
+      // 2) Fall through to value search if the query is numeric AND
+      //    name search returned nothing (so reps can still type "450" to
+      //    pull every $450 trade-in).
+      if (matches.length === 0 && isValueQuery) {
+        const target = parseFloat(numericPart);
+        matches = dataset
+          .filter(d => d.value != null && Number(d.value) === target)
+          .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+          .slice(0, 200);
+      }
     }
 
     listEl.innerHTML = '';
