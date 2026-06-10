@@ -2935,7 +2935,7 @@
 .rpkg-select{width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:13px;color:var(--text-primary);margin-bottom:8px;appearance:auto;}
 .rpkg-select:focus{border-color:var(--xfinity-purple);outline:none;}
 </style>
-<!-- PDF generation libs (used by handleSavePDF / handlePrint for iPad-friendly downloads) -->
+<!-- PDF generation libs (used by handleEmailPDF / handlePrint for iPad-friendly sharing & downloads) -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -3662,7 +3662,7 @@
       <div class="footer-btn-row no-print">
         <button class="btn btn-footer-back" onclick="goBack()">← Back</button>
         <button class="btn btn-footer-decline" onclick="declineMobileOffer()">✖ Customer Declines Mobile Offer</button>
-        <button class="btn btn-footer-save" onclick="handleSavePDF()">💾 Save as PDF</button>
+        <button class="btn btn-footer-save btn-footer-email" onclick="handleEmailPDF()">📧 Email PDF</button>
         <button class="btn btn-footer-print" onclick="handlePrint()">🖨 Print</button>
         <button class="btn btn-footer-submit" onclick="handleSubmit()">✅ Submit</button>
       </div>
@@ -14354,30 +14354,31 @@ function buildDeviceSummary(planMonthly, compBill) {
 // ── PDF GENERATION (iPad-friendly: no reliance on window.print) ──
 // Renders the comparison screen to a canvas, then builds a multi-page Letter PDF
 // and either downloads it or opens it in a new tab for printing via Safari Share.
-async function _buildQuotePdf({ openInNewTab = false } = {}) {
+// ── REWORKED 2026-06-10 ──────────────────────────────────────────
+// The old version hid the live page's .no-print elements (including the
+// footer button row with Submit) and injected the B&W stylesheet into the
+// LIVE document while html2canvas rendered. On iPads the render can take
+// many seconds — and if Safari's canvas limits made it hang, the cleanup
+// never ran, leaving Print/Submit hidden or disabled until a refresh.
+// This version:
+//   - Applies ALL capture styling inside html2canvas's cloned document
+//     (onclone), so the live page is never touched — Submit stays visible
+//     and clickable the entire time.
+//   - Caps the canvas size under iPad Safari's ~16.7M-pixel limit so the
+//     render can't silently fail or hang.
+//   - Adds a 40 s watchdog so a hung render fails loudly and restores the
+//     buttons instead of leaving them dead.
+//   - Supports returnBlob:true so Email PDF can hand the file to the
+//     share sheet.
+async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {}) {
   const target = document.getElementById('comparisonScreen');
   if (!target || !window.html2canvas || !window.jspdf) {
     alert('PDF library not loaded yet. Please wait a moment and try again.');
-    return;
+    return null;
   }
 
-  // Hide elements not meant for the printed copy (the no-print buttons,
-  // any tearsheet iframe with broken src, etc.) just for the duration of capture.
-  const hiddenEls = [];
-  target.querySelectorAll('.no-print, #pdfPage, #savingsTallyBar').forEach(el => {
-    hiddenEls.push([el, el.style.display]);
-    el.style.display = 'none';
-  });
-  // Also hide the global tally bar if it overlaps
-  const tally = document.getElementById('savingsTallyBar');
-  if (tally) { hiddenEls.push([tally, tally.style.display]); tally.style.display = 'none'; }
-
-  // Track previous body styles so we can restore them
-  const prevBodyOverflow = document.body.style.overflow;
-  document.body.style.overflow = 'visible';
-
-  // Show a quick "generating…" toast on the triggering button
-  const allBtns = document.querySelectorAll('.btn-footer-save, .btn-footer-print');
+  // Disable ONLY the PDF trigger buttons (never Submit) to block double-taps.
+  const allBtns = document.querySelectorAll('.btn-footer-save, .btn-footer-print, .btn-footer-email');
   const origLabels = [];
   allBtns.forEach(b => { origLabels.push([b, b.innerHTML, b.disabled]); b.disabled = true; });
 
@@ -14385,9 +14386,8 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
   // hardware, so we drop colored backgrounds entirely and use bold borders +
   // type weight to convey structure. This avoids html2canvas's color-fade
   // issues completely and produces a crisp, ink-efficient print.
-  const captureCss = document.createElement('style');
-  captureCss.id = '__pdf_capture_css__';
-  captureCss.textContent = `
+  // NOTE: applied ONLY to html2canvas's cloned document — never the live page.
+  const captureCssText = `
     /* Wipe every background image, gradient, and color throughout the capture */
     #comparisonScreen, #comparisonScreen * {
       color: #000000 !important;
@@ -14478,49 +14478,73 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
     /* Preserve italics for footnotes ("* Estimate only…") */
     #comparisonScreen em, #comparisonScreen i { font-style: italic !important; }
   `;
-  document.head.appendChild(captureCss);
+
+  // Page-break offset — measured inside the CLONED document by onclone below.
+  let breakOffsetCss = -1;
 
   try {
-    // Force-reflow so getBoundingClientRect reflects the B&W layout
-    target.offsetHeight;
+    const cssW = target.scrollWidth;
+    const cssH = target.scrollHeight;
 
-    // Determine where to force a page break — between the "* Estimate only.
-    // Taxes & fees not included." disclaimer and the "Plan Features &
-    // Promotions" section. The disclaimer is the last thing on page 1; page 2
-    // starts with the features header. This way an employee printing only
-    // page 1 still sees the disclaimer.
-    let breakOffsetCss = -1;
-    const featuresEl = document.getElementById('featuresSection');
-    if (featuresEl && featuresEl.offsetParent !== null) {
-      const tRect = target.getBoundingClientRect();
-      const fRect = featuresEl.getBoundingClientRect();
-      // Find the last visible disclaimer that sits above the features section
-      let lastDisclaimerBottom = -1;
-      document.querySelectorAll('.xfinity-disclaimer').forEach(d => {
-        if (d.offsetParent === null) return; // hidden
-        const r = d.getBoundingClientRect();
-        if (r.bottom <= fRect.top && r.bottom > lastDisclaimerBottom) {
-          lastDisclaimerBottom = r.bottom;
-        }
-      });
-      // Break ~6px BELOW the disclaimer so it stays on page 1, but BEFORE
-      // the features header so page 2 starts cleanly with features.
-      const breakAnchorPx = lastDisclaimerBottom > -1
-        ? lastDisclaimerBottom + 6
-        : fRect.top;
-      breakOffsetCss = Math.min(breakAnchorPx, fRect.top) - tRect.top;
-    }
+    // iPad Safari silently fails (or hangs) on canvases above ~16.7M pixels.
+    // Cap the render scale so the master canvas always stays under the limit.
+    const MAX_CANVAS_AREA = 16777216; // = 4096 × 4096, safe on every iPad
+    const scale = Math.min(2.5, Math.sqrt(MAX_CANVAS_AREA / (cssW * cssH)));
 
-    const canvas = await html2canvas(target, {
-      scale: 2.5,
+    const renderPromise = html2canvas(target, {
+      scale,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       letterRendering: true,
       logging: false,
-      windowWidth: target.scrollWidth,
-      windowHeight: target.scrollHeight,
+      windowWidth: cssW,
+      windowHeight: cssH,
+      onclone: (clonedDoc) => {
+        // Apply the B&W capture stylesheet to the CLONE only — the live
+        // page (and its footer buttons) is never modified.
+        const style = clonedDoc.createElement('style');
+        style.textContent = captureCssText;
+        clonedDoc.head.appendChild(style);
+        if (clonedDoc.body) clonedDoc.body.style.overflow = 'visible';
+
+        // Determine where to force a page break — between the "* Estimate
+        // only. Taxes & fees not included." disclaimer and the "Plan
+        // Features & Promotions" section. The disclaimer is the last thing
+        // on page 1; page 2 starts with the features header. This way an
+        // employee printing only page 1 still sees the disclaimer.
+        const cTarget = clonedDoc.getElementById('comparisonScreen');
+        const featuresEl = clonedDoc.getElementById('featuresSection');
+        if (!cTarget || !featuresEl) return;
+        cTarget.offsetHeight; // force reflow so rects reflect the B&W layout
+        if (featuresEl.offsetParent === null) return;
+        const tRect = cTarget.getBoundingClientRect();
+        const fRect = featuresEl.getBoundingClientRect();
+        // Find the last visible disclaimer that sits above the features section
+        let lastDisclaimerBottom = -1;
+        clonedDoc.querySelectorAll('.xfinity-disclaimer').forEach(d => {
+          if (d.offsetParent === null) return; // hidden
+          const r = d.getBoundingClientRect();
+          if (r.bottom <= fRect.top && r.bottom > lastDisclaimerBottom) {
+            lastDisclaimerBottom = r.bottom;
+          }
+        });
+        // Break ~6px BELOW the disclaimer so it stays on page 1, but BEFORE
+        // the features header so page 2 starts cleanly with features.
+        const breakAnchorPx = lastDisclaimerBottom > -1
+          ? lastDisclaimerBottom + 6
+          : fRect.top;
+        breakOffsetCss = Math.min(breakAnchorPx, fRect.top) - tRect.top;
+      },
     });
+
+    // Watchdog — if Safari's renderer hangs, fail loudly and restore the
+    // buttons instead of leaving the rep with a dead footer.
+    const canvas = await Promise.race([
+      renderPromise,
+      new Promise((_, reject) => setTimeout(
+        () => reject(new Error('PDF generation timed out. Please try again.')), 40000)),
+    ]);
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter' });
@@ -14579,7 +14603,10 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
     const filename = `Xfinity-Quote_${customerName || 'Customer'}_${datePart}.pdf`
       .replace(/[^A-Za-z0-9._-]/g, '_');
 
-    if (openInNewTab) {
+    if (returnBlob) {
+      // Caller (Email PDF) wants the raw file to hand to the share sheet.
+      return { blob: pdf.output('blob'), filename };
+    } else if (openInNewTab) {
       // Opens the PDF in a new tab so the rep can use the iPad Safari Share → Print
       const blobUrl = pdf.output('bloburl');
       window.open(blobUrl, '_blank');
@@ -14587,33 +14614,110 @@ async function _buildQuotePdf({ openInNewTab = false } = {}) {
       // Triggers a real download — saves to Files on iPad
       pdf.save(filename);
     }
+    return null;
   } catch (err) {
     console.error('PDF generation failed:', err);
     alert('PDF generation failed: ' + err.message);
+    return null;
   } finally {
-    // Restore everything we hid / injected
-    hiddenEls.forEach(([el, d]) => { el.style.display = d; });
-    document.body.style.overflow = prevBodyOverflow;
+    // The live page was never modified — just re-enable the trigger buttons.
     origLabels.forEach(([b, label, disabled]) => { b.innerHTML = label; b.disabled = disabled; });
-    const tmp = document.getElementById('__pdf_capture_css__');
-    if (tmp) tmp.remove();
   }
 }
 
-// ── SAVE AS PDF — triggers a download ──
-function handleSavePDF() {
+// ── EMAIL PDF — opens the iPad share sheet with the quote PDF attached ──
+// Replaces "Save as PDF" (Jeff's request, 2026-06-10). Uses the Web Share API
+// so the rep picks Outlook / Gmail / Mail and the PDF is already attached.
+// Safari & Chrome on iPad both use the native share sheet, so one code path
+// covers everyone.
+//
+// Two-tap flow when needed: the browser only allows the share sheet to open
+// within a moment of a user tap, and PDF generation can take several seconds
+// on an iPad. The first tap generates + caches the PDF and TRIES to share
+// immediately; if the browser says the tap "expired", the button turns into
+// a green "📤 Tap to Send" and the second tap opens the share sheet instantly
+// from the cache. Falls back to download + pre-filled email on browsers
+// without file-share support.
+let _emailPdfCache = null; // { file, filename, ts }
+
+async function handleEmailPDF() {
+  const btn = document.querySelector('.btn-footer-email');
   const repName  = document.getElementById('repName').value.trim();
   const storeName = document.getElementById('storeName').value;
   if (!repName || !storeName) {
-    alert('Please fill in Rep Name and Store Name before saving.');
+    alert('Please fill in Rep Name and Store Name before emailing.');
     return;
   }
+
+  // Second tap with a fresh cached PDF → open the share sheet right away.
+  if (_emailPdfCache && (Date.now() - _emailPdfCache.ts) < 120000) {
+    await _sharePdf(_emailPdfCache, btn);
+    return;
+  }
+  _emailPdfCache = null;
+
+  // First tap: fill the print contact footer (same as old Save as PDF) and generate.
   document.getElementById('pcf-custName').textContent  = document.getElementById('customerName').textContent || '—';
   document.getElementById('pcf-custPhone').textContent = document.getElementById('customerPhone').textContent || '—';
   document.getElementById('pcf-repName').textContent   = repName;
   document.getElementById('pcf-repPhone').textContent  = document.getElementById('repPhone').value || '—';
   document.getElementById('pcf-repEmail').textContent  = document.getElementById('repEmail').value || '—';
-  _buildQuotePdf({ openInNewTab: false });
+
+  if (btn) btn.innerHTML = '⏳ Preparing…';
+  const result = await _buildQuotePdf({ returnBlob: true });
+  if (btn) btn.innerHTML = '📧 Email PDF';
+  if (!result) return; // generation failed — _buildQuotePdf already alerted
+
+  const file = new File([result.blob], result.filename, { type: 'application/pdf' });
+  _emailPdfCache = { file, filename: result.filename, ts: Date.now() };
+  await _sharePdf(_emailPdfCache, btn);
+}
+
+async function _sharePdf(cache, btn) {
+  const { file, filename } = cache;
+  const showTapToSend = () => {
+    if (btn) {
+      btn.innerHTML = '📤 Tap to Send';
+      btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
+    }
+  };
+  const resetEmailBtn = () => {
+    _emailPdfCache = null;
+    if (btn) { btn.innerHTML = '📧 Email PDF'; btn.style.background = ''; }
+  };
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Xfinity Quote',
+        text: 'Your Xfinity quote is attached. Thank you!',
+      });
+      resetEmailBtn(); // shared successfully
+      return;
+    } catch (err) {
+      // AbortError: rep closed the share sheet — keep the cache for a re-tap.
+      // NotAllowedError: the tap "expired" during generation — ask for one more tap.
+      if (err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) {
+        showTapToSend();
+        return;
+      }
+      console.error('Share failed, falling back to download:', err);
+    }
+  }
+
+  // Fallback (no Web Share file support): download the PDF and open a
+  // pre-filled email — the rep attaches the downloaded file manually.
+  resetEmailBtn();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  alert('This browser can\'t open the share sheet, so the PDF was downloaded instead.\n\nAttach it from Files/Downloads when your email opens.');
+  location.href = 'mailto:?subject=' + encodeURIComponent('Your Xfinity Quote') +
+    '&body=' + encodeURIComponent('Hi,\n\nYour Xfinity quote is attached.\n\nThank you!');
 }
 
 // ── SUBMIT TO ZAPIER + GOOGLE APPS SCRIPT ──
