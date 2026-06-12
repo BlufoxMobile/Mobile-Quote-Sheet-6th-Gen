@@ -14538,7 +14538,9 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
     ]);
 
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter' });
+    // compress:true (2026-06-11) — without it the embedded page images are
+    // stored raw and the PDF was too large to attach in Outlook/Gmail.
+    const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter', compress: true });
     const pageWidth  = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
 
@@ -14554,7 +14556,10 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
       sctx.fillStyle = '#ffffff';
       sctx.fillRect(0, 0, slice.width, slice.height);
       sctx.drawImage(canvas, 0, -srcY);
-      const data = slice.toDataURL('image/png');
+      // JPEG instead of PNG (2026-06-11): the quote is B&W text on white, so
+      // JPEG at q0.85 is visually identical but ~10-20x smaller — keeps the
+      // PDF small enough to attach in Outlook/Gmail via Email PDF.
+      const data = slice.toDataURL('image/jpeg', 0.85);
 
       const imgWidth  = pageWidth;
       const imgHeight = srcHeight * (imgWidth / canvas.width);
@@ -14563,12 +14568,12 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
 
       let pos = 0;
       let remaining = imgHeight;
-      pdf.addImage(data, 'PNG', 0, pos, imgWidth, imgHeight);
+      pdf.addImage(data, 'JPEG', 0, pos, imgWidth, imgHeight);
       remaining -= pageHeight;
       while (remaining > 0) {
         pos -= pageHeight;
         pdf.addPage();
-        pdf.addImage(data, 'PNG', 0, pos, imgWidth, imgHeight);
+        pdf.addImage(data, 'JPEG', 0, pos, imgWidth, imgHeight);
         remaining -= pageHeight;
       }
     };
