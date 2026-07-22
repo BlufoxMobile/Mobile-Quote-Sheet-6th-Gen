@@ -3720,142 +3720,50 @@ let devicesOnlyMode = false; // When true, rep is quoting watches/tablets only (
 // storage: array of { gb, price } — if present, a storage picker appears after device selection
 const PHONES_FOR_SALE = [
   // Apple
-  { name: "Apple iPhone 17 Pro Max", price: 1199.99, storage: [
-      { gb: "256GB", price: 1199.99 },
-      { gb: "512GB", price: 1399.99 },
-      { gb: "1TB",   price: 1599.99 },
-      { gb: "2TB",   price: 1999.99 },
-  ]},
-  { name: "Apple iPhone 17 Pro", price: 1099.99, storage: [
-      { gb: "256GB", price: 1099.99 },
-      { gb: "512GB", price: 1299.99 },
-      { gb: "1TB",   price: 1499.99 },
-  ]},
-  { name: "Apple iPhone 17", price: 829.99, storage: [
-      { gb: "256GB", price:  829.99 },
-      { gb: "512GB", price: 1029.99 },
-  ]},
-  { name: "Apple iPhone Air", price: 999.99, storage: [
-      { gb: "256GB", price:  999.99 },
-      { gb: "512GB", price: 1199.99 },
-      { gb: "1TB",   price: 1399.99 },
-  ]},
-  { name: "Apple iPhone 17e", price: 599.99, storage: [
-      { gb: "256GB", price: 599.99 },
-      { gb: "512GB", price: 799.99 },
-  ]},
-  { name: "Apple iPhone 16 Plus", price: 829.99, storage: [
-      { gb: "128GB", price: 829.99 },
-  ]},
-  { name: "Apple iPhone 16", price: 729.99, storage: [
-      { gb: "128GB", price: 729.99 },
-  ]},
-  { name: "Apple iPhone 16e", price: 499.99, storage: [
-      { gb: "128GB", price: 499.99 },
-  ]},
-  { name: "Apple iPhone 15", price: 629.99, storage: [
-      { gb: "128GB", price: 629.99 },
-  ]},
+  { name: "Apple iPhone 17 Pro Max", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 }, { gb: "512GB", price: 1399.99 }, { gb: "1TB", price: 1599.99 }, { gb: "2TB", price: 1999.99 } ] },
+  { name: "Apple iPhone 17 Pro", price: 1099.99, storage: [ { gb: "256GB", price: 1099.99 }, { gb: "512GB", price: 1299.99 }, { gb: "1TB", price: 1499.99 } ] },
+  { name: "Apple iPhone 17", price: 829.99, storage: [ { gb: "256GB", price: 829.99 }, { gb: "512GB", price: 1029.99 } ] },
+  { name: "Apple iPhone Air", price: 999.99, storage: [ { gb: "256GB", price: 999.99 }, { gb: "512GB", price: 1199.99 }, { gb: "1TB", price: 1399.99 } ] },
+  { name: "Apple iPhone 17e", price: 599.99, storage: [ { gb: "256GB", price: 599.99 }, { gb: "512GB", price: 799.99 } ] },
+  { name: "Apple iPhone 16", price: 729.99, storage: [ { gb: "128GB", price: 729.99 } ] },
+  { name: "Apple iPhone 16e", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
+  { name: "Apple iPhone 15", price: 629.99, storage: [ { gb: "128GB", price: 629.99 } ] },
   // Samsung
-  { name: "Samsung Galaxy S26 Ultra", price: 1299.99, storage: [
-      { gb: "256GB", price: 1299.99 },
-      { gb: "512GB", price: 1499.99 },
-  ]},
-  { name: "Samsung Galaxy S26+", price: 1099.99, storage: [
-      { gb: "256GB", price: 1099.99 },
-      { gb: "512GB", price: 1299.99 },
-  ]},
-  { name: "Samsung Galaxy S26", price: 899.99, storage: [
-      { gb: "256GB", price:  899.99 },
-      { gb: "512GB", price: 1099.99 },
-  ]},
-  { name: "Samsung Galaxy Z Fold7", price: 1999.99, storage: [
-      { gb: "256GB", price: 1999.99 },
-      { gb: "512GB", price: 2119.99 },
-  ]},
-  { name: "Samsung Galaxy Z Flip7", price: 1099.99, storage: [
-      { gb: "256GB", price: 1099.99 },
-      { gb: "512GB", price: 1219.99 },
-  ]},
-  { name: "Samsung Galaxy Z Flip7 FE", price: 899.99, storage: [
-      { gb: "128GB", price: 899.99 },
-      { gb: "256GB", price: 959.99 },
-  ]},
-  { name: "Samsung Galaxy S25 Ultra", price: 1199.99, storage: [
-      { gb: "256GB", price: 1199.99 },
-  ]},
-  { name: "Samsung Galaxy S25 Edge", price: 899.99, storage: [
-      { gb: "256GB", price: 899.99 },
-  ]},
-  { name: "Samsung Galaxy S25", price: 799.99, storage: [
-      { gb: "128GB", price: 799.99 },
-  ]},
-  { name: "Samsung Galaxy S25 FE", price: 649.99, storage: [
-      { gb: "128GB", price: 649.99 },
-  ]},
-  { name: "Samsung Galaxy A37 5G", price: 449.99, storage: [
-      { gb: "128GB", price: 449.99 },
-  ]},
-  { name: "Samsung Galaxy A36 5G", price: 399.99, storage: [
-      { gb: "128GB", price: 399.99 },
-  ]},
-  { name: "Samsung Galaxy A26 5G", price: 299.99, storage: [
-      { gb: "128GB", price: 299.99 },
-  ]},
-  { name: "Samsung Galaxy A17 5G", price: 199.99, storage: [
-      { gb: "128GB", price: 199.99 },
-  ]},
-  { name: "Samsung Galaxy A16 5G", price: 179.99, storage: [
-      { gb: "128GB", price: 179.99 },
-  ]},
+  { name: "Samsung Galaxy Z Fold8 Ultra", price: 2099.99, storage: [ { gb: "256GB", price: 2099.99 }, { gb: "512GB", price: 2299.99 } ] },
+  { name: "Samsung Galaxy Z Fold8", price: 1899.99, storage: [ { gb: "256GB", price: 1899.99 }, { gb: "512GB", price: 2099.99 } ] },
+  { name: "Samsung Galaxy Z Flip8", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 }, { gb: "512GB", price: 1399.99 } ] },
+  { name: "Samsung Galaxy S26 Ultra", price: 1299.99, storage: [ { gb: "256GB", price: 1299.99 }, { gb: "512GB", price: 1499.99 } ] },
+  { name: "Samsung Galaxy S26+", price: 1099.99, storage: [ { gb: "256GB", price: 1099.99 }, { gb: "512GB", price: 1299.99 } ] },
+  { name: "Samsung Galaxy S26", price: 899.99, storage: [ { gb: "256GB", price: 899.99 }, { gb: "512GB", price: 1099.99 } ] },
+  { name: "Samsung Galaxy S25 Ultra", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 } ] },
+  { name: "Samsung Galaxy S25 Edge", price: 899.99, storage: [ { gb: "256GB", price: 899.99 } ] },
+  { name: "Samsung Galaxy S25 FE", price: 649.99, storage: [ { gb: "128GB", price: 649.99 } ] },
+  { name: "Samsung Galaxy S25", price: 799.99, storage: [ { gb: "128GB", price: 799.99 } ] },
+  { name: "Samsung Galaxy Z Fold7", price: 1999.99, storage: [ { gb: "256GB", price: 1999.99 }, { gb: "512GB", price: 2119.99 } ] },
+  { name: "Samsung Galaxy Z Flip7", price: 1099.99, storage: [ { gb: "256GB", price: 1099.99 }, { gb: "512GB", price: 1219.99 } ] },
+  { name: "Samsung Galaxy Z Flip7 FE", price: 899.99, storage: [ { gb: "128GB", price: 899.99 } ] },
+  { name: "Samsung Galaxy A37 5G", price: 449.99, storage: [ { gb: "128GB", price: 449.99 } ] },
+  { name: "Samsung Galaxy A36 5G", price: 399.99, storage: [ { gb: "128GB", price: 399.99 } ] },
+  { name: "Samsung Galaxy A27 5G", price: 349.99, storage: [ { gb: "128GB", price: 349.99 } ] },
+  { name: "Samsung Galaxy A26 5G", price: 299.99, storage: [ { gb: "128GB", price: 299.99 } ] },
+  { name: "Samsung Galaxy A17 5G", price: 199.99, storage: [ { gb: "128GB", price: 199.99 } ] },
   // Google
-  { name: "Google Pixel 10 Pro Fold", price: 1799.99, storage: [
-      { gb: "256GB", price: 1799.99 },
-      { gb: "512GB", price: 1919.99 },
-  ]},
-  { name: "Google Pixel 10 Pro XL", price: 1199.99, storage: [
-      { gb: "256GB", price: 1199.99 },
-      { gb: "512GB", price: 1319.99 },
-  ]},
-  { name: "Google Pixel 10 Pro", price: 999.99, storage: [
-      { gb: "128GB", price:  999.99 },
-      { gb: "256GB", price: 1099.99 },
-  ]},
-  { name: "Google Pixel 10", price: 649.99, storage: [
-      { gb: "128GB", price: 649.99 },
-      { gb: "256GB", price: 749.99 },
-  ]},
-  { name: "Google Pixel 10a", price: 499.99, storage: [
-      { gb: "128GB", price: 499.99 },
-  ]},
-  { name: "Google Pixel 9", price: 799.99, storage: [
-      { gb: "128GB", price: 799.99 },
-  ]},
-  { name: "Google Pixel 9a", price: 499.99, storage: [
-      { gb: "128GB", price: 499.99 },
-  ]},
+  { name: "Google Pixel 10 Pro XL", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 } ] },
+  { name: "Google Pixel 10 Pro", price: 999.99, storage: [ { gb: "128GB", price: 999.99 }, { gb: "256GB", price: 1099.99 } ] },
+  { name: "Google Pixel 10 Pro Fold", price: 1799.99, storage: [ { gb: "256GB", price: 1799.99 }, { gb: "512GB", price: 1919.99 } ] },
+  { name: "Google Pixel 10", price: 799.99, storage: [ { gb: "128GB", price: 799.99 }, { gb: "256GB", price: 899.99 } ] },
+  { name: "Google Pixel 10a", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
+  { name: "Google Pixel 9", price: 799.99, storage: [ { gb: "128GB", price: 799.99 } ] },
+  { name: "Google Pixel 9a", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
   // Motorola
-  { name: "Motorola razr - 2026",    price: 699.99, storage: [
-      { gb: "128GB", price: 699.99 },
-  ]},
-  { name: "Motorola razr - 2025",    price: 599.99, storage: [
-      { gb: "256GB", price: 599.99 },
-  ]},
-  { name: "Motorola moto g stylus - 2026", price: 499.99, storage: [
-      { gb: "128GB", price: 499.99 },
-  ]},
-  { name: "Motorola edge",           price: 399.99, storage: [
-      { gb: "256GB", price: 399.99 },
-  ]},
-  { name: "Motorola moto g stylus - 2025", price: 289.99, storage: [
-      { gb: "128GB", price: 289.99 },
-  ]},
-  { name: "Motorola moto g - 2026",  price: 249.99, storage: [
-      { gb: "128GB", price: 249.99 },
-  ]},
-  { name: "Motorola moto g play - 2026", price: 179.99, storage: [
-      { gb: "64GB",  price: 179.99 },
-  ]},
+  { name: "Motorola razr - 2026", price: 699.99, storage: [ { gb: "128GB", price: 699.99 } ] },
+  { name: "Motorola razr - 2025", price: 599.99, storage: [ { gb: "256GB", price: 599.99 } ] },
+  { name: "Motorola edge - 2026", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
+  { name: "Motorola edge", price: 399.99, storage: [ { gb: "256GB", price: 399.99 } ] },
+  { name: "Motorola moto g stylus - 2026", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
+  { name: "Motorola moto g stylus - 2025", price: 289.99, storage: [ { gb: "128GB", price: 289.99 } ] },
+  { name: "Motorola moto g - 2026", price: 249.99, storage: [ { gb: "128GB", price: 249.99 } ] },
+  { name: "Motorola moto g play - 2026", price: 179.99, storage: [ { gb: "64GB", price: 179.99 } ] },
 ];
 
 // ══════════════════════════════════════════════════════════════════
@@ -13066,7 +12974,7 @@ const TABLETS_FOR_SALE = [
 
 // ── SAMSUNG NO-TRADE PROMO (applied when no trade-in, buying eligible Samsung phone) ──
 // Change this amount monthly as needed
-const SAMSUNG_NO_TRADE_PROMO = 500;  // $500 off
+const SAMSUNG_NO_TRADE_PROMO = 600;  // $600 off (flat_samsung_600 — DEALS18 2026-07-22)
 
 // ── XMC INSURANCE TIERS (based on full retail price, before discounts) ──
 const XMC_TIERS = [
@@ -13587,112 +13495,81 @@ const PROMO_MATRIX = {
 // tag: used to conditionally show promos based on what's selected
 // endDate: YYYY-MM-DD — promo auto-hides on or after this date (null = always active)
 const PROMO_DEFINITIONS = [
+  // Re-keyed 2026-07-22 from Comcast DEALS18 "Mobile deals". New-line sheet.
   // ── $200 Prepaid Mastercard (flat, NO stacking) ──
-  // Replaces the retired mc_plus_scaled ($100 base + $100/DPP up to $500).
-  // Per the skill matrix (prepaid_mc_200): flat $200 for adding 2 new lines
-  // same day. One line must be a new mobile phone on Mobile Select or
-  // Mobile Plus (NOT Premium Unl, NOT NOW Mobile). Second line can be
-  // mobile, smartwatch, or tablet on any data plan. BYOD/PIF/DPP all
-  // eligible — no device or financing requirement. Both lines must
-  // activate within 90 days. Retail & Field Sales Event teams only
-  // (Big South Chicago qualifies).
   {
     tag:       'prepaid_mc_200',
     text:      '💳 $200 Prepaid Mastercard — adding 2 new lines same day (1 must be a new mobile phone on Mobile Select or Mobile Plus; 2nd can be mobile/watch/tablet on any data plan). BYOD/PIF/DPP all eligible. Activate both within 90 days.',
     startDate: '2026-06-03',
-    endDate:   '2026-07-21',
+    endDate:   '2026-08-21',
   },
-  // ── Waived activation fee — first line only, shown when activating a single line ──
+  // ── Waived $25 activation fee — surfaced on single-line quotes ──
   {
     tag:       'waived_activation_first_line',
-    text:      '✅ Waived Activation Fee For First Line - A $25 Value',
+    text:      '✅ Waived $25 Activation Fee — new XM customers (applies to all lines on the first order).',
+    startDate: '2026-05-11',
+    endDate:   '2026-08-30',
   },
-  // ── Pixel TIPS trade-in: RETIRED 2026-06-23. The separate $1,200 Pixel
-  // bucket is gone; all Pixel models now fall under the $830 Apple/Google/
-  // Motorola TIPS banner (tips_nonsam_830) below. Do not re-add a
-  // tips_pixel_1200 entry without a matching active row in the skill matrix.
-  // ── Samsung TIPS trade-in ($900 off Samsung devices) ──
+  // ── Motorola moto g stylus (2026) 'On Us' — new-line flagship, port required ──
+  {
+    tag:       'moto_gstylus_on_us',
+    text:      "📱 moto g stylus (2026) 'On Us' — $499.99 off (device free) w/ Mobile Plus or Premium Unlimited on a new line. Porting required.",
+    startDate: '2026-07-22',
+    endDate:   '2026-08-30',
+  },
+  // ── Samsung TIPS trade-in (up to $1,000 off Samsung) ──
   {
     tag:       'tips_samsung_1000',
-    text:      '📱 TIPS Trade-In: Up to $900 off select Samsung devices w/ Premium Unlimited — New Line or Elite Upgrade',
-    startDate: '2026-05-11',
-    endDate:   '2026-07-21',
+    text:      '📱 TIPS Trade-In: Up to $1,000 off select Samsung devices w/ Mobile Plus or Premium Unlimited — new line or upgrade (no porting).',
+    startDate: '2026-07-22',
+    endDate:   '2026-08-25',
   },
-  // ── Non-Samsung TIPS trade-in ($830 off Apple/Google/Motorola) ──
+  // ── Non-Samsung TIPS trade-in (up to $830 off Apple/Google/Motorola) ──
   {
     tag:       'tips_nonsam_830',
-    text:      '📱 TIPS Trade-In: Up to $830 off select Apple, Google, or Motorola devices w/ Premium Unlimited — New Line or Elite Upgrade',
+    text:      '📱 TIPS Trade-In: Up to $830 off select Apple, Google, or Motorola devices w/ Mobile Plus or Premium Unlimited — new line only (no porting).',
     startDate: '2026-05-11',
-    endDate:   '2026-07-21',
+    endDate:   '2026-08-25',
   },
-  // ── Samsung no-trade promo ($500 off) ──
+  // ── Samsung no-trade promo ($600 off) — flat_samsung_600, port required ──
   {
     tag:       'samsung_notrade',
-    text:      '💰 $500 off select Samsung devices w/ Premium Unlimited — New Line or Elite Upgrade (no trade-in required)',
-    startDate: '2026-05-11',
-    endDate:   '2026-07-21',
+    text:      '💰 $600 off select Samsung devices w/ Mobile Plus or Premium Unlimited — new line or upgrade (no trade-in required; porting required).',
+    startDate: '2026-07-22',
+    endDate:   '2026-08-25',
   },
-  // ── Samsung Unlimited trade-in ($500 TIPS) ──
-  {
-    tag:     'tips_samsung_500',
-    text:    '📱 TIPS Trade-In: Up to $500 off select Samsung devices w/ Unlimited — New Line or Upgrade',
-    endDate: '2026-07-21',
-  },
-  // ── Premium plan $400 off (non-Samsung, no qualifying trade) ──
-  // Note: text intentionally excludes Samsung — Samsung purchases get the
-  // $500 samsung_notrade promo instead. The activation logic only sets
-  // hasPremium400 = true for Apple/Google/Motorola purchases.
+  // ── Non-Samsung $400 off (no trade) — flat_nonsam_400, port required ──
   {
     tag:       'premium_400',
-    text:      '💰 $400 off select Apple, Google, or Motorola devices w/ Premium Unlimited — New Line or Elite Upgrade (no trade-in required)',
+    text:      '💰 $400 off select Apple, Google, or Motorola devices w/ Mobile Plus or Premium Unlimited — new line (no trade-in required; porting required).',
     startDate: '2026-05-11',
-    endDate:   '2026-07-21',
+    endDate:   '2026-08-25',
   },
-  // ── $200 off Samsung w/ Unlimited (non-TIPS) ──
-  {
-    tag:     'samsung_200_unlimited',
-    text:    '💰 $200 off select Samsung devices w/ Unlimited — New Line or Upgrade',
-    endDate: '2026-07-21',
-  },
-  // ── iPhone 17e specific promos ──
-  // Retired 2026-05-10. Cycle-renewal note: when these come back, re-add
-  // entries here AND a matching row in the skill matrix.
-  // ── Watch promos ──
-  // Diamond-only as of 2026-06-06. Platinum was briefly eligible Jun 3–6
-  // via a separate watch_platinum_300 entry; that promo was retired early
-  // and Platinum members no longer qualify for ANY watch discount.
-  // Terms: $299.99 off Apple/Samsung/Google watch, $10/mo Smartwatch plan,
-  // new line activation, new device on 36-month DPP. Member must redeem
-  // Xfinity Rewards before XM buy flow and enter the offer code IN ALL
-  // CAPS during XM checkout.
+  // ── Diamond smartwatch ($300 off) ──
   {
     tag:       'watch_diamond_300',
-    text:      '⌚ Diamond members: $300 off Apple/Samsung/Google smartwatches (over 36 months) — requires $10/mo Smartwatch plan & new line on DPP. Redeem Xfinity Rewards first; enter offer code IN ALL CAPS at checkout.',
+    text:      '⌚ Diamond members: $300 off Apple/Samsung/Google smartwatches (over 36 months) — requires Smartwatch plan & new line on DPP. Redeem Xfinity Rewards first; enter offer code IN ALL CAPS at checkout.',
     startDate: '2026-05-11',
-    endDate:   '2026-07-21',
+    endDate:   '2026-08-30',
   },
-  // xmc_50_watch retired 2026-05-10. Re-add when the promo cycle renews.
-  // ── XMC Plus included on Mobile Plus plans (account-wide protection) ──
-  // Auto-activates whenever the rep selects a Plus plan AND has at least
-  // one phone line with a device on the quote.
+  // ── XMC Plus included on Mobile Plus ──
   {
     tag:     'xmc_plus_included',
     text:    '🛡️ XMC Plus included FREE on Mobile Plus — covers the phone line plus all watches & tablets on the account (one Plus line is enough to extend coverage to the rest)',
   },
-  // ── Tablet promos ──
-  // xmc_50_tablet retired 2026-05-10. Re-add when the promo cycle renews.
-  // a11_50off — Galaxy Tab A11+ 50% off was discontinued 2026-05-10.
-  // Removed entirely (not just expired) since Jeff confirmed the offer
-  // is gone going forward.
-  // ipad_a16_50off — per the skill matrix (ipad_50_off), the marketing
-  // "50% off" is actually $250 off the $499.99 MSRP delivered as
-  // ~$6.94/mo bill credits over a 36-month Tablet plan DPP. NOT a flat
-  // in-store discount. Customer who pays in full FORFEITS the discount.
+  // ── iPad A16 $250 off ──
   {
     tag:       'ipad_a16_50off',
-    text:      '📲 $250 off iPad (A16) — 11th gen, 128 GB — delivered as ~$6.94/mo bill credits over 36-month DPP (Tablet plan). Pay-in-full forfeits the discount.',
-    startDate: '2026-05-11',
-    endDate:   '2026-07-21',
+    text:      '📲 $250 off iPad (A16) 128 GB — delivered as ~$6.94/mo bill credits over 36-month DPP (Tablet plan). Pay-in-full forfeits the discount.',
+    startDate: '2026-04-20',
+    endDate:   '2026-08-10',
+  },
+  // ── Galaxy Tab A11+ 50% off ──
+  {
+    tag:       'tab_a11plus_50off',
+    text:      '📲 50% off Galaxy Tab A11+ — $140 off $279.99 MSRP over 36-month DPP (Tablet plan), new tablet line. Pay-in-full forfeits the discount.',
+    startDate: '2026-07-22',
+    endDate:   '2026-08-10',
   },
 ];
 
@@ -13724,6 +13601,9 @@ function getTabletPromoDiscount(deviceName, devicePrice) {
   const name = (deviceName || '').toLowerCase();
   if ((name.includes('ipad (a16)') || name.includes('ipad a16')) && isPromoActiveByTag('ipad_a16_50off')) {
     return devicePrice * 0.5;
+  }
+  if (name.includes('galaxy tab a11') && isPromoActiveByTag('tab_a11plus_50off')) {
+    return devicePrice * 0.5; // 50% off Galaxy Tab A11+ ($140 off $279.99)
   }
   return 0;
 }
@@ -14222,6 +14102,7 @@ function buildFeatures(plan) {
   let watchLineCount  = 0;
   let tabletLineCount = 0;
   let hasIpadA16      = false;
+  let hasTabA11       = false;
   let hasWatchXmc     = false;
   let hasTabletXmc    = false;
 
@@ -14239,6 +14120,7 @@ function buildFeatures(plan) {
       tabletLineCount++;
       if (xmcEnabled) hasTabletXmc = true;
       if (deviceName.includes('ipad (a16)') || deviceName.includes('ipad a16')) hasIpadA16 = true;
+      if (deviceName.includes('galaxy tab a11')) hasTabA11 = true;
     }
   });
 
@@ -14256,15 +14138,14 @@ function buildFeatures(plan) {
   // conversation toward whichever combo (TIPS w/ trade vs. no-trade) fits.
   if (phoneLineCount > 0) {
     if (isPremiumPlan) {
-      activeTags.add('tips_samsung_1000');   // $900 off Samsung w/ trade
-      activeTags.add('tips_nonsam_830');    // $830 off Apple/Google/Moto w/ trade
-      activeTags.add('samsung_notrade');    // $500 off Samsung, no trade required
-      activeTags.add('premium_400');        // $400 off non-Samsung, no trade required
-      activeTags.add('xmc_plus_included');  // XMC Plus included free on Mobile Plus
-    } else if (isUnlimitedTierPlan) {
-      activeTags.add('tips_samsung_500');     // $500 off Samsung w/ trade (Unlimited)
-      activeTags.add('samsung_200_unlimited'); // $200 off Samsung no trade (Unlimited)
+      activeTags.add('tips_samsung_1000');   // up to $1,000 off Samsung w/ trade
+      activeTags.add('tips_nonsam_830');     // up to $830 off Apple/Google/Moto w/ trade
+      activeTags.add('samsung_notrade');     // $600 off Samsung, no trade (flat_samsung_600)
+      activeTags.add('premium_400');         // $400 off non-Samsung, no trade (flat_nonsam_400)
+      activeTags.add('moto_gstylus_on_us');  // moto g stylus 2026 'On Us'
+      activeTags.add('xmc_plus_included');   // XMC Plus included free on Mobile Plus
     }
+    // Legacy Unlimited-tier Samsung $500/$200 constructs retired (not in DEALS18 cycle).
     // iPhone 17e specific promos auto-hide via their endDate (2026-05-10).
     // When that promo cycle is renewed, surface them here under isPremiumPlan.
   }
@@ -14279,8 +14160,8 @@ function buildFeatures(plan) {
 
   // ── Tablet promos: surface as soon as a tablet line exists ──
   if (tabletLineCount > 0) {
-    if (hasIpadA16) activeTags.add('ipad_a16_50off'); // $250 off iPad A16 over 36-mo DPP
-    // xmc_50_tablet retired 2026-05-10.
+    if (hasIpadA16) activeTags.add('ipad_a16_50off');    // $250 off iPad A16 over 36-mo DPP
+    if (hasTabA11)  activeTags.add('tab_a11plus_50off'); // 50% off Galaxy Tab A11+ ($140)
   }
 
   // ── Prepaid Mastercard qualification (NEW: flat $200, no stacking) ──
@@ -16100,9 +15981,11 @@ function recalcRow(row) {
         promoApplied = tradeValue;
       } else if (noTrade || tradeValue === 0) {
         if (isSamsungEligible) {
-          promoApplied = SAMSUNG_NO_TRADE_PROMO; // $500 off Samsung w/ Premium, no trade
+          promoApplied = SAMSUNG_NO_TRADE_PROMO; // $600 off Samsung w/ Premium, no trade (flat_samsung_600)
+        } else if (/moto g stylus\s*-?\s*2026/i.test(deviceName)) {
+          promoApplied = devicePrice; // moto g stylus 2026 'On Us' — device free (moto_gstylus_on_us; port-in required)
         } else if (!isPixelTopTier) {
-          promoApplied = 400; // $400 off Apple/Google/Motorola w/ Premium, no trade
+          promoApplied = 400; // $400 off Apple/Google/Motorola w/ Premium, no trade (flat_nonsam_400)
         }
         // Pixel 10 Pro XL/Fold ($1,200 promo) requires a trade-in to discount
       }
