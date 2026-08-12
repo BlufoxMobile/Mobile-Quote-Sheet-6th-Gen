@@ -17449,22 +17449,15 @@ function buildFeatures(plan) {
 
     let discLabel = '';
     if (type === 'phone') {
-      const tipsPromoTag = getTipsPromoForNewPhone(deviceName).promo_tag;
-      const isPixelTop = false;
-      if (isPixelTop && tradeValue > 0 && !noTrade) {
-        discLabel = `TIPS Pixel -$${promoAmt.toFixed(0)} (trade-in)`;
-      } else if (isSamsungDevice && tradeValue > 0 && !noTrade) {
-        discLabel = `Samsung TIPS -$${promoAmt.toFixed(0)} (trade-in)`;
-      } else if (isSamsungDevice && (noTrade || tradeValue === 0)) {
+      // Label reflects which deal actually applied (recalcRow picks the better of
+      // the trade-in credit vs. the no-trade flat deal and records it here).
+      const fromTrade = row.dataset.appliedFromTrade === 'true';
+      if (fromTrade) {
+        discLabel = (isSamsungDevice ? 'Samsung TIPS' : 'TIPS Trade-In') + `: -$${promoAmt.toFixed(0)} off (trade-in)`;
+      } else if (isSamsungDevice) {
         discLabel = `Samsung No-Trade Promo: -$${promoAmt.toFixed(0)} off`;
-      } else if (!isSamsungDevice && tradeValue > 0 && !noTrade) {
-        discLabel = `TIPS Trade-In: -$${promoAmt.toFixed(0)} off (Apple/Google/Motorola)`;
-      } else if (!isSamsungDevice && isPremiumPlan && promoAmt === 400) {
-        discLabel = `Premium Unlimited Discount: -$400 off`;
-      } else if (!isSamsungDevice && isPremiumPlan && promoAmt === 500) {
-        discLabel = `Premium Unlimited Discount: -$500 off`;
-      } else if (promoAmt > 0) {
-        discLabel = `Discount Applied: -$${promoAmt.toFixed(0)} off`;
+      } else {
+        discLabel = `Premium Unlimited Discount: -$${promoAmt.toFixed(0)} off`;
       }
     } else if (type === 'watch' && promoAmt > 0) {
       discLabel = `Diamond Membership: -$${promoAmt.toFixed(0)} off watch`;
@@ -19191,45 +19184,45 @@ function recalcRow(row) {
     // (Premium Unlimited). Mobile Select and NOW Mobile customers pay
     // full device price with no carrier discount.
     const isPremiumPlanForDevice = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
+    let flatNoTrade = 0;          // best no-trade flat deal this device qualifies for (Plus/Premium)
+    let appliedFromTrade = false;
     if (isPremiumPlanForDevice) {
+      const _nm = (deviceName || '').toLowerCase();
+      if (isSamsungEligible) {
+        flatNoTrade = SAMSUNG_NO_TRADE_PROMO;             // $600 off Samsung (no trade)
+      } else if (/moto g stylus\s*-?\s*2026/i.test(deviceName)) {
+        flatNoTrade = devicePrice;                         // moto g stylus 2026 'On Us'
+      } else if (/pixel\s*11/.test(_nm)) {
+        flatNoTrade = 600;                                 // $600 off Google Pixel 11 Series (no trade)
+      } else if (/razr\s*fold/.test(_nm)) {
+        flatNoTrade = 0;                                   // razr fold 'On Us' REQUIRES a trade-in
+      } else {
+        flatNoTrade = 400;                                 // $400 off Apple/Google/Motorola (no trade)
+      }
       if (tradeValue > 0 && !noTrade) {
-        // Any TIPS promo: pay the actual trade-in value from the routed
-        // promo table. tradeValue comes from row.dataset (set when the
-        // rep picked the trade-in row) and reflects the per-model amount.
-        promoApplied = tradeValue;
-      } else if (noTrade || tradeValue === 0) {
-        const _nm = (deviceName || '').toLowerCase();
-        if (isSamsungEligible) {
-          promoApplied = SAMSUNG_NO_TRADE_PROMO; // $600 off Samsung, no trade (flat_samsung_600)
-        } else if (/moto g stylus\s*-?\s*2026/i.test(deviceName)) {
-          promoApplied = devicePrice; // moto g stylus 2026 'On Us' — device free
-        } else if (/pixel\s*11/.test(_nm)) {
-          promoApplied = 600; // $600 off Google Pixel 11 Series, no trade (new line)
-        } else if (/razr\s*fold/.test(_nm)) {
-          promoApplied = 0;   // moto razr fold 'On Us' REQUIRES a trade-in — no no-trade discount
-        } else {
-          promoApplied = 400; // $400 off Apple/Google/Motorola, no trade (flat_nonsam_400)
-        }
-        // Pixel 10 Pro XL/Fold ($1,200 promo) requires a trade-in to discount
+        // Opt for the BETTER of the trade-in credit vs. the no-trade flat deal (per Jeff):
+        // a $600 no-trade always beats a $500 trade-in, so take the higher of the two.
+        if (tradeValue >= flatNoTrade) { promoApplied = tradeValue; appliedFromTrade = true; }
+        else { promoApplied = flatNoTrade; appliedFromTrade = false; }
+      } else {
+        promoApplied = flatNoTrade;
       }
     }
     // Mobile Select / NOW Mobile / Unlimited fall through with promoApplied = 0
 
     // Cap promo at full device price — never discount more than the phone costs
     promoApplied = Math.min(promoApplied, devicePrice);
+    row.dataset.appliedFromTrade = appliedFromTrade ? 'true' : 'false';
 
     const netPrice = Math.max(0, devicePrice - promoApplied);
     const monthly  = netPrice / 36 + xmcAdd;
     row.dataset.promoAmount = promoApplied.toFixed(2);
 
-    // Build a clear promo description label
+    // Build a clear promo description label reflecting which deal actually applied
     let promoDesc = '';
     if (promoApplied > 0) {
-      if (tradeValue > 0 && !noTrade) {
-        // Trade-in promo — surface which TIPS bucket the rep is in
-        const bucketLabel = isPixelTopTier
-          ? 'TIPS Pixel'
-          : (isSamsungEligible ? 'Samsung TIPS' : 'TIPS');
+      if (appliedFromTrade) {
+        const bucketLabel = isSamsungEligible ? 'Samsung TIPS' : 'TIPS';
         promoDesc = `${bucketLabel} -$${promoApplied.toFixed(0)} (trade-in)`;
       } else if (isSamsungEligible) {
         promoDesc = `Samsung -$${promoApplied.toFixed(0)} (no trade-in promo)`;
