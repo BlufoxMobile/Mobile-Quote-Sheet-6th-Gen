@@ -18685,11 +18685,17 @@ function makeAutocomplete(inputEl, listEl, datasetOrFn, onSelect, maxInitial) {
       matches = dataset.slice(0, maxInitial);
     } else {
       // 1) Always try fuzzy name match first.
+      //    Cap must be high enough that a broad, evenly-scored query
+      //    (e.g. "galax" → ~252 rows, or "iphone" → ~90 rows, all sorted
+      //    alphabetically) does not truncate away later-sorting models.
+      //    Previously .slice(0,50) cut off Galaxy S/Z flagships and
+      //    iPhone 16-series because A-series / older iPhones filled the
+      //    first 50 slots. 600 comfortably covers a full 510-row bucket.
       matches = dataset
           .map(d => ({ item: d, score: fuzzyScore(d.name, query) }))
           .filter(x => x.score > 0)
           .sort((a, b) => b.score - a.score)
-          .slice(0, 50)
+          .slice(0, 600)
           .map(x => x.item);
       // 2) Fall through to value search if the query is numeric AND
       //    name search returned nothing (so reps can still type "450" to
@@ -19056,7 +19062,12 @@ function buildDeviceRow(lineNum, type) {
       return getTipsTradeInsForPurchase(purchasedDevice);
     }
 
-    makeAutocomplete(tradeInput, tradeList, getFilteredTradeIns(), (item) => {
+    // Pass the FUNCTION (not its one-time result) so the dropdown re-derives
+    // the trade-in list — and its per-bucket dollar values — from the CURRENT
+    // purchased device every time it renders. Passing getFilteredTradeIns()
+    // froze the dataset (and its values) to whatever device was set when the
+    // row was first built.
+    makeAutocomplete(tradeInput, tradeList, getFilteredTradeIns, (item) => {
       // Any phone from the TIPS list can be traded toward any device.
       // Display label: show the value and label so rep knows which promo is applied.
       const promoTag = item.label ? ` · ${item.label}` : '';
