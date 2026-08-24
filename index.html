@@ -1090,16 +1090,14 @@
 
     /* Info bar: 2-col */
     .info-section { padding: 16px 22px; }
-    .info-bar-grid { grid-template-columns: 1fr 1fr !important; grid-template-rows: auto auto auto auto; }
+    .info-bar-grid { grid-template-columns: 1fr 1fr !important; grid-template-rows: auto auto auto; }
     .info-bar-divider { display: none; }
-    .info-bar-name      { grid-column: 1; grid-row: 1; }
-    .info-bar-phone     { grid-column: 2; grid-row: 1; }
-    .info-bar-date      { grid-column: 1; grid-row: 2; }
-    .info-bar-tier      { grid-column: 2; grid-row: 2; }
-    .info-bar-rep-name  { grid-column: 1; grid-row: 3; }
-    .info-bar-rep-store { grid-column: 2; grid-row: 3; }
-    .info-bar-rep-email { grid-column: 1; grid-row: 4; }
-    .info-bar-rep-phone { grid-column: 2; grid-row: 4; }
+    .info-bar-rep-store { grid-column: 1; grid-row: 1; }
+    .info-bar-rep-name  { grid-column: 2; grid-row: 1; }
+    .info-bar-rep-email { grid-column: 1; grid-row: 2; }
+    .info-bar-rep-phone { grid-column: 2; grid-row: 2; }
+    .info-bar-date      { grid-column: 1; grid-row: 3; }
+    .info-bar-tier      { grid-column: 2; grid-row: 3; }
     .info-bar-block { padding: 8px 12px; }
 
     /* ── Quote / Carrier Comparison — tablet ── */
@@ -1433,7 +1431,7 @@
 
     /* Customer info bar */
     .info-section { padding: 6px 14px !important; }
-    .info-bar-grid { grid-template-columns: 1fr 1fr 1px 1fr 1fr !important; }
+    .info-bar-grid { grid-template-columns: 1fr 1fr 1fr !important; }
     .info-bar-block { padding: 6px 10px !important; }
     .info-display-label { font-size: 8px !important; }
     .info-display-value { font-size: 11px !important; }
@@ -1540,10 +1538,10 @@
     overflow: hidden;
   }
 
-  /* ── NEW INFO BAR: 4-col × 2-row grid with divider between customer/rep ── */
+  /* ── INFO BAR: 3-col × 2-row grid (rep details + date/tier) ── */
   .info-bar-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1px 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: auto auto;
     border: 1.5px solid var(--border);
     border-radius: var(--radius-sm);
@@ -1557,7 +1555,6 @@
   }
 
   /* Bottom row items: slightly muted */
-  .info-bar-date,
   .info-bar-tier,
   .info-bar-rep-email,
   .info-bar-rep-phone {
@@ -1572,15 +1569,14 @@
     background: var(--border);
   }
 
-  /* Grid placement */
-  .info-bar-name      { grid-column: 1; grid-row: 1; border-right: 1px solid var(--border); }
-  .info-bar-phone     { grid-column: 2; grid-row: 1; }
-  .info-bar-rep-name  { grid-column: 4; grid-row: 1; border-right: 1px solid var(--border); }
-  .info-bar-rep-store { grid-column: 5; grid-row: 1; }
-  .info-bar-date      { grid-column: 1; grid-row: 2; border-right: 1px solid var(--border); }
-  .info-bar-tier      { grid-column: 2; grid-row: 2; }
-  .info-bar-rep-email { grid-column: 4; grid-row: 2; border-right: 1px solid var(--border); }
-  .info-bar-rep-phone { grid-column: 5; grid-row: 2; }
+  /* Grid placement — row 1: Store, Rep Name, Date
+                     row 2: Rep Email, Rep Phone, Membership Tier */
+  .info-bar-rep-store { grid-column: 1; grid-row: 1; border-right: 1px solid var(--border); }
+  .info-bar-rep-name  { grid-column: 2; grid-row: 1; border-right: 1px solid var(--border); }
+  .info-bar-date      { grid-column: 3; grid-row: 1; }
+  .info-bar-rep-email { grid-column: 1; grid-row: 2; border-right: 1px solid var(--border); }
+  .info-bar-rep-phone { grid-column: 2; grid-row: 2; border-right: 1px solid var(--border); }
+  .info-bar-tier      { grid-column: 3; grid-row: 2; }
 
   .info-display-value-sm {
     font-size: 12px !important;
@@ -2974,10 +2970,6 @@
         <div class="rep-info-rows">
           <div class="rep-info-row">
             <div class="rep-info-field">
-              <label>Rep Name <span style="color:#e53935;">*</span></label>
-              <div style="position: relative;"><input type="text" id="repName" name="rep-name" autocomplete="name" placeholder="Your name"><ul style="position: absolute; top: 100%; left: 0px; right: 0px; z-index: 999; background: white; border-right-color: ; border-right-style: ; border-right-width: ; border-bottom-color: ; border-bottom-style: ; border-bottom-width: ; border-left-color: ; border-left-style: ; border-left-width: ; border-image-source: ; border-image-slice: ; border-image-width: ; border-image-outset: ; border-image-repeat: ; border-top: none; border-radius: 0px 0px 10px 10px; list-style: none; margin: 0px; padding: 4px 0px; box-shadow: rgba(103, 19, 210, 0.15) 0px 4px 16px; display: none; max-height: 200px; overflow-y: auto;"></ul></div>
-            </div>
-            <div class="rep-info-field">
               <label>Store Name <span style="color:#e53935;">*</span></label>
               <select id="storeName" name="rep-store" autocomplete="organization">
                 <option value="">— Select your store —</option>
@@ -3010,6 +3002,10 @@
                 <option>Valparaiso Xfinity Store</option>
               </select>
             </div>
+            <div class="rep-info-field">
+              <label>Rep Name <span style="color:#e53935;">*</span></label>
+              <div style="position: relative;"><input type="text" id="repName" name="rep-name" autocomplete="name" placeholder="Your name"><ul style="position: absolute; top: 100%; left: 0px; right: 0px; z-index: 999; background: white; border-right-color: ; border-right-style: ; border-right-width: ; border-bottom-color: ; border-bottom-style: ; border-bottom-width: ; border-left-color: ; border-left-style: ; border-left-width: ; border-image-source: ; border-image-slice: ; border-image-width: ; border-image-outset: ; border-image-repeat: ; border-top: none; border-radius: 0px 0px 10px 10px; list-style: none; margin: 0px; padding: 4px 0px; box-shadow: rgba(103, 19, 210, 0.15) 0px 4px 16px; display: none; max-height: 200px; overflow-y: auto;"></ul></div>
+            </div>
           </div>
           <div class="rep-info-row">
             <div class="rep-info-field">
@@ -3024,21 +3020,12 @@
         </div>
       </div>
 
-      <!-- Customer Info — shown after rep info -->
-      <div class="intake-section" id="sec-customer">
-        <div class="intake-section-title">Customer Information</div>
-        <div class="rep-info-rows">
-          <div class="rep-info-row">
-            <div class="rep-info-field">
-              <label>Customer Name</label>
-              <input type="text" id="i_customerName" name="customer-name" autocomplete="off" placeholder="Full name (optional)">
-            </div>
-            <div class="rep-info-field">
-              <label>Phone Number</label>
-              <input type="tel" id="i_customerPhone" name="customer-tel" autocomplete="off" placeholder="(XXX)XXX-XXXX">
-            </div>
-          </div>
-        </div>
+      <!-- Customer Information is no longer collected — reps shouldn't have to
+           type it. The inputs remain as hidden fields so existing JS and the
+           submission payload keep working; they simply always submit blank. -->
+      <div class="intake-section" id="sec-customer" style="display:none;">
+        <input type="hidden" id="i_customerName" name="customer-name">
+        <input type="hidden" id="i_customerPhone" name="customer-tel">
         <!-- Date hidden from form but still populated for the comparison sheet -->
         <input type="hidden" id="i_quoteDate" value="March 22, 2026">
       </div>
@@ -3431,40 +3418,32 @@
     <div class="info-section">
       <div class="info-bar-grid">
 
-        <!-- Row 1: Customer name + phone (large) -->
-        <div class="info-bar-block info-bar-name">
+        <!-- Customer name/phone are no longer collected. The value holders stay
+             in the DOM (hidden) so the existing JS that reads them keeps working. -->
+        <div class="info-bar-block info-bar-name" style="display:none;">
           <div class="info-display-label">Customer Name</div>
           <div class="info-display-value" id="customerName">—</div>
         </div>
-        <div class="info-bar-block info-bar-phone">
+        <div class="info-bar-block info-bar-phone" style="display:none;">
           <div class="info-display-label">Phone Number</div>
           <div class="info-display-value" id="customerPhone">—</div>
         </div>
 
-        <!-- Vertical divider -->
-        <div class="info-bar-divider"></div>
-
-        <!-- Row 1 right: Rep name + store (large) -->
-        <div class="info-bar-block info-bar-rep-name">
-          <div class="info-display-label">Rep Name</div>
-          <div class="info-display-value" id="hdr-repName">—</div>
-        </div>
+        <!-- Row 1: Store, Rep Name, Date -->
         <div class="info-bar-block info-bar-rep-store">
           <div class="info-display-label">Store</div>
           <div class="info-display-value" id="hdr-repStore">—</div>
         </div>
-
-        <!-- Row 2: Date + Tier (compact) -->
+        <div class="info-bar-block info-bar-rep-name">
+          <div class="info-display-label">Rep Name</div>
+          <div class="info-display-value" id="hdr-repName">—</div>
+        </div>
         <div class="info-bar-block info-bar-date">
           <div class="info-display-label">Date</div>
-          <div class="info-display-value info-display-value-sm" id="quoteDate">—</div>
-        </div>
-        <div class="info-bar-block info-bar-tier">
-          <div class="info-display-label">Membership Tier</div>
-          <div class="info-display-value info-display-value-sm" id="rewardsTierDisplay">—</div>
+          <div class="info-display-value" id="quoteDate">—</div>
         </div>
 
-        <!-- Row 2 right: Rep email + phone (compact) -->
+        <!-- Row 2: Rep Email, Rep Phone, Membership Tier -->
         <div class="info-bar-block info-bar-rep-email">
           <div class="info-display-label">Rep Email</div>
           <div class="info-display-value info-display-value-sm" id="hdr-repEmail">—</div>
@@ -3472,6 +3451,10 @@
         <div class="info-bar-block info-bar-rep-phone">
           <div class="info-display-label">Rep Phone</div>
           <div class="info-display-value info-display-value-sm" id="hdr-repPhone">—</div>
+        </div>
+        <div class="info-bar-block info-bar-tier">
+          <div class="info-display-label">Membership Tier</div>
+          <div class="info-display-value info-display-value-sm" id="rewardsTierDisplay">—</div>
         </div>
 
       </div>
@@ -3679,11 +3662,11 @@
     <div class="print-contact-footer" style="display:none;">
       <div class="pcf-title">Contact Information</div>
       <div class="pcf-grid">
-        <div class="pcf-block">
+        <div class="pcf-block" style="display:none;">
           <div class="pcf-label">Customer Name</div>
           <div class="pcf-value" id="pcf-custName"></div>
         </div>
-        <div class="pcf-block">
+        <div class="pcf-block" style="display:none;">
           <div class="pcf-label">Customer Phone</div>
           <div class="pcf-value" id="pcf-custPhone"></div>
         </div>
