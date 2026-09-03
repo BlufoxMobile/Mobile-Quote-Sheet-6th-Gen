@@ -5,9 +5,11 @@
 <script src="https://blufoxmobile.github.io/Daily-Sales-Report/data/rep-picker.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Xfinity Mobile Comparison</title>
-<link href="./Xfinity Mobile Comparison_files/css2" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --xfinity-purple: #6713D2;
@@ -2334,6 +2336,37 @@
     flex-shrink: 0;
   }
 
+  /* Flex children default to min-width:auto, so these two columns refused to
+     shrink below their ~394px min-content width. Below ~800px the pair was
+     791px wide inside a narrower card with overflow:hidden, which silently
+     clipped both edges on every phone. Let them shrink, then stack. */
+  .wt-side-by-side > * { min-width: 0; }
+  @media screen and (max-width: 780px) {
+    .wt-side-by-side { flex-direction: column; }
+    .wt-side-by-side .intake-section { width: 100%; }
+    .wt-divider-v { width: 100%; height: 1.5px; align-self: auto; }
+  }
+  .wt-count-btns { flex-wrap: wrap; }
+  .wt-btn-row { flex-wrap: wrap; min-width: 0; justify-content: center; }
+
+  /* Narrow phones: trim the padding that was pushing this block past the
+     viewport, and let the sticky savings bar wrap instead of overhanging. */
+  @media screen and (max-width: 420px) {
+    .wt-side-by-side .intake-section { padding: 18px 10px; }
+  }
+  .stb-stats { flex-wrap: wrap; row-gap: 4px; }
+  @media screen and (max-width: 560px) {
+    .stb-stat { padding: 0 10px; }
+  }
+
+  /* Minimum 44px touch targets on phones/tablets (Apple HIG + Material) */
+  @media (hover: none) and (pointer: coarse) {
+    .wt-count-btn, .intake-reward-btn, .intake-plan-pill,
+    input[type="text"], input[type="number"], input[type="email"], input[type="tel"], select, .btn {
+      min-height: 44px;
+    }
+  }
+
   /* ── DEVICES-ONLY MODE (Customer Declined Mobile Offer) ── */
   .devices-only-banner {
     display: none;
@@ -3868,7 +3901,10 @@
 
 <!-- PDF tearsheet page — only visible when printing -->
 <div class="pdf-page" id="pdfPage">
-  <iframe id="pdfIframe" src="./Xfinity Mobile Comparison_files/saved_resource.html" title="Xfinity Tearsheet"></iframe>
+  <!-- Tearsheet source removed: "./Xfinity Mobile Comparison_files/saved_resource.html"
+     was a dead relative path (404 on every page load). Point src= at a real
+     file in this repo to restore the printed tearsheet page. -->
+  <iframe id="pdfIframe" title="Xfinity Tearsheet" hidden></iframe>
 </div>
 
 <script>
@@ -15873,8 +15909,11 @@ function renderDevicesOnlyQuote() {
       if (coreRight && deviceRightHTML) coreRight.innerHTML += deviceRightHTML;
       if (coreLeft && deviceLeftHTML) coreLeft.innerHTML += deviceLeftHTML;
 
-      // Cap watch/tablet line fees at $35/mo combined
-      totalLineFees = Math.min(totalLineFees, 35);
+      // Cap watch/tablet line fees at $35/mo combined (except NOW Mobile).
+      // The NOW Mobile exemption was missing here while the two other places
+      // that apply this cap both have it, so a NOW Mobile quote with 4+
+      // accessory lines showed two different totals on the same screen.
+      if (intakeSelectedPlan !== 'now_mobile') totalLineFees = Math.min(totalLineFees, 35);
       totalDeviceCost += totalLineFees;
 
       const hpLineCost = getVoiceToXMCost();
@@ -16248,7 +16287,12 @@ function updateTotalWithDevices(planMonthly) {
     const isByod = (row.dataset.deviceName || '') === 'BYOD (Bring Your Own Device)';
     if (!isByod && devicePrice > 0) deviceTotal += (Math.max(0, devicePrice - promoAmt) / 36);
     totalLineFees += lineFee;
-    if (xmcEnabled) deviceTotal += xmcRate;
+    // XMC is included on Mobile Plus / Premium. The device summary table and
+    // the intake savings preview both skip it there; this total charged for it
+    // anyway, inflating the customer-facing bill (and shrinking the savings
+    // banner) by $15-19 per insured line.
+    const isPremiumPlanT = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
+    if (xmcEnabled && !isPremiumPlanT) deviceTotal += xmcRate;
     hasDevice = true;
   });
 
@@ -16281,6 +16325,11 @@ function updateTotalWithDevices(planMonthly) {
 
 // ── DEVICE FINANCING SUMMARY ──
 function buildDeviceSummary(planMonthly, compBill) {
+  // Was missing: every other function that reads isPremiumPlan declares it
+  // locally. Here it was referenced but never declared, so the first row with
+  // XMC enabled threw "isPremiumPlan is not defined" -> buildComparison()
+  // caught it, alerted, and the comparison screen never rendered.
+  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
   const section  = document.getElementById('deviceSummarySection');
   const table    = document.getElementById('deviceSummaryTable');
   const totalBar = document.getElementById('deviceTotalBar');
@@ -17715,7 +17764,7 @@ function buildDeviceRow(lineNum, type) {
       const tradeInEl  = document.getElementById(`${rowId}-trade`);
       const tradeListEl = tradeInEl && tradeInEl.parentNode && tradeInEl.parentNode.querySelector('.df-dropdown-list');
       if (tradeInEl && tradeListEl) {
-        const newBucket = getFilteredTradeIns();
+        const newBucket = getTipsTradeInsForPurchase(row.dataset.deviceName || '');
         // Rebuild the dropdown options against the new bucket
         makeAutocomplete(tradeInEl, tradeListEl, newBucket, (tradeItem) => {
           const promoTag = tradeItem.label ? ` · ${tradeItem.label}` : '';
@@ -17890,7 +17939,10 @@ function recalcRow(row) {
   const deviceName  = row.dataset.deviceName || '';
   const xmcEnabled  = row.dataset.xmcEnabled === 'true';
   const xmcRate     = parseFloat(row.dataset.xmcRate) || 0;
-    const lineNum     = row.dataset.line;
+  // Was missing: the BYOD branch below reads isPremiumPlan, which was never
+  // declared in this function — a BYOD line with XMC checked threw here.
+  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
+  const lineNum     = row.dataset.line;
   const monthlyEl   = document.getElementById(`${row.id}-monthly`);
 
   if (devicePrice === 0 && deviceName !== 'BYOD (Bring Your Own Device)') {
@@ -18030,6 +18082,10 @@ function rebuildWatchRows() {
 // ── INTAKE SAVINGS PREVIEW ──
 // Live estimate shown above "Build Comparison" so reps see potential before presenting
 function updateIntakeSavingsPreview() {
+  // Was missing: isPremiumPlan was read below but never declared here, so the
+  // live savings panel threw a ReferenceError on every recalc once any line
+  // had XMC checked (short-circuit hid it while XMC was off).
+  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
   const panel = document.getElementById('savingsPreviewPanel');
   if (!panel) return;
 
