@@ -3301,13 +3301,33 @@
 /* ── THEM vs XFINITY cards ── */
 #comparisonScreen .xf-cmp{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(8px,2.2cqw,22px);align-items:stretch;padding-top:14px}
 /* "VS" medallion between the two cards (wide enough sheets only) */
-#comparisonScreen .xf-sec-cmp .xf-cmp::after{content:'VS';position:absolute;z-index:5;left:50%;top:calc(14px + 48px + clamp(78px,11cqw,118px));width:42px;height:42px;margin-left:-21px;
+#comparisonScreen .xf-sec-cmp .xf-cmp > .xf-vs{position:absolute;z-index:5;left:50%;top:calc(14px + 48px + clamp(78px,11cqw,118px));width:42px;height:42px;margin-left:-21px;
   border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--xf-deep2),var(--xf-deep));color:#fff;
   font-family:var(--xf-disp);font-size:12px;font-weight:900;letter-spacing:.06em;box-shadow:0 0 0 3px #fff,0 0 0 5px var(--xf-gold),0 8px 20px rgba(24,0,84,.3)}
-@container xf (max-width:600px){ #comparisonScreen .xf-sec-cmp .xf-cmp::after{display:none} }
+@container xf (max-width:600px){ #comparisonScreen .xf-sec-cmp .xf-cmp > .xf-vs{display:none} }
 #comparisonScreen .xf-card{position:relative;display:flex;flex-direction:column;min-width:0;background:var(--xf-white);border-radius:20px;
   border:1.5px solid var(--xf-rowline);box-shadow:var(--xf-sh2);container:xfcard / inline-size;animation:xfUp .55s cubic-bezier(.22,.9,.3,1) both}
 #comparisonScreen .xf-cmp > .xf-card:nth-child(2){animation-delay:.08s}
+/* Savings hero lives with the cards (Jeff, 2026-09-27): stacked under them in portrait,
+   and the THIRD column beside Current Provider + Xfinity Mobile on a landscape iPad so
+   all three boxes fit on one screen. */
+#comparisonScreen .xf-cmp-row{position:relative}
+#comparisonScreen .xf-cmp-row > .xf-savings{margin:clamp(14px,2.4cqw,22px) 0 0}
+@media (orientation:landscape) and (min-width:1000px){
+  /* Screen only: the PDF clone (.xf-pdf) keeps the stacked page layout. */
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:clamp(10px,1.6cqw,20px);align-items:stretch}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row:has(> .xf-savings.xf-off){grid-template-columns:minmax(0,1fr)}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings{margin:14px 0 0;display:flex;flex-direction:column;justify-content:center;
+    padding:22px 16px 22px;border-radius:22px}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings.xf-off{display:none}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-in{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-num{font-size:clamp(52px,21cqw,92px);line-height:.95;justify-content:center;
+    margin:0;padding:0;border:0}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-line{font-size:14px;line-height:1.4;max-width:24ch;margin:0 auto;text-align:center;align-self:center}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-eye{font-size:10.5px;letter-spacing:.14em;justify-content:center;flex-wrap:wrap}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-chip{font-size:12px;max-width:100%;white-space:normal;justify-content:center;
+    align-self:center;margin:2px auto 0;text-align:center}
+}
 @keyframes xfUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 #comparisonScreen .xf-card-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;min-height:48px;padding:10px 12px;
   border-radius:18.5px 18.5px 0 0;color:#fff;font-family:var(--xf-disp);font-size:clamp(9.5px,3.1cqw,12px);font-weight:800;letter-spacing:.14em;
@@ -3605,7 +3625,7 @@ body.devices-only #comparisonScreen .xf-tables{grid-template-columns:minmax(0,1f
   #comparisonScreen.xf-flyer .xf-table tr,#comparisonScreen.xf-flyer .xf-dev-total,#comparisonScreen.xf-flyer .xf-ribbon{break-inside:avoid;page-break-inside:avoid}
   #comparisonScreen.xf-flyer .xf-sec-head{break-after:avoid;page-break-after:avoid}
   #comparisonScreen.xf-flyer .xf-cmp{break-inside:avoid;page-break-inside:avoid}
-  #comparisonScreen.xf-flyer .xf-cmp::after{display:none!important}
+  #comparisonScreen.xf-flyer .xf-cmp > .xf-vs{display:none!important}
   /* the legacy print sheet squeezes every .promo-banner-list li to 8.5px with no padding */
   #comparisonScreen.xf-flyer .promo-banner-list li{font-size:12.5px!important;line-height:1.4!important}
   #comparisonScreen.xf-flyer .promo-banner-list li.pg-chip{padding:11px 12px 10px 16px!important}
@@ -4207,6 +4227,7 @@ window.addEventListener('load', function () { setTimeout(function () { _loadPdfL
         <div class="xf-eye">Side by side</div>
         <h2 class="xf-h2">Your monthly bill, compared</h2>
       </div>
+      <div class="xf-cmp-row">
       <div class="xf-cmp">
 
         <!-- LEFT: Competitor -->
@@ -4255,20 +4276,22 @@ window.addEventListener('load', function () { setTimeout(function () { _loadPdfL
           </div>
         </div>
 
+        <span class="xf-vs" aria-hidden="true">VS</span>
       </div>
+      <!-- YEARLY SAVINGS HERO — directly below the side-by-side in portrait; the THIRD box beside
+           Current Provider + Xfinity Mobile on a landscape iPad (Jeff, 2026-09-27). Mirrors only (painted by xfFlyer from the real ids).
+           Hidden while savings are not shown (devices-only mode) or are $0 / negative. -->
+      <section class="xf-savings xf-off" aria-label="Your savings">
+        <div class="xf-sav-in">
+          <div class="xf-sav-eye"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/></svg><span>Your <span class="xf-sav-tot">total </span><span class="xf-sav-yr">first-year</span> savings</span><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/></svg></div>
+          <div class="xf-sav-num xf-money" data-xf-src="yearlySavings" data-xf-count></div>
+          <p class="xf-sav-line">That’s <b class="xf-money" data-xf-src="monthlySavings"></b> less every month than you pay today.</p>
+          <div class="xf-sav-chip"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7.5 9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg><span>Includes <b class="xf-money" data-xf-src="coreYearSavingsDisplay"></b> a year on your home services</span></div>
+        </div>
+      </section>
+      </div><!-- /xf-cmp-row -->
       <div class="xfinity-disclaimer">* Estimate only. Taxes &amp; fees not included.</div>
     </div>
-
-    <!-- YEARLY SAVINGS HERO — sits directly below the side-by-side (Jeff, 2026-09-24). Mirrors only (painted by xfFlyer from the real ids).
-         Hidden while savings are not shown (devices-only mode) or are $0 / negative. -->
-    <section class="xf-savings xf-off" aria-label="Your savings">
-      <div class="xf-sav-in">
-        <div class="xf-sav-eye"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/></svg><span>Your <span class="xf-sav-tot">total </span><span class="xf-sav-yr">first-year</span> savings</span><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/></svg></div>
-        <div class="xf-sav-num xf-money" data-xf-src="yearlySavings" data-xf-count></div>
-        <p class="xf-sav-line">That’s <b class="xf-money" data-xf-src="monthlySavings"></b> less every month than you pay today.</p>
-        <div class="xf-sav-chip"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7.5 9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg><span>Includes <b class="xf-money" data-xf-src="coreYearSavingsDisplay"></b> a year on your home services</span></div>
-      </div>
-    </section>
 
     <!-- Hidden plan banner for JS compat (not visible) -->
     <div style="display:none;">
