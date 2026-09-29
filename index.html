@@ -4554,28 +4554,29 @@ const PHONES_FOR_SALE = [
 ];
 
 // ═══════════════════════════════════════════════════════════════
-// TIPS PROMO DATA — synced from xfinity-tips-promotions 2026-09-12
+// TIPS PROMO DATA — synced from xfinity-tips-promotions 2026-09-12,
+// device lists refreshed from Celestial 2026-09-28
 // ───────────────────────────────────────────────────────────────
-// Four active buckets, keyed to the NEW phone being purchased. All four
-// are NEW LINE ONLY on this sheet. (CD871 is dual line-type on the card,
-// so Apple TIPs also renders on the Upgrade sheet from its own copy —
-// per Jeff 2026-09-12. Nothing on THIS sheet quotes an upgrade.)
+// Three active buckets, keyed to the NEW phone being purchased. All three
+// are NEW LINE ONLY on this sheet (Jeff 2026-09-28: new-line promotions live
+// here, upgrades on the Upgrade sheet).
 //   tips_apple_1300   → select Apple            (up to $1,300, 9/12–10/8, CD871)
 //   tips_gm_830       → select Google/Motorola  (up to $830, 9/12–10/8, CD872)
 //   tips_samsung_1200 → select Samsung          (up to $1,200, 8/26–10/8, CD865)
-//   tips_pixel11_1300 → Google Pixel 11 Series  (up to $1,300, 8/12–9/24, CD859)
+// 2026-09-28: the Pixel 11 bucket (CD859, up to $1,300) ENDED 9/24 and was
+// deleted. CD872 was re-issued 9/25 WITH the Pixel 11 series on it, so a
+// Pixel 11 now routes to tips_gm_830 (up to $830). CD872 also DROPPED the
+// Pixel 9, Pixel 10 Pro Fold and moto razr - 2025 — those get no TIPs bucket.
 // 2026-09-12 CYCLE: the old combined Apple/Google/Motorola bucket expired
 // 9/10 and was SPLIT — Apple got its own card at $1,300 (CD871) and Google/
-// Motorola dropped to $830 (CD872), a $270 ceiling cut. The Pixel 11
-// bucket was RENAMED to tips_pixel11_1300 (same card, same values —
-// only the tag and a few trade-in model spellings changed).
+// Motorola dropped to $830 (CD872), a $270 ceiling cut.
 // Apple and Samsung share ONE 139-device trade-in roster with IDENTICAL
 // tier assignments (413/413 rows verified) — only the ladder dollars
 // differ. Google/Motorola uses that same roster but differs in 12
 // Good-condition rows, and on those 12 the $830 deal pays MORE than the
-// $1,300 Apple deal. Pixel 11 is the odd one out: its own 170-device roster.
-// Floors differ: Samsung $550, the other three $450.
-// Motorola razr fold is BACK on a TIPS list (CD872, up to $830).
+// $1,300 Apple deal. The trade-in PDFs are unchanged as of 2026-09-28.
+// Floors differ: Samsung $550, the other two $450.
+// Motorola razr fold is on a TIPS list (CD872, up to $830).
 // ═══════════════════════════════════════════════════════════════
 const TIPS_PROMOS = {
   "tips_apple_1300": {
@@ -9620,17 +9621,18 @@ const TIPS_PROMOS = {
     "line_type": "new_line",
     "deal_card": "CD872",
     "eligible_new_phones": [
-      "Pixel 9",
       "Pixel 10",
       "Pixel 10 Pro",
-      "Pixel 10 Pro Fold",
       "Pixel 10 Pro XL",
-      "moto razr - 2025",
+      "Pixel 11",
+      "Pixel 11 Pro",
+      "Pixel 11 Pro XL",
+      "Pixel 11 Pro Fold",
       "moto razr - 2026",
       "Motorola razr fold"
     ],
     "applies_to_new_purchase": [
-      "Pixel 9, Pixel 10, Pixel 10 Pro, Pixel 10 Pro Fold, Pixel 10 Pro XL, moto razr - 2025, moto razr - 2026, Motorola razr fold"
+      "Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr - 2026, Motorola razr fold"
     ],
     "delivery": "36-month DPP bill credits",
     "tier_ladder": {
@@ -12122,3098 +12124,6 @@ const TIPS_PROMOS = {
         "value": 450
       }
     ]
-  },
-  "tips_pixel11_1300": {
-    "promo_tag": "tips_pixel11_1300",
-    "promo_title": "Up to $1,300 off Google Pixel 11 Series",
-    "max_value": 1300,
-    "timing": {
-      "start": "2026-08-12",
-      "end": "2026-09-24"
-    },
-    "line_type": "new_line",
-    "deal_card": "CD859",
-    "eligible_new_phones": [
-      "Pixel 11",
-      "Pixel 11 Pro",
-      "Pixel 11 Pro XL",
-      "Pixel 11 Pro Fold"
-    ],
-    "applies_to_new_purchase": [
-      "Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold"
-    ],
-    "delivery": "36-month DPP bill credits",
-    "tier_ladder": {
-      "1": 1300,
-      "2": 700,
-      "3": 600,
-      "4": 500,
-      "5": 450
-    },
-    "floor_value": 450,
-    "device_count": 170,
-    "trade_ins": [
-      {
-        "model": "Apple iPhone 11",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 11",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 11",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 11 Pro",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 11 Pro",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 11 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 11 Pro Max",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 11 Pro Max",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 11 Pro Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 12",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12 Mini",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 12 Mini",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12 Mini",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12 Pro",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 12 Pro",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12 Pro Max",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 12 Pro Max",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12 Pro Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 13",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 13",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 13",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 13 Mini",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 13 Mini",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 13 Mini",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 13 Pro",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 13 Pro",
-        "condition": "Fair",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 13 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 13 Pro Max",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 13 Pro Max",
-        "condition": "Fair",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 13 Pro Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 14",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 PLUS",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 14 PLUS",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 PLUS",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 PRO",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 14 PRO",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 14 PRO",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 PRO MAX",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 14 PRO MAX",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 14 PRO MAX",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 15",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 15",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 15",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 15 PLUS",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 15 PLUS",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 15 PLUS",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 15 PRO",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 15 PRO",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 15 PRO",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 15 PRO MAX",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 15 PRO MAX",
-        "condition": "Fair",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 15 PRO MAX",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 16",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 16",
-        "condition": "Fair",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 16",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 16 Plus",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 16 Plus",
-        "condition": "Fair",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 16 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 16 Pro",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 16 Pro",
-        "condition": "Fair",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 16 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 16 Pro Max",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 16 Pro Max",
-        "condition": "Fair",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 16 Pro Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 16e",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 16e",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 16e",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 17",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 17",
-        "condition": "Fair",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 17",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 17 Pro",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 17 Pro",
-        "condition": "Fair",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 17 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 17 Pro Max",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 17 Pro Max",
-        "condition": "Fair",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone 17 Pro Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 17e",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone 17e",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 17e",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 7",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 7",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 7",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 7 PLUS",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 7 PLUS",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 7 PLUS",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8 PLUS",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8 PLUS",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8 PLUS",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone Air",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Apple iPhone Air",
-        "condition": "Fair",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Apple iPhone Air",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone SE 2",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone SE 2",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone SE 2",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone SE 3",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone SE 3",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone SE 3",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone X",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone X",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone X",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XR",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XR",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XR",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS Max",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS Max",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 10 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 10 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Google Pixel 10 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 10 Pro 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 10 Pro 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Google Pixel 10 Pro 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 10 Pro Fold 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 10 Pro Fold 5G",
-        "condition": "Fair",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 10 Pro Fold 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 10 Pro XL 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 10 Pro XL 5G",
-        "condition": "Fair",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Google Pixel 10 Pro XL 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 10a 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 10a 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Google Pixel 10a 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4 XL",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4 XL",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4 XL",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4A",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4A",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4A",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4A 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4A 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4A 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 5 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 5 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 5 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 5A 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 5A 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 5A 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 6",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 6",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 6",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 6 Pro",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 6 Pro",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 6 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 6A",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 6A",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 6A",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 7 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 7 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 7 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 7 Pro 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 7 Pro 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 7 Pro 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 7A 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 7A 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 7A 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 8 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 8 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 8 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 8 Pro 5G",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Google Pixel 8 Pro 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 8 Pro 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 8A 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 8A 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 8A 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 9 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 9 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 9 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 9 Pro 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 9 Pro 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Google Pixel 9 Pro 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 9 Pro Fold 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 9 Pro Fold 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Google Pixel 9 Pro Fold 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 9 Pro XL 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Google Pixel 9 Pro XL 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Google Pixel 9 Pro XL 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 9A 5G",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Google Pixel 9A 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 9A 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "LGIC LG V60 ThinQ 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "LGIC LG V60 ThinQ 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "LGIC LG V60 ThinQ 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "LGIC Stylo 6",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "LGIC Stylo 6",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "LGIC Stylo 6",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "LGIC V50 ThinQ 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "LGIC V50 ThinQ 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "LGIC V50 ThinQ 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Edge 70 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Edge 70 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Edge 70 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto Edge 5G 2025",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto Edge 5G 2025",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto Edge 5G 2025",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto G 5G 2026",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto G 5G 2026",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto G 5G 2026",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto G Play 5G 2026",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto G Play 5G 2026",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto G Play 5G 2026",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto G Stylus 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto G Stylus 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto G Stylus 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto Razr",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto Razr",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto Razr",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto Razr 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto Razr 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto Razr 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto g play 2023",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto g play 2023",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Moto g play 2023",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola RAZR Ultra 5G 2025",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Motorola RAZR Ultra 5G 2025",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola RAZR Ultra 5G 2025",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G 2023",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G 2023",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G 2023",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G 2024",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G 2024",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G 2024",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G 2025",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G 2025",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G 2025",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr Plus 5G 2023",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr Plus 5G 2023",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr Plus 5G 2023",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8 PRO 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8 PRO 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8 PRO 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8T",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8T",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8T",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8T PLUS 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8T PLUS 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 8T PLUS 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 PRO 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 PRO 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 PRO 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A13 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A13 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A13 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A14 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A14 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A14 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A16 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A16 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A16 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A17 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A17 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A17 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A22",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A22",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A22",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A25 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A25 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A25 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A26 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A26 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A26 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A32 4G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A32 4G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A32 4G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A32 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A32 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A32 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A35 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A35 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A35 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A36 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A36 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A36 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A37 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A37 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A37 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A42 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A42 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A42 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A50",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A50",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A50",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A51",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A51",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A51",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A51 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A51 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A51 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A52 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A52 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A52 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A53 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A53 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A53 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A54 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A54 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A54 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A70",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A70",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A70",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71 5G UW",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71 5G UW",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71 5G UW",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A72 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A72 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A72 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Fold 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Fold 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Fold 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10 Lite",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10 Lite",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10 Lite",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10 Plus 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10 Plus 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10 Plus 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 4G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 4G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 4G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 Ultra 4G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 Ultra 4G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 Ultra 4G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 Ultra 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 Ultra 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 20 Ultra 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 8",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 8",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 8",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 9",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 9",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 9",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Lite",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Lite",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Lite",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Plus",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10E",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10E",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10E",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Fan Edition 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Fan Edition 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Fan Edition 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Plus",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Plus 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Plus 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Plus 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Ultra 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Ultra 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Ultra 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 Fan Edition 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 Fan Edition 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 Fan Edition 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 Plus 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 Plus 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 Plus 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 Ultra 5G",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Samsung Galaxy S21 Ultra 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S21 Ultra 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S22 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S22 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S22 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S22 Plus 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S22 Plus 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S22 Plus 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S22 Ultra 5G",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S22 Ultra 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S22 Ultra 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S23 5G",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S23 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S23 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S23 Fan Edition 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S23 Fan Edition 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S23 Fan Edition 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S23 Plus 5G",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Samsung Galaxy S23 Plus 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S23 Plus 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S23 Ultra 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S23 Ultra 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S23 Ultra 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S24 5G",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Samsung Galaxy S24 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S24 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S24 Fan Edition 5G",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S24 Fan Edition 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S24 Fan Edition 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S24 Plus 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S24 Plus 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S24 Plus 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S24 Ultra 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S24 Ultra 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S24 Ultra 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S25 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S25 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S25 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S25 Edge 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S25 Edge 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S25 Edge 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S25 Fan Edition 5G",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S25 Fan Edition 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S25 Fan Edition 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S25 Plus 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S25 Plus 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy S25 Plus 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S25 Ultra 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S25 Ultra 5G",
-        "condition": "Fair",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S25 Ultra 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S26 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S26 5G",
-        "condition": "Fair",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Samsung Galaxy S26 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S26 Plus 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S26 Plus 5G",
-        "condition": "Fair",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S26 Plus 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S26 Ultra 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S26 Ultra 5G",
-        "condition": "Fair",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy S26 Ultra 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S8",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S8",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S8",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S8 PLUS",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S8 PLUS",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S8 PLUS",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S9",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S9",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S9",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S9 Plus",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S9 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S9 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 4 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 4 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 4 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 4 Bespoke",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 4 Bespoke",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 4 Bespoke",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 5 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 5 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 5 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 6 5G",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 6 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 6 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 7 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 7 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 7 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 7 FE 5G",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 7 FE 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 7 FE 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 2 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 2 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 2 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 3 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 3 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 3 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 4 5G",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 4 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 4 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 5 5G",
-        "condition": "Good",
-        "tier": 2,
-        "value": 700
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 5 5G",
-        "condition": "Fair",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 5 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 6 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 6 5G",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 6 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 7 5G",
-        "condition": "Good",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 7 5G",
-        "condition": "Fair",
-        "tier": 1,
-        "value": 1300
-      },
-      {
-        "model": "Samsung Galaxy Z Fold 7 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      }
-    ]
   }
 };
 // ── APPLE DEAL MODELS — 2026-09-12 cycle ───────────────────
@@ -15261,6 +12171,7 @@ function canonDevice(name) {
     .trim();
   if (n === 'razr fold')    n = 'razr fold - 2026';   // only one fold SKU exists
   if (n === 'pixel 10 xl')  n = 'pixel 10 pro xl';    // two names, one handset
+  if (n === 'pixel 11 xl')  n = 'pixel 11 pro xl';    // CD869 (9/25) writes "Pixel 11 XL" — there is no such handset
   if (n === 'edge')         n = 'edge - 2025';        // the unyeared edge IS the 2025 model
   return n;
 }
@@ -15271,18 +12182,17 @@ function canonDevice(name) {
 // and both widen together.
 const DEAL_ELIGIBLE_PHONES = {
   tips_apple_1300:    APPLE_DEAL_MODELS,                                   // CD871 — 9 SKUs
-  tips_gm_830:        TIPS_PROMOS.tips_gm_830.eligible_new_phones,         // CD872 — 8
+  tips_gm_830:        TIPS_PROMOS.tips_gm_830.eligible_new_phones,         // CD872 — 9 (re-issued 9/25 with the Pixel 11 series)
   tips_samsung_1200:  TIPS_PROMOS.tips_samsung_1200.eligible_new_phones,   // CD865 — 10
-  tips_pixel11_1300:  TIPS_PROMOS.tips_pixel11_1300.eligible_new_phones,   // CD859 — 4
   apple_400:          APPLE_DEAL_MODELS,                                   // CD868 — the same nine
-  pixel11_600:        TIPS_PROMOS.tips_pixel11_1300.eligible_new_phones,   // CD858 — the same four
   samsung_500:        TIPS_PROMOS.tips_samsung_1200.eligible_new_phones
                         .concat(["Galaxy A57"]),                  // CD862 — the 10 above PLUS the Galaxy A57
-  gm_400:             [                                                    // CD869 — 15
-                        "Pixel 9", "Pixel 9a", "Pixel 10", "Pixel 10 Pro",
-                        "Pixel 10 Pro XL", "Pixel 10 Pro Fold", "Pixel 10a",
-                        "moto g stylus – 2025", "motorola edge – 2025",
-                        "moto g – 2026", "moto g play – 2026", "moto razr – 2025",
+  gm_400:             [                                                    // CD869 — 15, re-issued 9/25:
+                        "Pixel 10", "Pixel 10 Pro", "Pixel 10 Pro XL",     // + the Pixel 11 series;
+                        "Pixel 10a", "Pixel 11", "Pixel 11 Pro",           // - Pixel 9, Pixel 9a,
+                        "Pixel 11 Pro XL", "Pixel 11 Pro Fold",            //   Pixel 10 Pro Fold,
+                        "moto g stylus – 2025", "motorola edge – 2025",    //   moto razr – 2025
+                        "moto g – 2026", "moto g play – 2026",
                         "moto razr – 2026", "Motorola edge – 2026",
                         "Motorola razr fold"
                       ],
@@ -15301,22 +12211,19 @@ function isDeviceOnDeal(tag, deviceName) {
 
 // Which TIPS promo applies for the new phone being purchased?
 // Routing is keyed on the NEW phone bought, not the trade-in device
-// (synced 2026-09-12 from xfinity-mobile-promotions). Brand picks the bucket,
-// then the bucket's own card list decides whether there is a deal at all:
-//   • Pixel 11 Series              → tips_pixel11_1300 ($1,300, CD859)
+// (synced from xfinity-mobile-promotions; lists refreshed 2026-09-28). Brand
+// picks the bucket, then the bucket's own card list decides whether there is
+// a deal at all:
 //   • Apple                        → tips_apple_1300   ($1,300, CD871)
 //   • Any Samsung                  → tips_samsung_1200 ($1,200, CD865)
-//   • Other Google/Motorola, incl. → tips_gm_830       ($830, CD872)
-//     Motorola razr fold
+//   • Google/Motorola, incl. the   → tips_gm_830       ($830, CD872)
+//     Pixel 11 series (since 9/25)
+//     and the Motorola razr fold
 //   • not on that card's list      → null (no bucket, no trade-in rows, $0)
 function getTipsPromoForNewPhone(deviceName) {
   const name = (deviceName || '').toLowerCase();
-  // 2026-09-12: the razr fold is BACK on a TIPS list (CD872, up to $830),
-  // so the old "fold has no bucket" early-return is GONE — the fold now
-  // falls through to tips_gm_830 with the rest of Google/Motorola.
-  if (/pixel\s*11/.test(name)) {
-    return isDeviceOnDeal('tips_pixel11_1300', deviceName) ? TIPS_PROMOS.tips_pixel11_1300 : null;
-  }
+  // 2026-09-28: the separate Pixel 11 bucket (CD859) ended 9/24 and CD872 now
+  // lists the Pixel 11 series, so a Pixel 11 falls through to tips_gm_830.
   if (name.includes('iphone') || name.includes('apple')) {
     return isDeviceOnDeal('tips_apple_1300', deviceName) ? TIPS_PROMOS.tips_apple_1300 : null;
   }
@@ -15491,41 +12398,20 @@ function getTabletDataset() {
 // ══════════════════════════════════════════════════════════════
 const PROMO_MATRIX = {
   "cycle": {
-    "label": "DEALS18 / DEALS94 'Mobile deals' \u2014 cycle verified 2026-09-12",
-    "refreshed": "2026-09-12",
-    "source": "Comcast Celestial Customer Deals page \u2014 all 20 live deal cards opened individually 2026-09-12 (DEALS18 modified 09/11/2026), plus the DEALS94 'TIPs eligible device trade-in lists' article (modified 09/10/2026) and all four trade-in PDFs.",
+    "label": "DEALS18 / DEALS94 'Mobile deals' \u2014 refreshed 2026-09-28",
+    "refreshed": "2026-09-28",
+    "source": "Comcast Celestial Customer Deals page \u2014 DEALS18 'Mobile deals' (modified 09/25/2026) and every live deal card re-opened 2026-09-28 (CD872/CD869 modified 9/25; CD868 9/21; CD824/CD865/CD862/CD790 9/18), plus DEALS94 (modified 09/17/2026). The Apple, Google/Motorola and Samsung trade-in PDFs are unchanged since 9/9.",
     "verified_deal_cards": [
       "CD790",
       "CD824",
       "CD848",
-      "CD858",
-      "CD859",
       "CD862",
-      "CD863",
-      "CD864",
       "CD865",
-      "CD866",
-      "CD867",
       "CD868",
       "CD869",
-      "CD870",
       "CD871",
       "CD872",
-      "CD873",
       "DEALS122"
-    ],
-    "whats_new_since_2026_08_30": [
-      "THE BOARD TURNED OVER ALMOST COMPLETELY ON 9/12. The entire Apple / Google / Motorola structure was torn up and rebuilt.",
-      "The old combined Apple+Google+Motorola TIPs bucket (up to $1,100) expired 9/10 and was SPLIT into two cards with different caps: Apple $1,300 (CD871) and Google/Motorola $830 (CD872) \u2014 a $270 ceiling cut on Google/Motorola.",
-      "The old combined flat $400 non-Samsung deal expired 9/10 and was SPLIT into $400 Apple (CD868) and $400 Google/Motorola (CD869), with different line eligibility.",
-      "The Pixel 11 bucket was RENAMED to tips_pixel11_1300. Same card (CD859), same $1,300 cap, same 170-device table \u2014 only the tag changed, plus a few trade-in model spellings normalised.",
-      "CD871 is DUAL LINE-TYPE: it covers new activations AND existing-line/NDEL upgrades. Per Jeff it renders on BOTH sheets; on this sheet it is the new-line entry.",
-      "CD868 is also dual line-type (port required on a new line only). Same treatment.",
-      "Both Diamond iPhone 17 Pro deals (CD854, CD855) expired 9/1/26. smartwatch_300_diamond is now the ONLY Diamond-gated promo on the board.",
-      "All four Samsung deals were extended to 10/8/26; their legal disclaimers still read 9/10/26 and are stale.",
-      "waived_activation extended to 10/30/26 per DEALS18; the card itself still reads 9/21.",
-      "Motorola razr fold is BACK on a TIPs list (CD872, up to $830) after having no bucket at all under the 8/12\u20139/10 board.",
-      "Apple and Samsung trade-in tier assignments are IDENTICAL across all 413 rows; Google/Motorola differs in 12 Good-condition rows and pays MORE on all 12."
     ],
     "note": "Diamond-only promos carry diamond_only:true and must be gated to Diamond membership tier. The two in-store accessory offers (accessory_30_off, employee_merch_33) are retail-only rep reference and belong on neither quote sheet.",
     "cbm_excluded": [
@@ -15533,6 +12419,8 @@ const PROMO_MATRIX = {
       "New Comcast Business Mobile customers get $500 for two lines + $250 per additional line up to $2,500 \u2014 7/12\u20139/13."
     ],
     "retired_this_cycle": [
+      "tips_pixel11_1300 (CD859) \u2014 ended 9/24. The Pixel 11 series now rides tips_gm_830 (CD872, up to $830).",
+      "flat_pixel11_600 (CD858) \u2014 ended 9/24. The Pixel 11 series now rides flat_gm_400 (CD869, $400 with a port).",
       "The combined Apple/Google/Motorola TIPs bucket (up to $1,100) \u2014 ended 9/10. Split into CD871 + CD872.",
       "The combined flat $400 non-Samsung deal \u2014 ended 9/10. Split into CD868 + CD869.",
       "plus_up_nonsam_200 (CD839) \u2014 ended 9/10. Split into plus_up_apple_400 (CD873) + plus_up_gm_200 (CD870). Upgrade sheet.",
@@ -15542,13 +12430,23 @@ const PROMO_MATRIX = {
       "The moto razr fold 'On Us' $1,699.99 deal \u2014 ended 8/25. The fold now sits inside CD872 at up to $830.",
       "ipad_a16_250off \u2014 ended 8/25. No tablet device deal is live.",
       "prepaid_mc_200 \u2014 ended 8/21. No value-add card offer is live."
+    ],
+    "whats_new_since_2026_09_12": [
+      "The Pixel 11 deals ENDED 9/24: TIPs up to $1,300 (CD859) and $600 off, no trade (CD858). Both are gone from this sheet.",
+      "The Pixel 11 series MOVED onto the Google/Motorola cards, both re-issued 9/25: TIPs up to $830 (CD872) and $400 off with a port, no trade (CD869). A Pixel 11 new line now quotes those.",
+      "Those same two cards DROPPED Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025. CD872 is now 9 phones (Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr - 2026, Motorola razr fold); CD869 is 15 phones. A dropped phone gets no Google/Motorola deal.",
+      "CD869 writes 'Pixel 11 XL' \u2014 there is no such handset; the sheet folds it into Pixel 11 Pro XL.",
+      "flat_apple_400 port question settled: CD868's legal disclaimer (modified 9/21) requires a number transfer on a new Mobile Plus line. On this sheet (new lines only) the port is required, full stop.",
+      "Diamond $300 smartwatch extended to 10/30 (was 9/30) \u2014 CD824 modified 9/18, watch list unchanged.",
+      "Unchanged: Apple TIPs up to $1,300 (CD871), Samsung TIPs up to $1,200 (CD865) and $500 no-trade (CD862), all to 10/8; moto g stylus 2026 'On Us' (CD848) to 9/30; waived activation to 10/30; free line always on.",
+      "Jeff, 2026-09-28: this sheet carries NEW-LINE promotions only. The Apple cards that also allow an upgrade (CD871, CD868) are written here for the new-line path only; upgrades live on the Upgrade sheet."
     ]
   },
   "sheet_routing": {
-    "mobile_6th_gen": "New-line promotions. 12 active: tips_apple_1300, tips_gm_830, tips_samsung_1200, tips_pixel11_1300, flat_apple_400, flat_gm_400, flat_samsung_500, flat_pixel11_600, moto_gstylus_on_us, smartwatch_300_diamond (DIAMOND), waived_activation, free_line.",
-    "upgrade": "Existing-line upgrade promotions. 9 active: CD871 tips_apple_1300 \u21c4, CD868 flat_apple_400 \u21c4, plus_up_apple_400, plus_up_gm_200, plus_up_samsung_450, anytime_apple_400, anytime_gm_200, anytime_samsung_450, smartwatch_300_diamond \u21c4 (DIAMOND). Built from the Upgrade-Quote-Sheet repo, not this one.",
-    "three_promos_on_both_sheets": "The old 'no promo is valid on both sheets' rule is DEAD as of 2026-09-12. tips_apple_1300 (CD871) and flat_apple_400 (CD868) are dual line-type on their cards; smartwatch_300_diamond always needed a NEW watch line, which either sheet can add. On THIS sheet all three are new-line entries \u2014 the Upgrade sheet carries its own copies. Any logic that treats the sheet as an exclusive filter drops the two highest-value Apple offers off the Upgrade sheet.",
-    "diamond_split": "smartwatch_300_diamond needs a NEW watch line, so it renders on the 6th Gen sheet AND on the Upgrade sheet whenever a watch line is on the quote. It is the only Diamond promo left."
+    "mobile_6th_gen": "NEW-LINE promotions only (Jeff, 2026-09-28). 10 active: tips_apple_1300, tips_gm_830, tips_samsung_1200, flat_apple_400, flat_gm_400, flat_samsung_500, moto_gstylus_on_us (ends 9/30), smartwatch_300_diamond (DIAMOND, watch promos are on both sheets), waived_activation, free_line.",
+    "upgrade": "Existing-line upgrade promotions only, built from the Upgrade-Quote-Sheet repo: tips_apple_1300, Apple Plus Up and Anytime Upgrade ($400 through 9/28, $200 from 9/29), plus_up_gm_200, anytime_gm_200, plus_up_samsung_450, anytime_samsung_450, smartwatch_300_diamond.",
+    "diamond_split": "smartwatch_300_diamond needs a NEW watch line, so it renders on this sheet AND on the Upgrade sheet whenever a watch line is on the quote. It is the only Diamond promo, extended to 10/30.",
+    "dual_cards": "tips_apple_1300 (CD871) and flat_apple_400 (CD868) are valid on a new line AND an upgrade. Each sheet carries its own copy written for its own line type; this copy covers the new-line path only."
   },
   "plan_eligibility_values": {
     "plus_or_premium_unl": "Mobile Plus or Premium Unlimited (Unlimited Premium Flex / Pro on CBM). Mobile Select and NOW do NOT qualify.",
@@ -15557,17 +12455,17 @@ const PROMO_MATRIX = {
     "smartwatch_plan_diamond": "Smartwatch plan on a new watch line; Diamond members only.",
     "tablet_plan": "Tablet data plan on a new tablet line. NO tablet deal is live this cycle."
   },
-  "diamond_note": "Exactly ONE Diamond-gated promo this cycle: smartwatch_300_diamond (CD824, new watch line, ends 9/30/26). Both Diamond iPhone 17 Pro deals expired 9/1/26, so the old CD854 XM360 promotion-weighting note is obsolete. Surface the watch deal ONLY when the customer's membership tier is Diamond.",
+  "diamond_note": "Exactly ONE Diamond-gated promo: smartwatch_300_diamond (CD824, new watch line, extended to 10/30/26). Surface it ONLY when the customer's membership tier is Diamond.",
   "routing_notes": {
-    "tips_bucket_by_new_phone": "Pixel 11 -> tips_pixel11_1300; Apple (ONLY the nine APPLE_DEAL_MODELS SKUs) -> tips_apple_1300; Samsung -> tips_samsung_1200; every other Google or Motorola, INCLUDING Motorola razr fold -> tips_gm_830.",
+    "tips_bucket_by_new_phone": "Apple (ONLY the nine APPLE_DEAL_MODELS SKUs) -> tips_apple_1300; Samsung -> tips_samsung_1200; Google/Motorola, INCLUDING the Pixel 11 series (since 9/25) and the Motorola razr fold -> tips_gm_830.",
     "apple_deal_models": "All four Apple deals (CD871, CD873, CD867, CD868) list the SAME nine purchase SKUs: iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max. iPhone 15 Plus / 15 Pro / 15 Pro Max / 16 Plus / 16e are absent and get $0. The sheet holds this in one constant, APPLE_DEAL_MODELS, so the deal desk can widen it in one edit.",
     "razr_fold": "BACK ON A TIPS LIST. Motorola razr fold sits inside tips_gm_830 at up to $830 this cycle. Its flat fallback is CD869 ($400, new line + port).",
-    "gm_tips_list_is_short": "Only 8 phones are on CD872: Pixel 9, Pixel 10, Pixel 10 Pro, Pixel 10 Pro Fold, Pixel 10 Pro XL, moto razr - 2025, moto razr - 2026, Motorola razr fold. Pixel 9a, Pixel 10a, the whole Pixel 11 series, every moto g and both motorola edges are NOT on it. A moto g stylus - 2026 takes CD848 ($499.99 off, nets to $0), NOT the $400 flat deal.",
+    "gm_tips_list_is_short": "Only 9 phones are on CD872 (re-issued 9/25): Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr - 2026, Motorola razr fold. Pixel 9, Pixel 9a, Pixel 10a, Pixel 10 Pro Fold, moto razr - 2025, every moto g and both motorola edges are NOT on it. A moto g stylus - 2026 takes CD848 ($499.99 off, nets to $0), NOT the $400 flat deal.",
     "samsung_upgrade_path": "Samsung TIPs is new-line only. An existing-line Samsung upgrade routes to plus_up_samsung_450 (with trade) or anytime_samsung_450 (no trade) ONLY.",
     "samsung_tier_ladder_warning": "The Samsung TIPs bucket has its OWN tier ladder \u2014 $1,200 / $800 / $700 / $600 / $550. Do not apply the $1,300 / $700 / $600 / $500 / $450 ladder to it. Its floor is $550.",
     "gm_pays_more_than_apple": "For 12 Good-condition trade-ins the $830 Google/Motorola deal pays MORE than the $1,300 Apple deal: Pixel 10 Pro 5G and Pixel 9 Pro Fold 5G jump to Tier 1 ($830 vs $700), and ten more move $450 -> $500. Never assume the higher cap pays the bigger credit.",
-    "select_plan_customers": "NO new-line device deal works on Mobile Select \u2014 every one requires Mobile Plus or Premium Unlimited. On the Upgrade sheet only plus_up_apple_400 and plus_up_samsung_450 work on Select; plus_up_gm_200 is Plus/Premium pending deal-desk confirmation. NOW Mobile gets no device deal.",
-    "hard_cliff_9_24": "tips_pixel11_1300 and flat_pixel11_600 both end 9/24/26, two weeks before everything else. On 9/25 a Pixel 11 has no TIPs bucket (absent from CD872) and no no-trade deal (absent from CD869)."
+    "select_plan_customers": "NO new-line device deal works on Mobile Select \u2014 every one requires Mobile Plus or Premium Unlimited. NOW Mobile gets no device deal.",
+    "pixel_11": "Since 9/25 a Pixel 11 new line takes tips_gm_830 (up to $830, with a trade) or flat_gm_400 ($400 with a port, no trade). The $1,300 / $600 Pixel 11 deals ended 9/24."
   },
   "universal_terms": {
     "dpp": "Every device deal requires a 36-month Device Payment Plan. Pay-in-full forfeits the promotion.",
@@ -15627,15 +12525,15 @@ const PROMO_MATRIX = {
         "eligible_list": "tips_apple_1300"
       },
       "summary": {
-        "hook": "Trade in almost any phone and get up to $1,300 off a new iPhone \u2014 the biggest credit on the board, and the only trade-in deal that works on an upgrade.",
+        "hook": "Trade in almost any phone and get up to $1,300 off a new iPhone on a new line \u2014 the biggest credit on the board.",
         "qualify": [
-          "EITHER activate a NEW Mobile Plus line, OR add a Premium Unlimited line as an existing Premium Unlimited customer, OR upgrade the phone on an existing Mobile Plus or Premium Unlimited line (NDEL). All three paths qualify.",
+          "Activate a NEW Mobile Plus line, OR add a Premium Unlimited line as an existing Premium Unlimited customer.",
           "Buy an eligible Apple phone on a 36-month Device Payment Plan \u2014 the nine-SKU Apple list: iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max.",
           "Trade in a qualifying device. Good, Fair AND Poor condition are all accepted.",
           "No number transfer required \u2014 this deal does NOT need a port-in."
         ],
         "steps": [
-          "Establish the line: a new Mobile Plus line, or a new Premium line on an existing Premium account, or an upgrade on an existing Plus/Premium line.",
+          "Activate the new Mobile Plus line (or add a Premium Unlimited line to an existing Premium Unlimited account).",
           "Add the iPhone to the cart on a 36-month DPP.",
           "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
         ],
@@ -15645,11 +12543,9 @@ const PROMO_MATRIX = {
           "Offer ends 10/8/26."
         ],
         "watchouts": [
-          "Dual line-type \u2014 CD871 covers a NEW line AND an existing-line upgrade (NDEL). It is the only trade-in deal an upgrade can use; do not filter it out by sheet.",
-          "On an upgrade, always price this against TIPs Plus Up Apple (CD873: fair-market value + $400) on the Upgrade sheet. Below the top tier Plus Up frequently pays more \u2014 vs the $450 floor it wins whenever the trade is worth more than $50.",
+          "New-line copy (Jeff, 2026-09-28). The card also allows an existing-line upgrade \u2014 that path is quoted on the Upgrade sheet.",
           "The card's legal disclaimer says \"$1,200\"; the title, body and DEALS94 all say $1,300. Quote $1,300.",
           "The nine-SKU list is NARROW. iPhone 15 Plus / 15 Pro / 15 Pro Max / 16 Plus / 16e are absent from CD871 and get $0 this cycle \u2014 see APPLE_DEAL_MODELS in the code.",
-          "Explicitly NOT an upgrade-anytime offer \u2014 an upgrade here is an ordinary NDEL, so the 60-day rule does not apply.",
           "Credit is spread over 36 monthly bill credits \u2014 cancel the line or pay the phone off early and the remaining credits are forfeited.",
           "The credit can never exceed the retail price of the phone being bought.",
           "Out-of-stock phones are not eligible. Back-orders ARE eligible.",
@@ -15657,7 +12553,11 @@ const PROMO_MATRIX = {
         ],
         "credit_amount": "Trade-in tiers: up to $1,300 / $700 / $600 / $500 / $450 by device and condition. Apple and Samsung share one 139-device roster with identical tier assignments \u2014 only the ladder dollars differ."
       },
-      "diamond_only": false
+      "diamond_only": false,
+      "card_line_types": [
+        "new_line",
+        "upgrade"
+      ]
     },
     {
       "tag": "tips_gm_830",
@@ -15682,7 +12582,7 @@ const PROMO_MATRIX = {
         "Google",
         "Motorola"
       ],
-      "device_scope": "Pixel 9, Pixel 10, Pixel 10 Pro, Pixel 10 Pro Fold, Pixel 10 Pro XL, moto razr - 2025, moto razr - 2026, Motorola razr fold",
+      "device_scope": "Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr - 2026, Motorola razr fold",
       "offer": {
         "savings": "up to $830 off",
         "mechanism": "36-month trade-in DPP bill credits"
@@ -15709,10 +12609,10 @@ const PROMO_MATRIX = {
         "eligible_list": "tips_gm_830"
       },
       "summary": {
-        "hook": "Trade in and get up to $830 off a new Pixel or moto razr \u2014 no port-in needed.",
+        "hook": "Trade in and get up to $830 off a new Pixel \u2014 now including the Pixel 11 series \u2014 or a moto razr. No port-in needed.",
         "qualify": [
           "Activate a NEW Mobile Plus line, OR be an existing Premium Unlimited customer adding another Premium Unlimited line. Existing-line upgrades are NOT eligible.",
-          "Buy one of only 8 eligible phones on a 36-month DPP: Pixel 9, Pixel 10, Pixel 10 Pro, Pixel 10 Pro Fold, Pixel 10 Pro XL, moto razr - 2025, moto razr - 2026, Motorola razr fold.",
+          "Buy one of only 9 eligible phones on a 36-month DPP: Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr - 2026, Motorola razr fold.",
           "Trade in a qualifying device. Good, Fair and Poor are all accepted.",
           "No port-in required."
         ],
@@ -15726,12 +12626,10 @@ const PROMO_MATRIX = {
           "Offer ends 10/8/26."
         ],
         "watchouts": [
-          "The cap dropped $270 on 9/12 \u2014 this was up to $1,100 under the old combined Apple/Google/Motorola deal. Every Google/Motorola quote built before 9/12 is overstated.",
-          "The eligible-phone list is VERY SHORT. Pixel 9a, Pixel 10a, the entire Pixel 11 series, every moto g (stylus / play / base, 2025 or 2026) and both motorola edges are NOT on it.",
-          "Buying a Pixel 11? Use the Pixel 11 TIPs deal (CD859, up to $1,300) instead \u2014 Pixel 11 is absent here.",
+          "RE-ISSUED 9/25: the Pixel 11 series was ADDED (its own $1,300 deal ended 9/24) and Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 were REMOVED.",
+          "The eligible-phone list is short. Pixel 9, Pixel 9a, Pixel 10a, Pixel 10 Pro Fold, moto razr \u2013 2025, every moto g (stylus / play / base) and both motorola edges are NOT on it.",
           "Buying a moto g stylus 2026? It has no TIPs path \u2014 quote the moto g stylus 'On Us' deal (CD848, $499.99 off, phone nets to $0). Quoting $400 on that handset is $100 short of free.",
-          "Motorola razr fold is BACK on a TIPs list this cycle, capped at $830. Any rep still saying \"the fold has no trade-in deal\" is costing the customer up to $830.",
-          "The card's eligibility block wrongly says existing-line upgrades are eligible; the overview, line-eligibility field, order-entry steps and DEALS18 all say new lines only.",
+          "Existing-line upgrades are NOT eligible \u2014 upgrades belong on the Upgrade sheet.",
           "Credit is spread over 36 monthly bill credits \u2014 cancel the line or pay the phone off early and the remaining credits are forfeited.",
           "The credit can never exceed the retail price of the phone being bought.",
           "Out-of-stock phones are not eligible. Back-orders ARE eligible.",
@@ -15818,82 +12716,6 @@ const PROMO_MATRIX = {
       "diamond_only": false
     },
     {
-      "tag": "tips_pixel11_1300",
-      "deal_card": "CD859",
-      "marketing_name": "TIPs \u2014 Up to $1,300 off Google Pixel 11 Series",
-      "category": "trade_in_tips",
-      "sheet": "mobile_6th_gen",
-      "line_type": "new_line",
-      "plan_eligibility": "plus_or_premium_unl",
-      "trade_in": {
-        "required": true,
-        "bucket": "tips_pixel11_1300"
-      },
-      "port": {
-        "required": false
-      },
-      "mobile_service": [
-        "XM",
-        "CBM"
-      ],
-      "device_brands": [
-        "Google"
-      ],
-      "device_scope": "Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold",
-      "offer": {
-        "savings": "up to $1,300 off",
-        "mechanism": "36-month trade-in DPP bill credits"
-      },
-      "dates": {
-        "start": "2026-08-12",
-        "end": "2026-09-24"
-      },
-      "active": true,
-      "values_in": "xfinity-tips-promotions -> tips_pixel11_1300",
-      "display_when": {
-        "line_type": "new_line",
-        "device_type": "phone",
-        "brands": [
-          "Google"
-        ],
-        "plans": [
-          "mobile_plus",
-          "premium_unlimited"
-        ],
-        "trade_in": "required",
-        "diamond_only": false,
-        "eligible_list": "tips_pixel11_1300"
-      },
-      "summary": {
-        "hook": "Trade in almost any phone and get up to $1,300 off a Pixel 11.",
-        "qualify": [
-          "Activate a NEW Mobile Plus line, OR be an existing Premium Unlimited customer adding another Premium Unlimited line. Existing-line upgrades are NOT eligible.",
-          "Buy a Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold on a 36-month DPP.",
-          "Trade in a qualifying device. Good, Fair AND Poor are all accepted.",
-          "No port-in required."
-        ],
-        "steps": [
-          "Activate the new Mobile Plus line (or add a Premium Unlimited line to an existing Premium Unlimited account).",
-          "Add the Pixel 11 to the cart on a 36-month DPP.",
-          "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
-        ],
-        "deadlines": [
-          "Trade-in must reach Assurant within 21 DAYS of the order ship date.",
-          "Offer ends 9/24/26 \u2014 this and the $600 Pixel 11 deal are the first two promos off the board this cycle."
-        ],
-        "watchouts": [
-          "HARD CLIFF 9/24: this ends two weeks before the Apple, Google/Motorola and Samsung deals. After 9/24 a Pixel 11 new line with a trade has NO TIPs bucket at all \u2014 the Pixel 11 is not on the $830 Google/Motorola list.",
-          "Its trade-in roster is its OWN 170-device table, 48 models wider than the 139-device roster the other three buckets share (iPhone 7s, most Galaxy A-series, older Pixels, all LGIC). Those models lose their last TIPS path on 9/24.",
-          "Credit is spread over 36 monthly bill credits \u2014 cancel the line or pay the phone off early and the remaining credits are forfeited.",
-          "The credit can never exceed the retail price of the phone being bought.",
-          "Out-of-stock phones are not eligible. Back-orders ARE eligible.",
-          "Not combinable with any other device offer."
-        ],
-        "credit_amount": "Trade-in tiers: up to $1,300 / $700 / $600 / $500 / $450 by device and condition. Values come from a standalone 170-device table."
-      },
-      "diamond_only": false
-    },
-    {
       "tag": "flat_apple_400",
       "deal_card": "CD868",
       "marketing_name": "$400 off Apple devices (no trade-in)",
@@ -15940,29 +12762,34 @@ const PROMO_MATRIX = {
         "eligible_list": "apple_400"
       },
       "summary": {
-        "hook": "No trade-in? $400 off a new iPhone \u2014 port the number in on a new line, or just take it on an upgrade.",
+        "hook": "No trade-in? Port the number in on a new line and take $400 off a new iPhone.",
         "qualify": [
-          "One of three paths: (1) a NEW Mobile Plus line PLUS a number transfer from another carrier within 30 days; (2) an existing Premium Unlimited customer adding another Premium line PLUS a port within 30 days; (3) an upgrade on an existing Mobile Plus or Premium Unlimited line \u2014 the card's order-entry step for that path does not require a port.",
+          "Activate a NEW Mobile Plus line WITH a number transfer from another carrier within 30 days, OR be an existing Premium Unlimited customer adding another Premium Unlimited line with a port.",
           "Buy an eligible Apple phone on a 36-month DPP \u2014 the same nine-SKU list as the Apple TIPs deal: iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max.",
           "No trade-in required."
         ],
         "steps": [
-          "Establish the line by one of the three paths above; on either new-line path, start the number transfer.",
+          "Activate the new Mobile Plus line (or add a Premium Unlimited line) AND start the number transfer.",
           "Add the iPhone to the cart on a 36-month DPP."
         ],
         "deadlines": [
-          "On a new line the number transfer must COMPLETE within 30 DAYS of purchase or the credits are forfeited.",
+          "The number transfer must COMPLETE within 30 DAYS of purchase or the credits are forfeited.",
           "Offer ends 10/8/26."
         ],
         "watchouts": [
-          "PORT AMBIGUITY \u2014 the card's eligibility block says \"Porting required: Yes,\" but only the two new-line order-entry paths mention a port and the legal disclaimer covers only those two. Read it as: port on a NEW line, no port on an upgrade. Badge it and confirm with the deal desk.",
-          "If the customer HAS a trade-in, compare against the Apple TIPs deal (CD871, up to $1,300) and, on an upgrade, Plus Up Apple (CD873, fair-market value + $400) first \u2014 both beat a flat $400.",
+          "Port-in is mandatory on a new line \u2014 CD868's legal disclaimer (9/21) settles it. A new line with a brand-new number does not qualify.",
+          "If the customer HAS a trade-in, compare against the Apple TIPs deal (CD871, up to $1,300) first.",
           "The nine-SKU list is narrow: iPhone 15 Plus / 15 Pro / 15 Pro Max / 16 Plus / 16e are NOT on CD868 and get $0.",
+          "New-line copy (Jeff, 2026-09-28). The card also lists an existing-line upgrade \u2014 that path belongs to the Upgrade sheet.",
           "Credits forfeited on cancellation or early payoff. Not combinable with other device offers."
         ],
         "credit_amount": "$400 spread evenly across 36 monthly bill credits."
       },
-      "diamond_only": false
+      "diamond_only": false,
+      "card_line_types": [
+        "new_line",
+        "upgrade"
+      ]
     },
     {
       "tag": "flat_gm_400",
@@ -15986,7 +12813,7 @@ const PROMO_MATRIX = {
         "Google",
         "Motorola"
       ],
-      "device_scope": "Pixel 9, Pixel 9a, Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 10 Pro Fold, Pixel 10a, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto razr \u2013 2025, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold",
+      "device_scope": "Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold",
       "offer": {
         "savings": "$400 off",
         "mechanism": "36-month DPP bill credits"
@@ -16013,11 +12840,11 @@ const PROMO_MATRIX = {
         "eligible_list": "gm_400"
       },
       "summary": {
-        "hook": "No trade-in? Port the number in and take $400 off a Pixel or a Motorola.",
+        "hook": "No trade-in? Port the number in and take $400 off a Pixel \u2014 now including the Pixel 11 series \u2014 or a Motorola.",
         "qualify": [
           "Activate a NEW Mobile Plus line, OR be an existing Premium Unlimited customer adding another Premium Unlimited line. Existing-line upgrades are NOT eligible.",
           "TRANSFER THE NUMBER from another carrier \u2014 mandatory.",
-          "Buy one of the 15 eligible phones on a 36-month DPP: Pixel 9, Pixel 9a, Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 10 Pro Fold, Pixel 10a, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto razr \u2013 2025, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold.",
+          "Buy one of the 15 eligible phones on a 36-month DPP: Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold.",
           "No trade-in required."
         ],
         "steps": [
@@ -16029,11 +12856,11 @@ const PROMO_MATRIX = {
           "Offer ends 10/8/26."
         ],
         "watchouts": [
-          "Pixel 11 is NOT on this list \u2014 a Pixel 11 new line without a trade takes the $600 Pixel 11 deal (CD858), which is better anyway.",
+          "RE-ISSUED 9/25: the Pixel 11 series was ADDED (the $600 Pixel 11 deal ended 9/24) and Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 were REMOVED.",
           "moto g stylus 2026 is NOT on this list \u2014 it takes the 'On Us' deal (CD848, $499.99 off, phone is free). Quoting $400 here costs the customer $100.",
-          "This is the flat deal that covers Motorola razr fold \u2014 but with a trade-in the fold is now worth up to $830 on CD872, so always check the trade first.",
+          "With a trade-in, check CD872 first \u2014 for the phones on both lists (Pixel 10 / 11, razr 2026, razr fold) the trade is worth up to $830.",
           "Port-in is mandatory; a new line with a brand-new number does not qualify.",
-          "The card's eligibility block wrongly implies upgrades are eligible in one field while the rest of the card and DEALS18 say new lines only.",
+          "New lines only \u2014 upgrades belong on the Upgrade sheet.",
           "Credits forfeited on cancellation or early payoff."
         ],
         "credit_amount": "$400 spread evenly across 36 monthly bill credits."
@@ -16110,78 +12937,6 @@ const PROMO_MATRIX = {
           "Credits forfeited on cancellation or early payoff."
         ],
         "credit_amount": "$500 spread evenly across 36 monthly bill credits."
-      },
-      "diamond_only": false
-    },
-    {
-      "tag": "flat_pixel11_600",
-      "deal_card": "CD858",
-      "marketing_name": "$600 off Google Pixel 11 Series (no trade-in)",
-      "category": "flat_no_trade",
-      "sheet": "mobile_6th_gen",
-      "line_type": "new_line",
-      "plan_eligibility": "plus_or_premium_unl",
-      "trade_in": {
-        "required": false
-      },
-      "port": {
-        "required": true
-      },
-      "mobile_service": [
-        "XM",
-        "CBM"
-      ],
-      "device_brands": [
-        "Google"
-      ],
-      "device_scope": "Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold",
-      "offer": {
-        "savings": "$600 off",
-        "mechanism": "36-month DPP bill credits"
-      },
-      "dates": {
-        "start": "2026-08-12",
-        "end": "2026-09-24"
-      },
-      "active": true,
-      "display_when": {
-        "line_type": "new_line",
-        "device_type": "phone",
-        "brands": [
-          "Google"
-        ],
-        "plans": [
-          "mobile_plus",
-          "premium_unlimited"
-        ],
-        "trade_in": "not_required",
-        "diamond_only": false,
-        "port": "required",
-        "eligible_list": "pixel11_600"
-      },
-      "summary": {
-        "hook": "No trade-in? Port the number in and take $600 off a Pixel 11.",
-        "qualify": [
-          "Activate a NEW Mobile Plus line, OR be an existing Premium Unlimited customer adding another Premium Unlimited line.",
-          "TRANSFER THE NUMBER from another carrier \u2014 mandatory.",
-          "Buy a Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold on a 36-month DPP.",
-          "No trade-in required."
-        ],
-        "steps": [
-          "Activate the new Mobile Plus line AND start the number transfer from the other carrier.",
-          "Add the Pixel 11 to the cart on a 36-month DPP."
-        ],
-        "deadlines": [
-          "Number transfer must COMPLETE within 30 DAYS of purchase.",
-          "Offer ends 9/24/26 \u2014 off the board two weeks before everything else."
-        ],
-        "watchouts": [
-          "After 9/24 a Pixel 11 falls back to the $400 Google/Motorola deal \u2014 except the Pixel 11 is NOT on that list either, so a Pixel 11 new line will have NO no-trade deal at all. Flag this to the team before the 24th.",
-          "Port-in is mandatory. A new line with a brand-new number does not qualify.",
-          "If the customer has a trade-in, compare against the Pixel 11 TIPs deal (CD859, up to $1,300) \u2014 usually worth more.",
-          "Credits forfeited on cancellation or early payoff."
-        ],
-        "credit_amount": "$600 spread evenly across 36 monthly bill credits."
       },
       "diamond_only": false
     },
@@ -16287,7 +13042,7 @@ const PROMO_MATRIX = {
       },
       "dates": {
         "start": "2026-05-11",
-        "end": "2026-09-30"
+        "end": "2026-10-30"
       },
       "active": true,
       "display_when": {
@@ -16320,7 +13075,7 @@ const PROMO_MATRIX = {
         ],
         "deadlines": [
           "New watch line must be activated within 30 DAYS of the purchase date.",
-          "Offer ends 9/30/26."
+          "Offer ends 10/30/26 \u2014 extended from 9/30 (CD824, 9/18)."
         ],
         "watchouts": [
           "Order matters: if the rep starts the buy flow before the member redeems the benefit, the discount will not apply.",
@@ -16556,15 +13311,15 @@ const PROMO_GUIDE = [
    "eligible_list": "tips_apple_1300"
   },
   "summary": {
-   "hook": "Trade in almost any phone and get up to $1,300 off a new iPhone \u2014 the biggest credit on the board, and the only trade-in deal that works on an upgrade.",
+   "hook": "Trade in almost any phone and get up to $1,300 off a new iPhone on a new line \u2014 the biggest credit on the board.",
    "qualify": [
-    "EITHER activate a NEW Mobile Plus line, OR add a Premium Unlimited line as an existing Premium Unlimited customer, OR upgrade the phone on an existing Mobile Plus or Premium Unlimited line (NDEL). All three paths qualify.",
+    "Activate a NEW Mobile Plus line, OR add a Premium Unlimited line as an existing Premium Unlimited customer.",
     "Buy an eligible Apple phone on a 36-month Device Payment Plan \u2014 the nine-SKU Apple list: iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max.",
     "Trade in a qualifying device. Good, Fair AND Poor condition are all accepted.",
     "No number transfer required \u2014 this deal does NOT need a port-in."
    ],
    "steps": [
-    "Establish the line: a new Mobile Plus line, or a new Premium line on an existing Premium account, or an upgrade on an existing Plus/Premium line.",
+    "Activate the new Mobile Plus line (or add a Premium Unlimited line to an existing Premium Unlimited account).",
     "Add the iPhone to the cart on a 36-month DPP.",
     "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
    ],
@@ -16574,11 +13329,9 @@ const PROMO_GUIDE = [
     "Offer ends 10/8/26."
    ],
    "watchouts": [
-    "Dual line-type \u2014 CD871 covers a NEW line AND an existing-line upgrade (NDEL). It is the only trade-in deal an upgrade can use; do not filter it out by sheet.",
-    "On an upgrade, always price this against TIPs Plus Up Apple (CD873: fair-market value + $400) on the Upgrade sheet. Below the top tier Plus Up frequently pays more \u2014 vs the $450 floor it wins whenever the trade is worth more than $50.",
+    "New-line copy (Jeff, 2026-09-28). The card also allows an existing-line upgrade \u2014 that path is quoted on the Upgrade sheet.",
     "The card's legal disclaimer says \"$1,200\"; the title, body and DEALS94 all say $1,300. Quote $1,300.",
     "The nine-SKU list is NARROW. iPhone 15 Plus / 15 Pro / 15 Pro Max / 16 Plus / 16e are absent from CD871 and get $0 this cycle \u2014 see APPLE_DEAL_MODELS in the code.",
-    "Explicitly NOT an upgrade-anytime offer \u2014 an upgrade here is an ordinary NDEL, so the 60-day rule does not apply.",
     "Credit is spread over 36 monthly bill credits \u2014 cancel the line or pay the phone off early and the remaining credits are forfeited.",
     "The credit can never exceed the retail price of the phone being bought.",
     "Out-of-stock phones are not eligible. Back-orders ARE eligible.",
@@ -16590,7 +13343,11 @@ const PROMO_GUIDE = [
    "XM",
    "CBM"
   ],
-  "diamond_only": false
+  "diamond_only": false,
+  "card_line_types": [
+   "new_line",
+   "upgrade"
+  ]
  },
  {
   "tag": "tips_gm_830",
@@ -16602,7 +13359,7 @@ const PROMO_GUIDE = [
    "Google",
    "Motorola"
   ],
-  "device_scope": "Pixel 9, Pixel 10, Pixel 10 Pro, Pixel 10 Pro Fold, Pixel 10 Pro XL, moto razr - 2025, moto razr - 2026, Motorola razr fold",
+  "device_scope": "Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr - 2026, Motorola razr fold",
   "plan_eligibility": "plus_or_premium_unl",
   "trade_in": {
    "required": true,
@@ -16635,10 +13392,10 @@ const PROMO_GUIDE = [
    "eligible_list": "tips_gm_830"
   },
   "summary": {
-   "hook": "Trade in and get up to $830 off a new Pixel or moto razr \u2014 no port-in needed.",
+   "hook": "Trade in and get up to $830 off a new Pixel \u2014 now including the Pixel 11 series \u2014 or a moto razr. No port-in needed.",
    "qualify": [
     "Activate a NEW Mobile Plus line, OR be an existing Premium Unlimited customer adding another Premium Unlimited line. Existing-line upgrades are NOT eligible.",
-    "Buy one of only 8 eligible phones on a 36-month DPP: Pixel 9, Pixel 10, Pixel 10 Pro, Pixel 10 Pro Fold, Pixel 10 Pro XL, moto razr - 2025, moto razr - 2026, Motorola razr fold.",
+    "Buy one of only 9 eligible phones on a 36-month DPP: Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr - 2026, Motorola razr fold.",
     "Trade in a qualifying device. Good, Fair and Poor are all accepted.",
     "No port-in required."
    ],
@@ -16652,12 +13409,10 @@ const PROMO_GUIDE = [
     "Offer ends 10/8/26."
    ],
    "watchouts": [
-    "The cap dropped $270 on 9/12 \u2014 this was up to $1,100 under the old combined Apple/Google/Motorola deal. Every Google/Motorola quote built before 9/12 is overstated.",
-    "The eligible-phone list is VERY SHORT. Pixel 9a, Pixel 10a, the entire Pixel 11 series, every moto g (stylus / play / base, 2025 or 2026) and both motorola edges are NOT on it.",
-    "Buying a Pixel 11? Use the Pixel 11 TIPs deal (CD859, up to $1,300) instead \u2014 Pixel 11 is absent here.",
+    "RE-ISSUED 9/25: the Pixel 11 series was ADDED (its own $1,300 deal ended 9/24) and Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 were REMOVED.",
+    "The eligible-phone list is short. Pixel 9, Pixel 9a, Pixel 10a, Pixel 10 Pro Fold, moto razr \u2013 2025, every moto g (stylus / play / base) and both motorola edges are NOT on it.",
     "Buying a moto g stylus 2026? It has no TIPs path \u2014 quote the moto g stylus 'On Us' deal (CD848, $499.99 off, phone nets to $0). Quoting $400 on that handset is $100 short of free.",
-    "Motorola razr fold is BACK on a TIPs list this cycle, capped at $830. Any rep still saying \"the fold has no trade-in deal\" is costing the customer up to $830.",
-    "The card's eligibility block wrongly says existing-line upgrades are eligible; the overview, line-eligibility field, order-entry steps and DEALS18 all say new lines only.",
+    "Existing-line upgrades are NOT eligible \u2014 upgrades belong on the Upgrade sheet.",
     "Credit is spread over 36 monthly bill credits \u2014 cancel the line or pay the phone off early and the remaining credits are forfeited.",
     "The credit can never exceed the retail price of the phone being bought.",
     "Out-of-stock phones are not eligible. Back-orders ARE eligible.",
@@ -16745,79 +13500,6 @@ const PROMO_GUIDE = [
   "diamond_only": false
  },
  {
-  "tag": "tips_pixel11_1300",
-  "deal_card": "CD859",
-  "marketing_name": "TIPs \u2014 Up to $1,300 off Google Pixel 11 Series",
-  "sheet": "mobile_6th_gen",
-  "line_type": "new_line",
-  "device_brands": [
-   "Google"
-  ],
-  "device_scope": "Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold",
-  "plan_eligibility": "plus_or_premium_unl",
-  "trade_in": {
-   "required": true,
-   "bucket": "tips_pixel11_1300"
-  },
-  "port": {
-   "required": false
-  },
-  "offer": {
-   "savings": "up to $1,300 off",
-   "mechanism": "36-month trade-in DPP bill credits"
-  },
-  "dates": {
-   "start": "2026-08-12",
-   "end": "2026-09-24"
-  },
-  "display_when": {
-   "line_type": "new_line",
-   "device_type": "phone",
-   "brands": [
-    "Google"
-   ],
-   "plans": [
-    "mobile_plus",
-    "premium_unlimited"
-   ],
-   "trade_in": "required",
-   "diamond_only": false,
-   "eligible_list": "tips_pixel11_1300"
-  },
-  "summary": {
-   "hook": "Trade in almost any phone and get up to $1,300 off a Pixel 11.",
-   "qualify": [
-    "Activate a NEW Mobile Plus line, OR be an existing Premium Unlimited customer adding another Premium Unlimited line. Existing-line upgrades are NOT eligible.",
-    "Buy a Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold on a 36-month DPP.",
-    "Trade in a qualifying device. Good, Fair AND Poor are all accepted.",
-    "No port-in required."
-   ],
-   "steps": [
-    "Activate the new Mobile Plus line (or add a Premium Unlimited line to an existing Premium Unlimited account).",
-    "Add the Pixel 11 to the cart on a 36-month DPP.",
-    "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
-   ],
-   "deadlines": [
-    "Trade-in must reach Assurant within 21 DAYS of the order ship date.",
-    "Offer ends 9/24/26 \u2014 this and the $600 Pixel 11 deal are the first two promos off the board this cycle."
-   ],
-   "watchouts": [
-    "HARD CLIFF 9/24: this ends two weeks before the Apple, Google/Motorola and Samsung deals. After 9/24 a Pixel 11 new line with a trade has NO TIPs bucket at all \u2014 the Pixel 11 is not on the $830 Google/Motorola list.",
-    "Its trade-in roster is its OWN 170-device table, 48 models wider than the 139-device roster the other three buckets share (iPhone 7s, most Galaxy A-series, older Pixels, all LGIC). Those models lose their last TIPS path on 9/24.",
-    "Credit is spread over 36 monthly bill credits \u2014 cancel the line or pay the phone off early and the remaining credits are forfeited.",
-    "The credit can never exceed the retail price of the phone being bought.",
-    "Out-of-stock phones are not eligible. Back-orders ARE eligible.",
-    "Not combinable with any other device offer."
-   ],
-   "credit_amount": "Trade-in tiers: up to $1,300 / $700 / $600 / $500 / $450 by device and condition. Values come from a standalone 170-device table."
-  },
-  "mobile_service": [
-   "XM",
-   "CBM"
-  ],
-  "diamond_only": false
- },
- {
   "tag": "flat_apple_400",
   "deal_card": "CD868",
   "marketing_name": "$400 off Apple devices (no trade-in)",
@@ -16858,24 +13540,25 @@ const PROMO_GUIDE = [
    "eligible_list": "apple_400"
   },
   "summary": {
-   "hook": "No trade-in? $400 off a new iPhone \u2014 port the number in on a new line, or just take it on an upgrade.",
+   "hook": "No trade-in? Port the number in on a new line and take $400 off a new iPhone.",
    "qualify": [
-    "One of three paths: (1) a NEW Mobile Plus line PLUS a number transfer from another carrier within 30 days; (2) an existing Premium Unlimited customer adding another Premium line PLUS a port within 30 days; (3) an upgrade on an existing Mobile Plus or Premium Unlimited line \u2014 the card's order-entry step for that path does not require a port.",
+    "Activate a NEW Mobile Plus line WITH a number transfer from another carrier within 30 days, OR be an existing Premium Unlimited customer adding another Premium Unlimited line with a port.",
     "Buy an eligible Apple phone on a 36-month DPP \u2014 the same nine-SKU list as the Apple TIPs deal: iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max.",
     "No trade-in required."
    ],
    "steps": [
-    "Establish the line by one of the three paths above; on either new-line path, start the number transfer.",
+    "Activate the new Mobile Plus line (or add a Premium Unlimited line) AND start the number transfer.",
     "Add the iPhone to the cart on a 36-month DPP."
    ],
    "deadlines": [
-    "On a new line the number transfer must COMPLETE within 30 DAYS of purchase or the credits are forfeited.",
+    "The number transfer must COMPLETE within 30 DAYS of purchase or the credits are forfeited.",
     "Offer ends 10/8/26."
    ],
    "watchouts": [
-    "PORT AMBIGUITY \u2014 the card's eligibility block says \"Porting required: Yes,\" but only the two new-line order-entry paths mention a port and the legal disclaimer covers only those two. Read it as: port on a NEW line, no port on an upgrade. Badge it and confirm with the deal desk.",
-    "If the customer HAS a trade-in, compare against the Apple TIPs deal (CD871, up to $1,300) and, on an upgrade, Plus Up Apple (CD873, fair-market value + $400) first \u2014 both beat a flat $400.",
+    "Port-in is mandatory on a new line \u2014 CD868's legal disclaimer (9/21) settles it. A new line with a brand-new number does not qualify.",
+    "If the customer HAS a trade-in, compare against the Apple TIPs deal (CD871, up to $1,300) first.",
     "The nine-SKU list is narrow: iPhone 15 Plus / 15 Pro / 15 Pro Max / 16 Plus / 16e are NOT on CD868 and get $0.",
+    "New-line copy (Jeff, 2026-09-28). The card also lists an existing-line upgrade \u2014 that path belongs to the Upgrade sheet.",
     "Credits forfeited on cancellation or early payoff. Not combinable with other device offers."
    ],
    "credit_amount": "$400 spread evenly across 36 monthly bill credits."
@@ -16884,7 +13567,11 @@ const PROMO_GUIDE = [
    "XM",
    "CBM"
   ],
-  "diamond_only": false
+  "diamond_only": false,
+  "card_line_types": [
+   "new_line",
+   "upgrade"
+  ]
  },
  {
   "tag": "flat_gm_400",
@@ -16896,7 +13583,7 @@ const PROMO_GUIDE = [
    "Google",
    "Motorola"
   ],
-  "device_scope": "Pixel 9, Pixel 9a, Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 10 Pro Fold, Pixel 10a, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto razr \u2013 2025, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold",
+  "device_scope": "Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold",
   "plan_eligibility": "plus_or_premium_unl",
   "trade_in": {
    "required": false
@@ -16929,11 +13616,11 @@ const PROMO_GUIDE = [
    "eligible_list": "gm_400"
   },
   "summary": {
-   "hook": "No trade-in? Port the number in and take $400 off a Pixel or a Motorola.",
+   "hook": "No trade-in? Port the number in and take $400 off a Pixel \u2014 now including the Pixel 11 series \u2014 or a Motorola.",
    "qualify": [
     "Activate a NEW Mobile Plus line, OR be an existing Premium Unlimited customer adding another Premium Unlimited line. Existing-line upgrades are NOT eligible.",
     "TRANSFER THE NUMBER from another carrier \u2014 mandatory.",
-    "Buy one of the 15 eligible phones on a 36-month DPP: Pixel 9, Pixel 9a, Pixel 10, Pixel 10 Pro, Pixel 10 Pro XL, Pixel 10 Pro Fold, Pixel 10a, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto razr \u2013 2025, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold.",
+    "Buy one of the 15 eligible phones on a 36-month DPP: Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold.",
     "No trade-in required."
    ],
    "steps": [
@@ -16945,11 +13632,11 @@ const PROMO_GUIDE = [
     "Offer ends 10/8/26."
    ],
    "watchouts": [
-    "Pixel 11 is NOT on this list \u2014 a Pixel 11 new line without a trade takes the $600 Pixel 11 deal (CD858), which is better anyway.",
+    "RE-ISSUED 9/25: the Pixel 11 series was ADDED (the $600 Pixel 11 deal ended 9/24) and Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 were REMOVED.",
     "moto g stylus 2026 is NOT on this list \u2014 it takes the 'On Us' deal (CD848, $499.99 off, phone is free). Quoting $400 here costs the customer $100.",
-    "This is the flat deal that covers Motorola razr fold \u2014 but with a trade-in the fold is now worth up to $830 on CD872, so always check the trade first.",
+    "With a trade-in, check CD872 first \u2014 for the phones on both lists (Pixel 10 / 11, razr 2026, razr fold) the trade is worth up to $830.",
     "Port-in is mandatory; a new line with a brand-new number does not qualify.",
-    "The card's eligibility block wrongly implies upgrades are eligible in one field while the rest of the card and DEALS18 say new lines only.",
+    "New lines only \u2014 upgrades belong on the Upgrade sheet.",
     "Credits forfeited on cancellation or early payoff."
    ],
    "credit_amount": "$400 spread evenly across 36 monthly bill credits."
@@ -17024,76 +13711,6 @@ const PROMO_GUIDE = [
     "Credits forfeited on cancellation or early payoff."
    ],
    "credit_amount": "$500 spread evenly across 36 monthly bill credits."
-  },
-  "mobile_service": [
-   "XM",
-   "CBM"
-  ],
-  "diamond_only": false
- },
- {
-  "tag": "flat_pixel11_600",
-  "deal_card": "CD858",
-  "marketing_name": "$600 off Google Pixel 11 Series (no trade-in)",
-  "sheet": "mobile_6th_gen",
-  "line_type": "new_line",
-  "device_brands": [
-   "Google"
-  ],
-  "device_scope": "Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold",
-  "plan_eligibility": "plus_or_premium_unl",
-  "trade_in": {
-   "required": false
-  },
-  "port": {
-   "required": true
-  },
-  "offer": {
-   "savings": "$600 off",
-   "mechanism": "36-month DPP bill credits"
-  },
-  "dates": {
-   "start": "2026-08-12",
-   "end": "2026-09-24"
-  },
-  "display_when": {
-   "line_type": "new_line",
-   "device_type": "phone",
-   "brands": [
-    "Google"
-   ],
-   "plans": [
-    "mobile_plus",
-    "premium_unlimited"
-   ],
-   "trade_in": "not_required",
-   "diamond_only": false,
-   "port": "required",
-   "eligible_list": "pixel11_600"
-  },
-  "summary": {
-   "hook": "No trade-in? Port the number in and take $600 off a Pixel 11.",
-   "qualify": [
-    "Activate a NEW Mobile Plus line, OR be an existing Premium Unlimited customer adding another Premium Unlimited line.",
-    "TRANSFER THE NUMBER from another carrier \u2014 mandatory.",
-    "Buy a Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold on a 36-month DPP.",
-    "No trade-in required."
-   ],
-   "steps": [
-    "Activate the new Mobile Plus line AND start the number transfer from the other carrier.",
-    "Add the Pixel 11 to the cart on a 36-month DPP."
-   ],
-   "deadlines": [
-    "Number transfer must COMPLETE within 30 DAYS of purchase.",
-    "Offer ends 9/24/26 \u2014 off the board two weeks before everything else."
-   ],
-   "watchouts": [
-    "After 9/24 a Pixel 11 falls back to the $400 Google/Motorola deal \u2014 except the Pixel 11 is NOT on that list either, so a Pixel 11 new line will have NO no-trade deal at all. Flag this to the team before the 24th.",
-    "Port-in is mandatory. A new line with a brand-new number does not qualify.",
-    "If the customer has a trade-in, compare against the Pixel 11 TIPs deal (CD859, up to $1,300) \u2014 usually worth more.",
-    "Credits forfeited on cancellation or early payoff."
-   ],
-   "credit_amount": "$600 spread evenly across 36 monthly bill credits."
   },
   "mobile_service": [
    "XM",
@@ -17197,7 +13814,7 @@ const PROMO_GUIDE = [
   },
   "dates": {
    "start": "2026-05-11",
-   "end": "2026-09-30"
+   "end": "2026-10-30"
   },
   "display_when": {
    "line_type": "new_line",
@@ -17229,7 +13846,7 @@ const PROMO_GUIDE = [
    ],
    "deadlines": [
     "New watch line must be activated within 30 DAYS of the purchase date.",
-    "Offer ends 9/30/26."
+    "Offer ends 10/30/26 \u2014 extended from 9/30 (CD824, 9/18)."
    ],
    "watchouts": [
     "Order matters: if the rep starts the buy flow before the member redeems the benefit, the discount will not apply.",
@@ -17582,7 +14199,7 @@ const PROMO_DEFINITIONS = [
   // Re-keyed 2026-09-12 from the Celestial Customer Deals page (DEALS18,
   // modified 09/11/2026), synced with the xfinity-mobile-promotions skill.
   // New-line sheet. Display tags below map to matrix tags as follows:
-  //   samsung_notrade   → flat_samsung_500      pixel11_600 → flat_pixel11_600
+  //   samsung_notrade   → flat_samsung_500
   //   apple_400         → flat_apple_400 (CD868)
   //   gm_400            → flat_gm_400 (CD869)
   //   watch_diamond_300 → smartwatch_300_diamond
@@ -17614,14 +14231,14 @@ const PROMO_DEFINITIONS = [
   // ── NEW 2026-09-12: Apple TIPS trade-in, up to $1,300 (CD871) — split off the retired combined A/G/M card ──
   {
     tag:       'tips_apple_1300',
-    text:      '📱 TIPS Trade-In: Up to $1,300 off select Apple devices w/ Mobile Plus or Premium Unlimited — no porting. New line OR existing-line upgrade (the only TIPs deal an upgrade can use). Nine eligible iPhone SKUs.',
+    text:      "📱 TIPS Trade-In: Up to $1,300 off select Apple devices w/ Mobile Plus or Premium Unlimited — new line, no porting. Nine eligible iPhones.",
     startDate: '2026-09-12',
     endDate:   '2026-10-08',
   },
   // ── NEW 2026-09-12: Google/Motorola TIPS trade-in, up to $830 (CD872) — split off the retired combined A/G/M card ──
   {
     tag:       'tips_gm_830',
-    text:      '📱 TIPS Trade-In: Up to $830 off select Google and Motorola devices w/ Mobile Plus or Premium Unlimited — new line only (no porting). Only 8 eligible phones; the ceiling fell $270 on 9/12.',
+    text:      "📱 TIPS Trade-In: Up to $830 off select Google and Motorola devices w/ Mobile Plus or Premium Unlimited — new line only (no porting). Now includes the Pixel 11 series; 9 eligible phones.",
     startDate: '2026-09-12',
     endDate:   '2026-10-08',
   },
@@ -17632,20 +14249,8 @@ const PROMO_DEFINITIONS = [
     startDate: '2026-08-26',
     endDate:   '2026-10-08',
   },
-  // ── Pixel 11 Series TIPS trade-in, up to $1,300 (CD859) — tag renamed 2026-09-12, values unchanged ──
-  {
-    tag:       'tips_pixel11_1300',
-    text:      '📱 TIPS Trade-In: Up to $1,300 off Google Pixel 11 Series w/ Mobile Plus or Premium Unlimited — new line only (no porting). Ends 9/24/26, two weeks before everything else.',
-    startDate: '2026-08-12',
-    endDate:   '2026-09-24',
-  },
-  // ── $600 off Pixel 11 Series, no trade — PORT REQUIRED (CD858) ──
-  {
-    tag:       'pixel11_600',
-    text:      '💰 $600 off Google Pixel 11 Series w/ Mobile Plus or Premium Unlimited — new line, no trade-in required. Porting required (transfer within 30 days of purchase).',
-    startDate: '2026-08-12',
-    endDate:   '2026-09-24',
-  },
+  // ── DELETED 2026-09-28: the Pixel 11 TIPs (CD859) and $600 Pixel 11 no-trade (CD858)
+  //    deals ended 9/24. The Pixel 11 series now rides CD872 / CD869 above and below. ──
   // ── $500 off Samsung, no trade — EXTENDED to 10/8/26, verified 2026-09-12 (CD862) ──
   {
     tag:       'samsung_notrade',
@@ -17656,14 +14261,14 @@ const PROMO_DEFINITIONS = [
   // ── NEW 2026-09-12: $400 off Apple, no trade — PORT REQUIRED (CD868), split off the retired combined non-Samsung card ──
   {
     tag:       'apple_400',
-    text:      '💰 $400 off select Apple devices w/ Mobile Plus or Premium Unlimited — no trade-in required. Porting required on a new line (not on an upgrade — confirm with the deal desk). Nine eligible iPhone SKUs.',
+    text:      "💰 $400 off select Apple devices w/ Mobile Plus or Premium Unlimited — new line, no trade-in required. Porting required. Nine eligible iPhones.",
     startDate: '2026-09-12',
     endDate:   '2026-10-08',
   },
   // ── NEW 2026-09-12: $400 off Google/Motorola, no trade — PORT REQUIRED (CD869), split off the retired combined non-Samsung card ──
   {
     tag:       'gm_400',
-    text:      '💰 $400 off select Google and Motorola devices w/ Mobile Plus or Premium Unlimited — new line, no trade-in required. Porting required. Covers Motorola razr fold; Pixel 11 and the 2026 moto g stylus are NOT on the list.',
+    text:      "💰 $400 off select Google and Motorola devices w/ Mobile Plus or Premium Unlimited — new line, no trade-in required. Porting required. Now includes the Pixel 11 series; the 2026 moto g stylus takes its own 'On Us' deal.",
     startDate: '2026-09-12',
     endDate:   '2026-10-08',
   },
@@ -17672,7 +14277,7 @@ const PROMO_DEFINITIONS = [
     tag:       'watch_diamond_300',
     text:      '⌚ Diamond members: $300 off Apple/Samsung/Google smartwatches (over 36 months) — requires Smartwatch plan & new line on DPP. Redeem the Membership benefit BEFORE the XM buy flow; enter offer code IN ALL CAPS. Max two transactions per code.',
     startDate: '2026-05-11',
-    endDate:   '2026-09-30',
+    endDate:   '2026-10-30',   // extended from 9/30 (CD824, modified 9/18)
   },
   // ── XMC Plus included on Mobile Plus ──
   {
@@ -18282,11 +14887,9 @@ function buildFeatures(plan) {
       activeTags.add('tips_apple_1300');     // up to $1,300 off Apple w/ trade (CD871)
       activeTags.add('tips_gm_830');         // up to $830 off Google/Motorola w/ trade (CD872)
       activeTags.add('tips_samsung_1200');   // up to $1,200 off Samsung w/ trade (CD865)
-      activeTags.add('tips_pixel11_1300');   // up to $1,300 off Pixel 11 Series w/ trade (CD859)
       activeTags.add('samsung_notrade');     // $500 off Samsung, no trade (port req, CD862)
       activeTags.add('apple_400');           // $400 off Apple, no trade (port req on new line, CD868)
       activeTags.add('gm_400');              // $400 off Google/Motorola, no trade (port req, CD869)
-      activeTags.add('pixel11_600');         // $600 off Pixel 11 Series, no trade (port req, CD858)
       activeTags.add('moto_gstylus_on_us');  // moto g stylus 2026 'On Us' (CD848)
       activeTags.add('xmc_plus_included');   // XMC Plus included free on Mobile Plus
     }
@@ -18406,7 +15009,7 @@ function buildFeatures(plan) {
         discLabel = `Samsung No-Trade Promo: -$${promoAmt.toFixed(0)} off`;
       } else {
         // Audit M4 (2026-09-24): this branch is the Apple / Google / Motorola $400 and the
-        // Pixel 11 $600 no-trade credit, which was labelled "Premium Unlimited Discount".
+        // old Pixel 11 $600 no-trade credit (ended 9/24), which was labelled "Premium Unlimited Discount".
         const brand = deviceName.split(' ')[0] || '';
         discLabel = `${brand ? brand + ' ' : ''}No-Trade Promo: -$${promoAmt.toFixed(0)} off`;
       }
@@ -20312,9 +16915,6 @@ function recalcRow(row) {
         // 8/26–10/8. 11 devices: the CD865 ten plus the Galaxy A57,
         // which has no new-line TIPs path of its own.
         flatNoTrade = isPromoActiveByTag('samsung_notrade') ? SAMSUNG_NO_TRADE_PROMO : 0;
-      } else if (isDeviceOnDeal('pixel11_600', deviceName)) {
-        // $600 off Pixel 11 Series, no trade — flat_pixel11_600 (CD858), 8/12–9/24
-        flatNoTrade = isPromoActiveByTag('pixel11_600') ? 600 : 0;
       } else if (isDeviceOnDeal('apple_400', deviceName)) {
         // $400 off Apple, no trade — flat_apple_400 (CD868), 9/12–10/8.
         // 2026-09-12: the old combined flat $400 non-Samsung deal expired 9/10 and
@@ -20323,8 +16923,9 @@ function recalcRow(row) {
         flatNoTrade = isPromoActiveByTag('apple_400') ? 400 : 0;
       } else if (isDeviceOnDeal('gm_400', deviceName)) {
         // $400 off Google/Motorola, no trade — flat_gm_400 (CD869), 9/12–10/8.
-        // Covers Motorola razr fold and the 2026 edge — but the fold is also back
-        // on a TIPS list (CD872, up to $830), so with a trade the trade usually wins.
+        // Since the 9/25 re-issue it covers the Pixel 11 series (the $600 Pixel 11
+        // deal ended 9/24) and no longer covers Pixel 9 / 9a / 10 Pro Fold / razr 2025.
+        // Covers the razr fold too — with a trade, CD872 (up to $830) usually wins.
         flatNoTrade = isPromoActiveByTag('gm_400') ? 400 : 0;
       } else {
         // On no no-trade card this cycle (Galaxy A27/A26/A17, the plain Galaxy
