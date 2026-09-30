@@ -18,16 +18,20 @@
   var SRC = 'https://blufoxmobile.github.io/Daily-Sales-Report/data/rep-picker.js';
   var WAIT_AFTER_READY_MS = 5000;
   var st = window.__bfxRepPickerLoad = { state: 'loading' };
+  var s = null;
   function useFallback(why) {
     if (st.state !== 'loading') return;
     st.state = 'fallback:' + why;
     window.__BLUFOX_REP_PICKER_V4__ = true;          // a late rep-picker.js now returns at once
+    // 2026-09-30: the stalled request is dropped from the page too. (Measured in Chromium and WebKit:
+    // this alone does not release the page's load event, hence __bfxAfterLoad below.)
+    try { if (s && s.parentNode) s.parentNode.removeChild(s); } catch (e) {}
     var run = function () {
       (window.__bfxLegacyPickers || []).forEach(function (f) { try { f(); } catch (e) {} });
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
   }
-  var s = document.createElement('script');
+  s = document.createElement('script');
   s.src = SRC;
   s.async = true;
   s.onload = function () { if (st.state === 'loading') st.state = 'loaded'; };
@@ -35,6 +39,19 @@
   (document.head || document.documentElement).appendChild(s);
   var arm = function () { setTimeout(function () { useFallback('timeout'); }, WAIT_AFTER_READY_MS); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm); else arm();
+})();
+/* 2026-09-30: the page's load event waits for EVERY request still open, so a rep-picker.js or Google
+   Fonts request that hangs (store guest Wi-Fi) held it forever: the frame was still "interactive" at
+   15 s, and the work this page starts after load (PDF-library warm-up, art warm-up, the outbox's first
+   send) never started. __bfxAfterLoad(fn) runs fn once, on load as before, or 10 s after
+   DOMContentLoaded if load has not come by then. */
+(function () {
+  var q = [], done = false, LATE_MS = 10000;
+  function go() { if (done) return; done = true; var a = q; q = []; a.forEach(function (f) { try { f(); } catch (e) {} }); }
+  window.__bfxAfterLoad = function (fn) { if (done) setTimeout(fn, 0); else q.push(fn); };
+  window.addEventListener('load', go);
+  var late = function () { setTimeout(go, LATE_MS); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', late); else late();
 })();
 </script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -1415,33 +1432,10 @@
     .section-label { font-size: 10px; }
     .total-comp-grid { grid-template-columns: 1fr !important; }
 
-    /* ── Intake form — mobile ── */
-    .intake-card { border-radius: 0; }
-    .intake-body { padding: 20px 16px; }
-    .intake-section { margin-bottom: 24px; }
-    .intake-section-title { font-size: 16px; letter-spacing: 0.5px; }
-    .intake-grid   { grid-template-columns: 1fr !important; gap: 12px; }
-    .intake-grid-3 { grid-template-columns: 1fr !important; gap: 12px; }
-    .intake-field input,
-    .intake-field select { padding: 14px 16px; font-size: 16px; }
-    .intake-field label { font-size: 10px; margin-bottom: 5px; }
-    .intake-rewards { gap: 8px; }
-    .intake-reward-btn { flex: 1 1 calc(50% - 4px); justify-content: center; padding: 10px 12px; font-size: 13px; }
-    .intake-plan-pills { flex-direction: column; gap: 10px; }
-    .intake-plan-pill { padding: 14px 16px; }
-    .ipp-name { font-size: 15px; }
-    .ipp-sub  { font-size: 12px; }
-    .wt-toggle-row { flex-direction: column; gap: 16px; }
-    .wt-toggle-block { min-width: unset; width: 100%; }
-    .wt-count-btns { display: flex; flex-direction: column; gap: 8px; }
-    .wt-btn-row { display: flex; gap: 8px; flex-wrap: nowrap; }
-    .wt-btn-spacer { width: 56px; min-width: 56px; flex-shrink: 0; }
-    .wt-count-btn { padding: 9px 16px; font-size: 14px; }
-    .df-row-body { padding: 14px; }
-    .df-autocomplete-wrap input { font-size: 16px; padding: 12px 14px; }
-    .intake-footer { padding: 16px; flex-direction: column; align-items: stretch; gap: 12px; text-align: center; }
-    .btn-build { width: 100%; justify-content: center; padding: 16px; font-size: 16px; }
-    .intake-required-note { font-size: 11px; text-align: center; }
+    /* ── Intake form — mobile ──
+       2026-09-30: moved further down (search "INTAKE FORM — PHONE"). Here, above the base intake
+       rules, 57 of these declarations lost to them (36px side padding, 22px titles, tier pills
+       stacked 4 high, 15px fields on phones). */
   }
 
 
@@ -1477,8 +1471,8 @@
     #savingsTallyBar,
     .savings-tally-bar { display: none !important; }
 
-    /* Core savings: keep subtle bg on print */
-    #sec-core { background: #f0f8ff !important; }
+    /* 2026-09-30: the "#sec-core { background: #f0f8ff }" print rule is gone with the Core
+       Services restyle (the intake never prints). */
 
     /* Device Financing: always expand on print regardless of toggle state */
     .financing-collapse {
@@ -2020,35 +2014,40 @@
       pointer-events: none;
     }
   }
-  /* ── CORE SAVINGS INTAKE ── */
+  /* ── CORE SAVINGS INTAKE ──
+     2026-09-30 (Core Services restyle): the result is now a quiet strip like a device card
+     (.df-row) instead of a green gradient box, and the note wraps under the amount. Before, the
+     note was pushed right with margin-left:auto and, on a phone, squeezed to one word per line
+     and spilled out of the box (clipped by the section). JS still shows/hides it (style.display). */
   .core-savings-result {
-    margin-top: 16px;
-    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-    border: 2px solid #00C853;
+    max-width: 700px;
+    margin: 14px auto 0;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 16px 20px;
+    padding: 12px 16px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 16px;
+    gap: 2px 14px;
   }
   .csr-label {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #1b5e20;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
   }
   .csr-amount {
     font-family: 'Outfit', sans-serif;
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 800;
-    color: #1b5e20;
+    color: #0f8a3c;   /* the sheet's savings green (.pg-chip-amt) */
   }
   .csr-sub {
-    font-size: 11px;
-    color: #2e7d32;
-    margin-left: auto;
-    font-style: italic;
+    flex-basis: 100%;
+    font-size: 12px;
+    color: var(--text-muted);
   }
 
   /* ── CORE SAVINGS BREAKDOWN (comparison screen) ── */
@@ -2161,6 +2160,9 @@
   /* ── INTAKE SCREEN ── */
   #intakeScreen {
     display: block;
+    /* 2026-09-30: muted text (every field label, the section intros) was #9090b0, 3.1:1 on white,
+       too faint to read comfortably. Darker on the rep's screens only; the customer view is unchanged. */
+    --text-muted: #6e6e90;
   }
   #comparisonScreen {
     display: none;
@@ -2171,8 +2173,20 @@
     background: var(--surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow-md);
-    overflow: hidden;
+    /* 2026-09-30: was overflow:hidden, which cut off the watch and tablet suggestion lists (they
+       open below the last rows of the card), so the last watches/tablets could not be reached.
+       Sideways it still clips; the header and footer round their own corners. */
+    overflow: visible;
+    overflow-x: clip;
     animation: fadeUp 0.4s ease both;
+  }
+  .intake-card > .header {
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+  }
+  .intake-card > .intake-footer {
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
   }
 
   .intake-body {
@@ -2428,6 +2442,11 @@
     color: #e65100;
   }
   .devices-only-banner.visible { display: flex; }
+  /* 2026-09-30: on a phone the long message squeezed the button to 64px (four lines). Now the
+     button drops under the message when there is no room beside it. */
+  .devices-only-banner { flex-wrap: wrap; }
+  .devices-only-banner > span { flex: 1 1 220px; }
+  .devices-only-banner .dob-link { flex: 0 0 auto; }
   .devices-only-banner .dob-link {
     background: transparent;
     border: 1.5px solid #e65100;
@@ -2448,6 +2467,9 @@
   body.devices-only #yrToggleWrap {
     display: none !important;
   }
+  /* 2026-09-30 (6GQ-15): the phone cards stayed live after the customer declined mobile, and a
+     phone picked there went into the Zapier total without being shown or counted. */
+  body.devices-only #sec-financing { display: none !important; }
   body.devices-only .tables-side-by-side-grid { grid-template-columns: 100% !important; }
     body.devices-only #voiceToXMSection { display: block !important; }
     #homePhoneToXM select { width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
@@ -2462,9 +2484,14 @@
 
   /* ── WATCH / TABLET STANDALONE SECTIONS (below Device Financing) ── */
   .wt-standalone-section {
-    background: white;
+    /* 2026-09-30: was background:white, which painted square corners over the rounded border of
+       the watches + tablets panel (.wt-side-by-side). The card behind it is white anyway. */
+    background: transparent;
     text-align: center;
   }
+  /* 2026-09-30: the watch and tablet cards (and their suggestion lists) inherited the centred
+     text of their section; phone cards are left-aligned. */
+  .wt-standalone-section .df-row { text-align: left; }
   .wt-standalone-header {
     display: flex;
     flex-direction: column;
@@ -2582,7 +2609,7 @@
   }
   .df-monthly-inline .df-mo-promo {
     font-size: 10px;
-    color: var(--xfinity-green);
+    color: #0a7532;   /* 2026-09-30: was --xfinity-green #00C853, 1.96:1 on the card header; now 5.1:1 (AA) on #f0eeff */
     font-weight: 600;
     display: block;
   }
@@ -2708,6 +2735,18 @@
     opacity: 0.9;
   }
 
+  /* 2026-09-30: touch targets on phones and iPads were under the 44px minimum: the storage pills
+     (32px tall), the "No trade-in" checkbox (16px, its label 17px tall), the "Remove $30/mo" and
+     "Internet Essentials Quote" toggles (36px) and Store Submissions "Refresh" (42 x 14). */
+  @media (hover: none) and (pointer: coarse) {
+    .df-storage-btn { min-height: 44px; }
+    .df-no-trade-wrap { min-height: 44px; margin-top: 0; }
+    .df-no-trade-wrap input[type="checkbox"] { width: 22px; height: 22px; }
+    .df-no-trade-wrap label { display: inline-flex; align-items: center; min-height: 44px; padding-right: 12px; }
+    #i_removeDiscountWrap > label { min-height: 44px; }
+    /* Store Submissions "Refresh": see .subtrk-refresh further down (it must come after its base rule). */
+  }
+
   /* legacy — kept for JS compat but not used in layout */
   .df-monthly { display: none; }
   .df-trade-wrap { display: contents; }
@@ -2830,6 +2869,95 @@
     box-shadow: 0 6px 24px rgba(103,19,210,0.45);
   }
 
+  /* ── INTAKE FORM — PHONE (≤ 600px) ──
+     2026-09-30: moved here unchanged from the "MOBILE (≤ 600px)" block near the top of the file.
+     Up there the base intake rules came later and overrode them, so phones got 36px side padding,
+     22px section titles that wrapped, tier pills stacked four high and 15px fields. Left out on
+     purpose: `.wt-btn-row { flex-wrap: nowrap }` (the count pills are laid out further down). */
+  @media screen and (max-width: 600px) {
+    .intake-card { border-radius: 0; }
+    .intake-body { padding: 20px 16px; }
+    .intake-section { margin-bottom: 24px; }
+    .intake-section-title { font-size: 16px; letter-spacing: 0.5px; }
+    .intake-grid   { grid-template-columns: 1fr !important; gap: 12px; }
+    .intake-grid-3 { grid-template-columns: 1fr !important; gap: 12px; }
+    .intake-field input,
+    .intake-field select { padding: 14px 16px; font-size: 16px; }
+    .intake-field label { font-size: 10px; margin-bottom: 5px; }
+    .intake-rewards { gap: 8px; }
+    .intake-reward-btn { flex: 1 1 calc(50% - 4px); justify-content: center; padding: 10px 12px; font-size: 13px; }
+    .intake-plan-pills { flex-direction: column; gap: 10px; }
+    .intake-plan-pill { padding: 14px 16px; }
+    .ipp-name { font-size: 15px; }
+    .ipp-sub  { font-size: 12px; }
+    .wt-toggle-row { flex-direction: column; gap: 16px; }
+    .wt-toggle-block { min-width: unset; width: 100%; }
+    .wt-count-btns { display: flex; flex-direction: column; gap: 8px; }
+    .wt-btn-row { display: flex; gap: 8px; }
+    .wt-btn-spacer { width: 56px; min-width: 56px; flex-shrink: 0; }
+    .wt-count-btn { padding: 9px 16px; font-size: 14px; }
+    .df-row-body { padding: 14px; }
+    .df-autocomplete-wrap input { font-size: 16px; padding: 12px 14px; }
+    .intake-footer { padding: 16px; flex-direction: column; align-items: stretch; gap: 12px; text-align: center; }
+    .btn-build { width: 100%; justify-content: center; padding: 16px; font-size: 16px; }
+    .intake-required-note { font-size: 11px; text-align: center; }
+  }
+
+  /* 2026-09-30: watch/tablet count pills on phones. They wrapped raggedly (None 1 2 3 / 4 5 /
+     6 7 8 9 / 10) because the 56px spacer stayed on after wrapping. Now the same two rows as on
+     the iPad, None 1–5 over [spacer] 6–10, in six columns (None's a little wider) so the numbers line up. */
+  @media screen and (max-width: 600px) {
+    .wt-side-by-side { align-self: stretch; }   /* full width like the phone cards (the old pill rows forced it) */
+    .wt-count-btns { width: 100%; max-width: 360px; }
+    .wt-btn-row { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(5, minmax(0, 1fr)); gap: 6px; }
+    .wt-btn-spacer { width: auto; min-width: 0; }
+    .wt-count-btn { min-width: 0; padding: 9px 0; }
+  }
+  /* 2026-09-30: the same two rows where watches and tablets sit side by side in two narrow
+     columns (781-899px: the portrait iPad opened directly, 820 and 834 wide). Their pills
+     wrapped raggedly there, None 1 2 3 4 / 5 / 6-10 (the lone "5" on its own row). Narrower,
+     the panel stacks and each row fits; wider, None 1-5 / 6-10 already fit as before. */
+  @media screen and (min-width: 781px) and (max-width: 899px) {
+    .wt-side-by-side { align-self: stretch; }   /* full width as before (the old pill rows forced it) */
+    .wt-count-btns { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .wt-btn-row { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(5, minmax(0, 1fr)); gap: 6px; }
+    .wt-btn-spacer { width: auto; min-width: 0; }
+    .wt-count-btn { min-width: 0; padding-left: 0; padding-right: 0; }
+  }
+
+  /* 2026-09-30: the running tally on phones. Its two amounts and their captions wrapped into
+     three or four rows, so the fixed bar was 188px tall at 390px wide: it covered the page header
+     (and the devices-only banner) at the top of the page and, with the keyboard up, most of what
+     was left of the screen. Up to 740px it is now one slim 38px row: the 💰, then the monthly and
+     yearly amounts with their "/ mo" and "/ yr" units. The page starts right below it. */
+  @media screen and (max-width: 740px) {
+    .savings-tally-bar { padding: 6px 12px; }
+    .stb-inner { gap: 10px; justify-content: center; }
+    /* keep the 💰, drop the words (their own spans in the markup: ::first-letter on an emoji is not
+       reliable in every browser) */
+    .stb-label-row { font-size: 0; letter-spacing: 0; line-height: 0; }
+    .stb-label-row .stb-ico { font-size: 18px; line-height: 24px; }
+    .stb-label-row .stb-words { display: none; }
+    .stb-stats { flex: 0 1 auto; flex-wrap: nowrap; }
+    .stb-stat { flex-wrap: nowrap; padding: 0 10px; }
+    .stb-amount { font-size: 20px; }
+    .stb-desc { display: none; }
+    .stb-divider { height: 24px; }
+    /* The room for the bar is the intake card's own top margin, so it is right even on the paths
+       that come back to the intake without body.tally-active (e.g. Customer Declines Mobile Offer). */
+    body.tally-active { padding-top: 0; }
+    .intake-card { margin-top: 50px; }   /* 38px bar + 12px */
+  }
+  @media screen and (max-width: 600px) {
+    .intake-card { margin-top: 38px; }   /* the card runs edge to edge on a phone */
+  }
+  /* The browser's own "bring the focused field into view" scrolling keeps fields clear of the bar
+     (only while the bar shows; the customer view hides it). */
+  html:has(#savingsTallyBar.visible) { scroll-padding-top: 76px; }
+  @media screen and (max-width: 740px) {
+    html:has(#savingsTallyBar.visible) { scroll-padding-top: 48px; }
+  }
+
   /* Back button on comparison screen */
   .back-btn {
     display: inline-flex;
@@ -2913,31 +3041,12 @@
     .savings-tally-bar { display: none !important; }
   }
 
-  /* ── CORE SAVINGS — stands out with soft purple glow ── */
-  #sec-core {
-    background: linear-gradient(135deg, #f0f8ff 0%, #e8f5ff 100%);
-    border: 2px solid var(--xfinity-purple-light);
-    border-radius: var(--radius);
-    padding: 20px 24px !important;
-    position: relative;
-    overflow: hidden;
-  }
-
-  #sec-core::before {
-    content: '';
-    position: absolute;
-    top: -30px; right: -30px;
-    width: 120px; height: 120px;
-    background: rgba(103,19,210,0.06);
-    border-radius: 50%;
-    pointer-events: none;
-  }
-
-  #sec-core .intake-section-title {
-    color: var(--xfinity-purple) !important;
-    font-size: 17px !important;
-    font-weight: 800 !important;
-  }
+  /* ── CORE SAVINGS ──
+     2026-09-30 (Core Services restyle): a plain intake section like "Current Carrier Information"
+     (no rules of its own). It used to be its own light-blue box with a purple border, a decorative
+     bubble and a smaller 17px title, the only section styled that way. Same ids, handlers, fields
+     and position. Repackage Details reads as part of Core Savings: its card sits right under the result. */
+  #sec-core:has(+ #repackagePanel.visible) { margin-bottom: 0; }
 
   /* ── DEVICE FINANCING — collapsible toggle section ── */
   #sec-financing {
@@ -2945,7 +3054,8 @@
   }
   /* 2026-09-27: always open. The line cards sit directly under the section title;
      the old toggle-bar rules below stay only for the print/PDF blocks that name them. */
-  #sec-financing .fin-lede {
+  /* 2026-09-30: shared by Device Financing and Core Savings (was scoped to #sec-financing). */
+  .fin-lede {
     font-size: 13px; color: var(--text-muted); margin: -6px 0 14px; text-align: center;
   }
   #sec-financing .financing-collapse,
@@ -3070,17 +3180,30 @@
   }
 
 
-/* ── Repackage Details ── */
-.repackage-panel{margin-top:12px;padding:18px 20px;border:2px solid var(--xfinity-purple);border-radius:14px;background:var(--surface-secondary);display:none;width:100%;box-sizing:border-box;}
+/* ── Repackage Details ──
+   2026-09-30 (Core Services restyle): a device-card style panel (.df-row look: light fill, thin
+   border, a header strip) whose selects look like every other select on the sheet. Before it was
+   a second box with a 2px purple border, a background token that does not exist (so it was see-
+   through) and small native 13px selects with grey chevrons. Same ids, options and position. */
+.repackage-panel{max-width:700px;margin:14px auto 0;padding:0;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);display:none;width:100%;box-sizing:border-box;}
 .repackage-panel.visible{display:block;}
 /* 2026-09-27: the panel now sits above Current Carrier Information, so give that heading room. */
 #repackagePanel.visible{margin-bottom:32px;}
-.repackage-title{text-align:center;font-weight:800;font-size:15px;color:var(--xfinity-purple);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
-.repackage-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;}
-.repackage-col-head{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-secondary);text-align:center;margin-bottom:4px;}
-.rpkg-cat{font-weight:700;font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;}
-.rpkg-select{width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:13px;color:var(--text-primary);margin-bottom:8px;appearance:auto;}
-.rpkg-select:focus{border-color:var(--xfinity-purple);outline:none;}
+.repackage-title{margin:0;padding:10px 14px;background:var(--surface-3);border-bottom:1px solid var(--border);border-radius:var(--radius-sm) var(--radius-sm) 0 0;
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-secondary);text-align:left;}
+.repackage-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 16px;padding:12px 14px 14px;}
+.repackage-col-head{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--xfinity-purple);text-align:left;margin:0;}
+.rpkg-cat{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin:0 0 6px;}
+.rpkg-select{width:100%;min-height:44px;margin:0;padding:12px 38px 12px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);
+  font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text-primary);cursor:pointer;outline:none;
+  -webkit-appearance:none;appearance:none;
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236713D2' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+  transition:border-color .2s,box-shadow .2s;}   /* white on the tinted card, like the fields in a device card */
+.rpkg-select:focus{border-color:var(--xfinity-purple);box-shadow:0 0 0 3px rgba(103,19,210,.1);background-color:#fff;outline:none;}
+@media screen and (max-width:420px){
+  .repackage-grid{gap:10px;padding:12px 10px;}
+  .rpkg-select{padding-left:12px;padding-right:30px;background-position:right 10px center;}
+}
 
   /* ══════════════════════════════════════════════════════════════
      LIVE SUBMISSION TRACKER  (added 2026-08-27)
@@ -3162,6 +3285,12 @@
     font-size: 11px; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline;
   }
   .subtrk-refresh:disabled { color: var(--text-muted); cursor: default; text-decoration: none; }
+  /* 2026-09-30: "Refresh" was a 42 x 14 tap target on phones and iPads; now 44px tall (the
+     negative margins let it use the footer's own padding, so the text stays where it was). */
+  @media (hover: none) and (pointer: coarse) {
+    .subtrk-foot { align-items: center; }
+    .subtrk-refresh { min-height: 44px; padding: 0 8px; margin: -8px -8px -8px 0; }
+  }
   /* Monthly t-sheet goal (2026-09-27): from the Monthly Target Planner's latest upload. */
   .subtrk-total-sub { margin-top: 3px; font-size: 11px; font-weight: 600; color: var(--text-muted); }
   .subtrk-total-sub b { color: var(--text-primary); font-weight: 700; }
@@ -3325,6 +3454,21 @@
 #comparisonScreen .xf-chip .xf-ic{font-size:15px;color:var(--xf-pur)}
 #comparisonScreen .xf-chip-l{font-family:var(--xf-disp);font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--xf-txt3);white-space:nowrap}
 #comparisonScreen .xf-chip-v{flex:1 1 auto;font-size:12.5px;font-weight:700;color:var(--xf-txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* 2026-09-30: the rep's email and the date wrap instead of being cut off. On a portrait iPad the
+   longer directory emails showed as "fpedraza-scalfano@blufoxmo…" and the date as
+   "September 30, 20…", and the Email PDF cut the email off with no ellipsis at all. */
+#comparisonScreen #hdr-repEmail,#comparisonScreen #quoteDate{white-space:normal;overflow-wrap:anywhere;text-overflow:clip}
+/* ...but in the Email PDF the strip must not get taller: page 1 of a PDF made on a portrait iPad in
+   the site viewer (741px) has about 5px to spare, and any extra line pushed the "* Estimate only…"
+   note under the savings banner to the top of page 2. There the date stays on one line (at 720px
+   and up it overhangs its text box by 7px at most, inside the chip's own 12px padding; it never
+   ellipsized in the PDF), and an email long enough to wrap takes two tight lines within the
+   chip's usual 30px (a one-line email looks exactly as before). */
+@container xf (min-width:720px){ #comparisonScreen .xf-pdf #quoteDate{white-space:nowrap;overflow:visible} }
+/* 621-719 (a PDF captured 653-751px wide, e.g. the iPad mini portrait): one line too, a touch smaller */
+@container xf (min-width:621px) and (max-width:719px){ #comparisonScreen .xf-pdf #quoteDate{white-space:nowrap;overflow:visible;font-size:11px;letter-spacing:-.01em} }
+#comparisonScreen .xf-pdf .xf-chip:has(> #hdr-repEmail){padding-top:1px;padding-bottom:1px}
+#comparisonScreen .xf-pdf #hdr-repEmail{line-height:13px;overflow:visible}   /* visible: the tight line box must not clip the p/@ descenders */
 #comparisonScreen .xf-chip-v .tier-badge{padding:1px 9px 1px 7px;font-size:12px;gap:5px}
 #comparisonScreen .xf-chip-v .tier-badge .dot{width:8px;height:8px}
 @container xf (max-width:900px){ #comparisonScreen .xf-chip:not(.xf-chip-tier) .xf-chip-l{display:none} }
@@ -3427,6 +3571,12 @@
   #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-line{padding:0 10px}
   #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-chip{white-space:nowrap;font-size:12.5px;padding:6px 12px 6px 10px;margin:0 8px}
 }
+/* 2026-09-30: the one-line chip above is meant for the iPad split; on a 360-375px phone it ran off
+   centre to the edge (and was clipped at 360). On a narrow banner it drops its side margins and a
+   half size so it stays on one line down to 375px, and wraps rather than clips below that. */
+@container xfsav (max-width:420px){
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-chip{white-space:normal;margin:0;font-size:12px;padding:6px 10px 6px 8px}
+}
 /* LANDSCAPE iPad (screen only; the PDF clone .xf-pdf keeps its own page layout): the two cards
    side by side and the split savings banner under both (above), sized so cards + banner fit
    on one screen inside the
@@ -3499,6 +3649,9 @@
   font-family:var(--xf-disp);font-size:clamp(9px,3cqw,11.5px);font-weight:900;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;
   animation:xfBadgeIn .5s cubic-bezier(.34,1.56,.64,1) .45s both}
 #comparisonScreen .xf-offer-badge .xf-ic{font-size:1.15em}
+/* 2026-09-30: on 360-375px phones "YOUR XFINITY OFFER" ran past its gold pill and the card edge. */
+@container xfcard (max-width:200px){ #comparisonScreen .xf-offer-badge{letter-spacing:.06em;padding:5px 9px 5px 7px;gap:4px} }
+@container xfcard (max-width:170px){ #comparisonScreen .xf-offer-badge .xf-ic{display:none} }   /* 360px phones: no room for the star */
 @keyframes xfBadgeIn{from{opacity:0;transform:translateY(8px) scale(.7)}to{opacity:1;transform:none}}
 
 /* core-services items (buildComparison + devices-only templates; !important beats the devices-only inline styles) */
@@ -3572,6 +3725,16 @@ body.devices-only #comparisonScreen .xf-tables{grid-template-columns:minmax(0,1f
 #comparisonScreen .xf-tbl-blk{min-width:0;padding:0;border:0}
 #comparisonScreen .xf-sec-head-sm{margin-bottom:12px}
 #comparisonScreen .xf-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:18px;background:var(--xf-white);border:1.5px solid var(--xf-rowline);box-shadow:var(--xf-sh1)}
+/* 2026-09-30: a table wider than its box (the device table on a phone: 614px in a 364px box) scrolls
+   sideways, but nothing said so and "Monthly Payment" was off-screen. While there is more to the
+   right the box fades out at its right edge (.xf-more is kept up to date by a small script near the
+   end of the file; the PDF clone is .xf-pdf and never fades). Phone widths only, and only when a
+   real part of the table is hidden (over 64px): a heavy quote's table overhangs its box by 28-38px
+   on a landscape iPad, where the fade only dimmed the Monthly Payment amounts. */
+@container xf (max-width:700px){
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-table-wrap.xf-more{
+    -webkit-mask-image:linear-gradient(to left,rgba(0,0,0,.18) 0,#000 56px);mask-image:linear-gradient(to left,rgba(0,0,0,.18) 0,#000 56px)}
+}
 #comparisonScreen .xf-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;color:var(--xf-txt2)}
 #comparisonScreen .xf-table th{padding:12px 10px;text-align:left;vertical-align:bottom;background:var(--xf-pur);color:#fff;
   font-family:var(--xf-disp);font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;line-height:1.25;word-break:normal;overflow-wrap:normal}
@@ -3590,6 +3753,15 @@ body.devices-only #comparisonScreen .xf-tables{grid-template-columns:minmax(0,1f
 #comparisonScreen #deviceSummaryTable td:nth-child(3){min-width:104px;font-size:12px!important}
 #comparisonScreen #deviceSummaryTable td:nth-child(n+4){white-space:nowrap}
 #comparisonScreen #deviceSummaryTable td:last-child{font-family:var(--xf-disp);font-weight:900!important;color:var(--xf-price)!important}
+/* 2026-09-30: with the two tables side by side (container 1000px and up: the iPad landscape, in the
+   site viewer or not) a heavy device table was 668px in a 632-642px column, cutting "Monthly Payment"
+   to "MONTHL" and "$19.44/m" with no cue. The inner cell padding goes from 10px to 6px (outer 16px to 12px) there, so it fits. */
+@container xf (min-width:1000px){
+  body:not(.devices-only) #comparisonScreen #deviceSummaryTable th:not(:first-child),body:not(.devices-only) #comparisonScreen #deviceSummaryTable td:not(:first-child){padding-left:6px}
+  body:not(.devices-only) #comparisonScreen #deviceSummaryTable th:not(:last-child),body:not(.devices-only) #comparisonScreen #deviceSummaryTable td:not(:last-child){padding-right:6px}
+  body:not(.devices-only) #comparisonScreen #deviceSummaryTable th:first-child,body:not(.devices-only) #comparisonScreen #deviceSummaryTable td:first-child{padding-left:12px}
+  body:not(.devices-only) #comparisonScreen #deviceSummaryTable th:last-child,body:not(.devices-only) #comparisonScreen #deviceSummaryTable td:last-child{padding-right:12px}
+}
 #comparisonScreen #deviceSummaryTable span[style*="xfinity-green"]{color:var(--xf-green-ink)!important;font-weight:800!important}
 #comparisonScreen #deviceSummaryTable span[style*="xfinity-accent"]{color:var(--xf-pur)!important;font-weight:700!important}
 #comparisonScreen #deviceSummaryTable em{color:var(--xf-txt3)!important}
@@ -3645,6 +3817,21 @@ body.devices-only #comparisonScreen .xf-tables{grid-template-columns:minmax(0,1f
   #comparisonScreen .xf-actionbar .xf-btn-txt{padding:0 8px}
 }
 @container xf (max-width:560px){ #comparisonScreen .xf-actionbar{position:relative;box-shadow:none;background:var(--xf-page)} }
+/* 2026-09-30: between the phone grid (below) and the full-width bar, the five buttons wrapped
+   onto two rows with SUBMIT alone on the second (a 126px sticky bar on the portrait iPad inside
+   the site viewer and the 11" iPad Pro). One row: only the Decline label may wrap onto two lines.
+   Decline keeps a readable width (14em), and a long Submit status ("⏳ Sending… keep this page
+   open", shown for the whole send when the browser can't store the quote) wraps inside its own
+   button, at most 13.5em wide. Before, that status crushed Decline to 26-100px with its label
+   spilling out over the ×. The normal labels (Submit, Saving…, Submitted!) fit well within 13.5em,
+   so they look exactly as before. */
+@container xf (min-width:701px) and (max-width:880px){
+  #comparisonScreen .xf-actionbar .footer-btn-row{flex-wrap:nowrap}
+  #comparisonScreen .xf-actionbar .btn.btn-footer-decline{white-space:normal;min-width:14em;flex:0 1 auto;text-align:center}
+  #comparisonScreen .xf-actionbar .btn.btn-footer-decline span{text-wrap:balance}
+  #comparisonScreen .xf-actionbar .btn.btn-footer-submit{flex-shrink:0;max-width:13.5em;white-space:normal;text-wrap:balance;text-align:center}
+  #comparisonScreen .xf-actionbar .btn.btn-footer-submit:disabled{line-height:1.1}   /* the status lines while it sends */
+}
 @container xf (max-width:700px){
   #comparisonScreen .xf-actionbar .footer-btn-row{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:6px}
   #comparisonScreen .xf-actionbar .btn{min-height:46px;padding:0 10px;font-size:12.5px;white-space:normal;line-height:1.15;text-align:center}
@@ -3666,6 +3853,15 @@ body.devices-only #comparisonScreen .xf-tables{grid-template-columns:minmax(0,1f
 .pg-modal .pg-close{position:absolute;z-index:2;top:14px;right:14px;width:44px;height:44px;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.14);
   color:#fff;font-size:24px;line-height:44px;text-align:center;cursor:pointer}
 .pg-modal .pg-close:hover{background:rgba(255,255,255,.28);color:#fff}
+/* 2026-09-30: on a phone a promo sheet is 1,800-2,100px tall and its only × scrolled away with the
+   header, and scrolling past the end moved the page behind it. Now the scroll stays inside the
+   sheet (overscroll-behavior; pgOpen also locks the page) and the × stays pinned to the top of the
+   screen (sticky; it is the card's first child, and the card clips with overflow:clip, which, unlike
+   hidden, does not stop sticky). At rest it sits exactly where it was: 14px in from the corner. */
+.pg-modal{overscroll-behavior:contain}
+.pg-modal .pg-modal-inner{display:flow-root;overflow:hidden;overflow:clip}
+.pg-modal .pg-modal-inner > .pg-close{position:-webkit-sticky;position:sticky;top:14px;right:auto;display:block;margin:14px 14px -58px auto}
+.pg-modal.pg-scrolled .pg-modal-inner > .pg-close{background:rgba(24,0,84,.86);box-shadow:0 4px 16px rgba(10,0,40,.35)}
 .pg-modal .pg-diamond-strip{display:inline-flex;align-items:center;gap:6px;margin:0 0 10px;padding:4px 12px;border-radius:99px;font-family:'Montserrat',sans-serif;
   font-size:10px;font-weight:900;letter-spacing:.14em;background:linear-gradient(135deg,#DDF6FF,#9CC3EA);color:#0d3d63}
 .pg-modal .pg-title{margin:0;font-family:'Montserrat',-apple-system,sans-serif;font-size:22px;font-weight:900;letter-spacing:-.02em;line-height:1.18;color:#fff}
@@ -3765,17 +3961,38 @@ function _loadPdfLibs() {
   var load = function (src) {
     return new Promise(function (res, rej) {
       var el = document.createElement('script');
-      el.src = src; el.onload = res; el.onerror = function () { rej(new Error('failed ' + src)); };
+      // 2026-09-30: a CDN request that never answers (store Wi-Fi) left Email PDF / Print on
+      // "Preparing…" forever, on every tap. Now it gives up after 15 s: the builder shows its
+      // "PDF library not loaded yet" alert and the next tap tries again (see below).
+      var timer = setTimeout(function () {
+        try { el.remove(); } catch (e) {}
+        rej(new Error('timeout ' + src));
+      }, 15000);
+      el.src = src;
+      el.onload = function () { clearTimeout(timer); res(); };
+      el.onerror = function () { clearTimeout(timer); rej(new Error('failed ' + src)); };
       document.head.appendChild(el);
     });
   };
+  // 2026-09-30: every try after a failed one uses a URL the browser has not asked for yet. A hung request
+  // stays open in the browser after its <script> is removed, and a new <script> with the same URL waits
+  // on it (measured: no new request went out, so the "next tap" hung again even with the CDN back). The
+  // 2nd try uses cdnjs (byte-identical copies of the same versions, in case jsDelivr is what is blocked),
+  // later tries alternate between the two with ?try=N. A library that already arrived is not re-fetched.
+  var SRCS = [
+    ['https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js', 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js'],
+    ['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js']
+  ];
+  var tryN = window._pdfLibsTry = (window._pdfLibsTry || 0) + 1;
+  var set = SRCS[(tryN - 1) % 2], q = tryN > 2 ? '?try=' + tryN : '';
   window._pdfLibsPromise = Promise.all([
-    load('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'),
-    load('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js')
+    window.html2canvas ? null : load(set[0] + q),
+    window.jspdf ? null : load(set[1] + q)
   ]).catch(function (e) { window._pdfLibsPromise = null; throw e; });
   return window._pdfLibsPromise;
 }
-window.addEventListener('load', function () { setTimeout(function () { _loadPdfLibs().catch(function () {}); }, 3000); });
+// 2026-09-30: after load, or 10 s after DOMContentLoaded when a hung request holds load (see __bfxAfterLoad).
+(window.__bfxAfterLoad || function (f) { window.addEventListener('load', f); })(function () { setTimeout(function () { _loadPdfLibs().catch(function () {}); }, 3000); });
 </script>
 </head>
 <body>
@@ -3927,20 +4144,20 @@ window.addEventListener('load', function () { setTimeout(function () { _loadPdfL
            order only; the customer view is unchanged. -->
       <div class="intake-section" id="sec-core">
         <div class="intake-section-title">💡 Core Savings</div>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;text-align:center;">Show how much the customer saves on their core services when they rebundle with Xfinity Mobile.</p>
+        <p class="fin-lede">Show how much the customer saves on their core services when they rebundle with Xfinity Mobile.</p>
         <div class="intake-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px;margin:0 auto;">
           <div class="intake-field">
             <label>Current Core Bill (Internet, TV, etc.)</label>
             <div style="position:relative;">
               <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:700;font-size:15px;color:var(--text-secondary);pointer-events:none;">$</span>
-              <input type="number" id="i_coreCurrent" autocomplete="off" placeholder="0.00" style="padding-left:28px;" oninput="calcCoreSavings()">
+              <input type="number" id="i_coreCurrent" inputmode="decimal" enterkeyhint="next" autocomplete="off" placeholder="0.00" style="padding-left:28px;" oninput="calcCoreSavings()">
             </div>
           </div>
           <div class="intake-field">
             <label>Core Bill After Rebundle With Xfinity Mobile</label>
             <div style="position:relative;">
               <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:700;font-size:15px;color:var(--text-secondary);pointer-events:none;">$</span>
-              <input type="number" id="i_coreRebundle" autocomplete="off" placeholder="0.00" style="padding-left:28px;" oninput="calcCoreSavings()">
+              <input type="number" id="i_coreRebundle" inputmode="decimal" enterkeyhint="next" autocomplete="off" placeholder="0.00" style="padding-left:28px;" oninput="calcCoreSavings()">
             </div>
           </div>
         </div>
@@ -4036,7 +4253,7 @@ window.addEventListener('load', function () { setTimeout(function () { _loadPdfL
             <label>Current Monthly Bill <span style="color:#e53935;">*</span></label>
             <div style="position:relative;">
               <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:700;font-size:15px;color:var(--text-secondary);pointer-events:none;">$</span>
-              <input type="number" id="i_bill" autocomplete="off" placeholder="0.00" style="padding-left:28px;">
+              <input type="number" id="i_bill" inputmode="decimal" enterkeyhint="next" autocomplete="off" placeholder="0.00" style="padding-left:28px;">
             </div>
           </div>
         </div>
@@ -4241,7 +4458,8 @@ window.addEventListener('load', function () { setTimeout(function () { _loadPdfL
 ══════════════════════════════════════ -->
 <div class="savings-tally-bar visible" id="savingsTallyBar">
   <div class="stb-inner">
-    <div class="stb-label-row">💰 RUNNING SAVINGS TALLY</div>
+    <!-- 2026-09-30: the 💰 and the words in their own spans so a phone can show just the 💰 (same text). -->
+    <div class="stb-label-row"><span class="stb-ico">💰</span> <span class="stb-words">RUNNING SAVINGS TALLY</span></div>
     <div class="stb-stats">
       <div class="stb-stat">
         <div class="stb-amount stb-monthly" id="fssMonthly">$—</div>
@@ -4498,7 +4716,7 @@ window.addEventListener('load', function () { setTimeout(function () { _loadPdfL
     <div class="actions-footer xf-actionbar no-print">
       <div class="footer-btn-row no-print">
         <button class="btn btn-footer-back xf-btn-txt" onclick="goBack()"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 18l-6-6 6-6"/></svg><span>Back</span></button>
-        <button class="btn btn-footer-decline xf-btn-dec" onclick="declineMobileOffer()"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Customer Declines Mobile Offer</span></button>
+        <button class="btn btn-footer-decline xf-btn-dec" onclick="confirmDeclineMobileOffer()"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Customer Declines Mobile Offer</span></button>
         <button class="btn btn-footer-save btn-footer-email xf-btn-alt" onclick="handleEmailPDF()"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/></svg><span>Email PDF</span></button>
         <button class="btn btn-footer-print xf-btn-alt" onclick="handlePrint()"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 9V2.5h11V9"/><rect x="2.5" y="9" width="19" height="8.5" rx="2"/><path d="M6.5 14h11v7.5h-11z"/></svg><span>Print</span></button>
         <button class="btn btn-footer-submit xf-btn-yes" onclick="handleSubmit()"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6.5L9.5 17 4 11.5"/></svg><span>Submit</span></button>
@@ -12405,32 +12623,63 @@ function getXmcRate(fullRetailPrice) {
 // ── DIAMOND WATCH DISCOUNT ──
 const DIAMOND_WATCH_DISCOUNT = 299.99; // $299.99 off per watch for Diamond tier (CD824; was $300 — the card says $299.99, corrected 2026-09-12)
 
+// 2026-09-30 (6GQ-01): the Diamond credit was applied to ANY watch, so the Apple Watch
+// Series 12 and Ultra 4 (added to the catalog 9/12, not on the card) got $299.99 off.
+// These are the model families on CD824's device_scope (PROMO_GUIDE smartwatch_300_diamond);
+// recalcRow and the promo chip both gate on this list, so the chip and the money agree.
+const DIAMOND_WATCH_MODELS = [
+  'Apple Watch Series 10', 'Apple Watch Series 11', 'Apple Watch Ultra 2', 'Apple Watch Ultra 3', 'Apple Watch SE 3',
+  'Samsung Galaxy Watch Ultra 47mm', 'Samsung Galaxy Watch Ultra2', 'Samsung Galaxy Watch Ultra 2',
+  'Samsung Galaxy Watch8', 'Samsung Galaxy Watch9',
+  'Google Pixel Watch 4', 'Google Pixel Watch 5',
+];
+function isDiamondWatch(name) {
+  const n = String(name || '');
+  return DIAMOND_WATCH_MODELS.some(p => n.startsWith(p));
+}
+
 // ── BRAND PAIRING HELPERS ──
-// Reads the phone selected on Line 1 and returns the brand name
-function getPrimaryPhoneBrand() {
-  const row = document.getElementById('phone-row-1');
-  if (!row) return '';
-  const name = (row.dataset.deviceName || '').toLowerCase();
+// Brand of a phone name (same rules the Line 1 check always used).
+function phoneBrandOf(deviceName) {
+  const name = (deviceName || '').toLowerCase();
   if (name.includes('apple') || name.includes('iphone') || name.includes('ipad')) return 'Apple';
   if (name.includes('samsung') || name.includes('galaxy')) return 'Samsung';
   if (name.includes('google') || name.includes('pixel')) return 'Google';
   if (name.includes('motorola') || name.startsWith('moto')) return 'Motorola';
   return '';
 }
+// Reads the phone selected on Line 1 and returns the brand name
+function getPrimaryPhoneBrand() {
+  const row = document.getElementById('phone-row-1');
+  if (!row) return '';
+  return phoneBrandOf(row.dataset.deviceName);
+}
 
 // Returns watches filtered to the paired brand, sorted cheapest→most expensive
+// 2026-09-30 (6GQ-18): paired on EVERY picked phone, not Line 1 only — a Pixel on line 1
+// and an iPhone on line 2 left no Apple Watch to quote. The list is the union of the
+// Apple/Samsung/Google phones picked; a BYOD line adds no brand (iPhone + BYOD stays
+// Apple-only, as before). The full list when no such phone is picked, or when a Motorola
+// is (no Motorola watches — the old Line 1 rule).
 function getWatchDataset() {
-  const brand = getPrimaryPhoneBrand();
+  const brands = new Set();
+  let anyBrand = false;
+  document.querySelectorAll('.df-row[data-type="phone"]').forEach(r => {
+    if (!r.dataset.deviceName) return; // nothing picked on this line yet
+    const b = phoneBrandOf(r.dataset.deviceName);
+    if (b === 'Apple' || b === 'Samsung' || b === 'Google') brands.add(b);
+    else if (b === 'Motorola') anyBrand = true;
+    // BYOD / unrecognised name: no watch brand of its own — adds nothing
+  });
   let filtered;
-  if (brand === 'Apple') {
-    filtered = WATCHES_FOR_SALE.filter(w => w.name.startsWith('Apple'));
-  } else if (brand === 'Samsung') {
-    filtered = WATCHES_FOR_SALE.filter(w => w.name.startsWith('Galaxy') || w.name.startsWith('Samsung'));
-  } else if (brand === 'Google') {
-    filtered = WATCHES_FOR_SALE.filter(w => w.name.startsWith('Pixel') || w.name.startsWith('Google'));
-  } else {
-    // Motorola (no Motorola watches on Xfinity) or unknown — show all
+  if (anyBrand || brands.size === 0) {
+    // Motorola (no Motorola watches on Xfinity), only BYOD, or nothing picked — show all
     filtered = WATCHES_FOR_SALE;
+  } else {
+    filtered = WATCHES_FOR_SALE.filter(w =>
+      (brands.has('Apple')   && w.name.startsWith('Apple')) ||
+      (brands.has('Samsung') && (w.name.startsWith('Galaxy') || w.name.startsWith('Samsung'))) ||
+      (brands.has('Google')  && (w.name.startsWith('Pixel') || w.name.startsWith('Google'))));
   }
   return [...filtered].sort((a, b) => a.price - b.price);
 }
@@ -14090,6 +14339,13 @@ function pgMatches(p, ctx) {
   if (!onThisSheet) return false;
   if (!pgActive(p)) return false;
 
+  // 2026-09-30 (6GQ-09): NOW Mobile (prepaid) qualifies for none of these deals, but the
+  // plan used to reach here as '' and skip the plan check, so its quote advertised TIPs,
+  // $400 off, waived activation and the free line. The free line (Select/Plus) also needs
+  // promo pricing: it does not stack with Internet Essentials or "Remove $30" pricing.
+  if (ctx.plan === 'now_mobile') return false;
+  if (p.tag === 'free_line' && ctx.freeLine === false) return false;
+
   const w = p.display_when || {};
 
   // 3. Diamond gate — hard rule, never leaks a Diamond deal to a non-Diamond.
@@ -14140,6 +14396,14 @@ function pgMatches(p, ctx) {
   // 8. Trade-in
   if (w.trade_in === 'required' && ctx.tradeState === 'no') return false;
 
+  // 2026-09-30 (6GQ-01): the Diamond watch deal only covers the watches on its card
+  // (DIAMOND_WATCH_MODELS, the same list recalcRow credits). Once watches are picked
+  // and none is on it, the chip goes, as the credit does.
+  if (w.device_type === 'watch' && typeof isDiamondWatch === 'function') {
+    const watches = (ctx.watchNames || []).filter(Boolean);
+    if (watches.length && !watches.some(isDiamondWatch)) return false;
+  }
+
   return true;
 }
 
@@ -14189,10 +14453,104 @@ function pgEsc(s) {
 }
 
 /* ── Detail card ───────────────────────────────────────────────────────── */
+// 2026-09-30 (the Upgrade sheet's UQ-08 fix, here too): these cards open only from the customer
+// view's "Current promotions" chips, and they showed the customer rep-only notes: "New-line copy
+// (Jeff, 2026-09-28)", "the title, body and DEALS94 all say $1,300", "absent from CD871 … see
+// APPLE_DEAL_MODELS in the code", "The deal card itself still reads 9/21; DEALS18 … governs", and
+// the "Deal card" fact. On the customer view the card now leaves out the Deal card fact and every
+// line that is a rep note, drops deal-card asides and sentences, and names other offers by their
+// marketing name instead of their tag. The promo tables are untouched; the full card is kept for
+// any future rep-side entry point.
+function pgIsCustomerView() {
+  try {
+    const cs = document.getElementById('comparisonScreen');
+    return !!cs && getComputedStyle(cs).display !== 'none';
+  } catch (e) { return false; }
+}
+// A whole line that is a rep note: Jeff, the deal desk, Celestial, a DEALS source, an internal tag or
+// code name (tips_apple_1300, APPLE_DEAL_MODELS), the Upgrade sheet. DEALS/CD are matched in capitals
+// only, so the everyday word "deals" ("it stacks with the device deals") is not taken for one.
+const PG_REP_NOTE = /\b(?:Jeff|deal desk|Celestial)\b|\b(?:the|Upgrade) sheet\b|^RE-ISSUED\b|\bconfirmed \d+\/\d+/i;
+const PG_REP_CODE = /\bDEALS\d+\b|\b[A-Za-z]+(?:_[A-Za-z0-9]+)+\b/;
+function pgIsRepNote(x) { return PG_REP_NOTE.test(x) || PG_REP_CODE.test(x); }
+// Deal-card bookkeeping inside an otherwise customer-facing line (CD871, DEALS18, "the card's own
+// legal disclaimer still says 9/10/26").
+const PG_CARD_NOTE = /\b(?:cards?|Celestial|Jeff|deal desk)\b|\b(?:the|Upgrade) sheet\b/i;
+const PG_CARD_CODE = /\bCD\d{3}\b|\bDEALS\d+\b/;
+function pgIsCardNote(x) { return PG_CARD_NOTE.test(x) || PG_CARD_CODE.test(x); }
+// "check CD872 first" -> "check “<that offer's name>” first" when the card is one of this sheet's
+// offers (deal_card in PROMO_GUIDE); other codes are left for the rules below.
+function pgCardName(code) {
+  const q = (typeof PROMO_GUIDE !== 'undefined' ? PROMO_GUIDE : []).find(z => z && z.deal_card === code);
+  return q && q.marketing_name ? '“' + q.marketing_name + '”' : '';
+}
+function pgCustomerText(x) {
+  let t = String(x == null ? '' : x);
+  t = t.replace(/\b(check|see|try)\s+(CD\d{3})\b/g, function (m, v, code) { const n = pgCardName(code); return n ? v + ' ' + n : m; });
+  // Asides: "(Jeff, 2026-09-28)", "(CD824, 9/18)", "(DEALS18 modified 9/11)" go; one that also
+  // carries money keeps it without the card code: "(CD871, up to $1,300)" -> "(up to $1,300)".
+  t = t.replace(/\s*\(([^()]*)\)/g, function (m, inner) {
+    if (/\b(?:Celestial|Jeff|cards?)\b/i.test(inner)) return '';
+    if (!PG_CARD_CODE.test(inner)) return m;
+    const rest = inner.replace(/\b(?:CD\d{3}|DEALS\d+)\b[,;:]?\s*/g, '').trim();
+    return /\$/.test(rest) ? ' (' + rest + ')' : '';
+  });
+  // Sentence by sentence (". " + capital; "$299.99" is never split): a trailing "— …" clause about
+  // the deal card is cut, and a sentence that is still about it is left out.
+  let cut = false;
+  const parts = t.split(/\.\s+(?=[A-Z])/).map(function (sn) {
+    return sn.replace(/\s+—\s+[^—]*$/, function (cl) { if (pgIsCardNote(cl)) { cut = true; return ''; } return cl; });
+  });
+  const kept = parts.filter(function (sn) { return sn.trim() && !pgIsCardNote(sn); });
+  if (kept.length < parts.length) cut = true;
+  t = kept.join('. ');
+  if (cut && t && !/[.!?:]$/.test(t)) t += '.';
+  // internal tags -> the offer's marketing name
+  t = t.replace(/\b[a-z]+(?:_[a-z0-9]+)+\b/g, function (tg) {
+    const q = PROMO_GUIDE.find(z => z.tag === tg);
+    return q ? '“' + q.marketing_name + '”' : tg;
+  });
+  return t;
+}
+// A "Watch out" line that states a customer condition and then adds a rep caveat ("… — verify with
+// the deal desk.") keeps the condition: a "Carried forward from …:" lead-in and trailing
+// verify/confirm sentences or " — verify …" clauses come off before the rep-note test (as on the
+// Upgrade sheet). The first sentence is never taken.
+const PG_CAVEAT = /\b(?:verify|confirm)\b/i;
+function pgDropCaveats(x) {
+  let t = String(x == null ? '' : x);
+  const lead = /^Carried forward from [^:]*:\s*/i;
+  const hadLead = lead.test(t);
+  t = t.replace(lead, '');
+  let parts = t.split(/\.\s+(?=[A-Z])/), before;
+  do {
+    before = parts.join('. ');
+    while (parts.length > 1 && PG_CAVEAT.test(parts[parts.length - 1])) parts.pop();
+    parts[parts.length - 1] = parts[parts.length - 1].replace(/\s+—\s+(?:verify|confirm)\b[^—]*$/i, '');
+  } while (parts.join('. ') !== before);
+  t = parts.join('. ').trim();
+  if (t !== String(x == null ? '' : x).trim()) {
+    if (t && !/[.!?:]$/.test(t)) t += '.';
+    if (hadLead) t = t.charAt(0).toUpperCase() + t.slice(1);
+  }
+  return t;
+}
 function pgOpen(tag) {
   const p = PROMO_GUIDE.find(x => x.tag === tag);
   if (!p) return;
-  const s = p.summary || {};
+  let s = p.summary || {};
+  const forCustomer = pgIsCustomerView();
+  if (forCustomer) {
+    const cl = arr => (arr || []).map(pgCustomerText).filter(x => x && !pgIsRepNote(x));
+    s = {
+      hook:          s.hook ? pgCustomerText(s.hook) : '',
+      qualify:       cl(s.qualify),
+      steps:         cl(s.steps),
+      deadlines:     cl(s.deadlines),
+      watchouts:     (s.watchouts || []).map(pgDropCaveats).filter(x => x && !pgIsRepNote(x)).map(pgCustomerText).filter(Boolean),
+      credit_amount: s.credit_amount ? pgCustomerText(s.credit_amount) : '',
+    };
+  }
   const li = (arr, cls) => (arr && arr.length)
     ? '<ul class="pg-list ' + (cls||'') + '">' + arr.map(x => '<li>' + pgEsc(x) + '</li>').join('') + '</ul>'
     : '';
@@ -14211,14 +14569,17 @@ function pgOpen(tag) {
     ['Port-in',    (p.port && p.port.required) ? 'REQUIRED — 30 days' : 'Not required'],
     ['Runs',       window_],
     ['Deal card',  p.deal_card || '—'],
-  ].map(r => '<div class="pg-fact"><span>' + r[0] + '</span><b>' + pgEsc(r[1]) + '</b></div>').join('');
+  ].filter(r => !(forCustomer && r[0] === 'Deal card'))   // 2026-09-30: rep-only
+   .map(r => '<div class="pg-fact"><span>' + r[0] + '</span><b>' + pgEsc(r[1]) + '</b></div>').join('');
 
   // Markup restyled 2026-09-24 (flyer-style header, SVG icons instead of emoji); same content.
+  // 2026-09-30: the × is the first thing in the card instead of inside the header, so it can stay
+  // pinned at the top while a long promo is scrolled (on a phone it used to scroll out of reach).
   const ic = (n) => (window.xfIcon ? xfIcon(n) : '');
   const html =
     '<div class="pg-modal-inner" role="dialog" aria-modal="true" aria-label="' + pgEsc(p.marketing_name) + '">' +
+      '<button class="pg-close" onclick="pgClose()" aria-label="Close">×</button>' +
       '<div class="pg-head">' +
-        '<button class="pg-close" onclick="pgClose()" aria-label="Close">×</button>' +
         (p.diamond_only ? '<div class="pg-diamond-strip">' + ic('diamond') + 'DIAMOND MEMBERS ONLY</div>' : '') +
         '<h3 class="pg-title">' + pgEsc(p.marketing_name) + '</h3>' +
         (s.hook ? '<p class="pg-hook">' + pgEsc(s.hook) + '</p>' : '') +
@@ -14229,7 +14590,9 @@ function pgOpen(tag) {
         '<h4 class="pg-h">' + ic('checkC') + 'How the customer qualifies</h4>' + li(s.qualify, 'pg-check') +
         '<h4 class="pg-h">' + ic('steps') + 'Order of operations</h4>' + li(s.steps, 'pg-steps') +
         '<h4 class="pg-h">' + ic('clock') + 'Deadlines that kill the credit</h4>' + li(s.deadlines, 'pg-dead') +
-        '<h4 class="pg-h">' + ic('alert') + 'Watch out</h4>' + li(s.watchouts, 'pg-warn') +
+        // 2026-09-30: on the customer view a "Watch out" list left empty by the rep-note filter drops its heading too.
+        ((forCustomer && !(s.watchouts && s.watchouts.length)) ? '' :
+        '<h4 class="pg-h">' + ic('alert') + 'Watch out</h4>' + li(s.watchouts, 'pg-warn')) +
         (p.device_scope ? '<h4 class="pg-h">' + ic('phone') + 'Eligible devices</h4><p class="pg-scope">' + pgEsc(p.device_scope) + '</p>' : '') +
       '</div>' +
     '</div>';
@@ -14240,11 +14603,29 @@ function pgOpen(tag) {
     el.id = 'pgModal';
     el.className = 'pg-modal';
     el.addEventListener('click', e => { if (e.target === el) pgClose(); });
+    // 2026-09-30: once the card scrolls, the pinned × gets a solid backing so it shows on white.
+    el.addEventListener('scroll', () => el.classList.toggle('pg-scrolled', el.scrollTop > 8), { passive: true });
     document.body.appendChild(el);
   }
   el.innerHTML = html;
+  el.classList.remove('pg-scrolled');
   el.style.display = 'flex';
+  el.scrollTop = 0;
+  pgLockPage(true);
   document.addEventListener('keydown', pgEscKey);
+}
+// 2026-09-30: while a promo sheet is open the page behind it stays put. Before, scrolling past the
+// end of a long promo scrolled the customer view underneath, so closing it landed somewhere else.
+let _pgPageOverflow = null;
+function pgLockPage(on) {
+  const r = document.documentElement;
+  if (on) {
+    if (_pgPageOverflow === null) _pgPageOverflow = r.style.overflow || '';
+    r.style.overflow = 'hidden';
+  } else if (_pgPageOverflow !== null) {
+    r.style.overflow = _pgPageOverflow;
+    _pgPageOverflow = null;
+  }
 }
 
 function pgFmt(iso) {
@@ -14256,6 +14637,7 @@ function pgEscKey(e) { if (e.key === 'Escape') pgClose(); }
 function pgClose() {
   const el = document.getElementById('pgModal');
   if (el) el.style.display = 'none';
+  pgLockPage(false);
   document.removeEventListener('keydown', pgEscKey);
 }
 
@@ -14569,14 +14951,16 @@ function selectReward(btn) {
 }
 
 // ── MAIN QUOTE UPDATE ──
-function updateQuote() {
+function updateQuote(opts) {
   const lines    = parseInt(document.getElementById('numLinesHidden').value) || 0;
   const planKey  = document.getElementById('xfinityPlan').value;
   const compBill = parseFloat(document.getElementById('competitorBillHidden').value) || 0;
   const unavailEl = document.getElementById('planUnavailable');
 
   unavailEl.style.display = 'none';
-  _invalidateEmailPdf(); // the quote on screen is about to change
+  // 2026-09-30: handleSubmit re-renders Year 1 and back to Year 2 to read the Year 1
+  // figures (6GQ-13); the quote on screen does not change then, so the PDF stays valid.
+  if (!(opts && opts.keepPdf)) _invalidateEmailPdf(); // the quote on screen is about to change
   updateYrToggleVisibility(planKey);
 
   // ── DEVICES-ONLY MODE: skip plan comparison, show devices on Xfinity side ──
@@ -14680,7 +15064,8 @@ function renderDevicesOnlyQuote() {
   document.getElementById('compTotalAmount').textContent = '$0/mo';
 
   // Xfinity side (right) — devices summary
-  document.getElementById('xfPlanNameDisplay').textContent = getVoiceToXMCost() > 0 ? 'Home Phone to XM' : 'Devices Only';
+  // 2026-09-30 (6GQ-24): Voice to XM on Mobile Select costs $0, so "cost > 0" labelled it "Devices Only".
+  document.getElementById('xfPlanNameDisplay').textContent = isVoiceToXMActive() ? 'Home Phone to XM' : 'Devices Only';
   const summaryParts = [];
   if (watchCount > 0) summaryParts.push(watchCount + ' Watch' + (watchCount > 1 ? 'es' : ''));
   if (tabletCount > 0) summaryParts.push(tabletCount + ' Tablet' + (tabletCount > 1 ? 's' : ''));
@@ -14694,7 +15079,6 @@ function renderDevicesOnlyQuote() {
 
   // (Plan-colour tints removed 2026-09-24: the customer view's styling lives in CSS.)
       // Hide Full Monthly Bill Comparison - not needed in devices-only mode
-      document.getElementById('tablesSideBySide').style.display = 'none';
       const mobComp = document.getElementById('mobileCompareSection');
       if (mobComp) mobComp.style.display = 'none';
       document.getElementById('featuresSection').style.display = 'none';
@@ -14703,6 +15087,14 @@ function renderDevicesOnlyQuote() {
       const hpCost = getVoiceToXMCost();
       buildDeviceSummary(hpCost, 0);
       updateTotalWithDevices(hpCost);
+      // 2026-09-30 (6GQ-02): #tablesSideBySide was hidden here, and with it the Device
+      // Financing Summary — the only place a devices-only quote without core bills lists its
+      // devices, so that customer view (and PDF) showed no device and no price. The lines
+      // table inside it is already hidden by `body.devices-only #linesSection`; the section
+      // shows whenever the summary has rows.
+      const devSumSec = document.getElementById('deviceSummarySection');
+      document.getElementById('tablesSideBySide').style.display =
+        (devSumSec && devSumSec.style.display !== 'none') ? 'block' : 'none';
 
       // Hide savings banners in devices-only mode
       document.getElementById('monthlySavings').textContent = '';
@@ -14742,17 +15134,22 @@ function renderDevicesOnlyQuote() {
       let totalDeviceCost = 0;
       let totalLineFees = 0;
 
+      // 2026-09-30 (6GQ-03): a blank watch/tablet row (customer's own device) returned before
+      // its line fee was added, and XMC was never added, so "Xfinity + Devices" ran lower than
+      // the device total the sheet submits. Line fee and XMC first (same rules as
+      // updateTotalWithDevices), then blank rows skip only the name tile.
+      const isPlusForXmc = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
       document.querySelectorAll('.df-row').forEach(row => {
         const dName = row.dataset.deviceName;
-        if (!dName) return;
         const dType = row.dataset.type;
         if (dType === 'phone') return;
+        totalLineFees += dType === 'watch' ? 10 : 20;
+        if (row.dataset.xmcEnabled === 'true' && !isPlusForXmc) totalDeviceCost += parseFloat(row.dataset.xmcRate) || 0;
+        if (!dName) return;
         const dPrice = parseFloat(row.dataset.devicePrice) || 0;
         const dPromo = parseFloat(row.dataset.promoAmount) || 0;
         const dMonthly = Math.max(0, dPrice - dPromo) / 36;
-        const lineFee = dType === 'watch' ? 10 : 20;
         totalDeviceCost += dMonthly;
-        totalLineFees += lineFee;
         const tLabel = dType === 'watch' ? 'WATCH' : 'TABLET';
         deviceRightHTML += '<div style="' + itemStyle + '"><div style="' + nameStyle + 'color:var(--xfinity-purple);">' + dName + '</div><div style="' + lblStyle + 'color:var(--text-secondary);">' + tLabel + '</div></div>';
         deviceLeftHTML += '<div style="' + itemStyle + '"><div style="' + nameStyle + 'color:var(--text-primary);">&nbsp;</div><div style="' + lblStyle + 'color:var(--text-secondary);">&nbsp;</div></div>';
@@ -14882,136 +15279,11 @@ function buildFeatures(plan) {
   // Feature tiles with SVG icons (customer-view redesign 2026-09-24); same text, emoji dropped.
   const featureItems = plan.features.map(f => window.xfFeatTile ? xfFeatTile(f) : `<li>${f}</li>`).join('');
 
-  // ── Determine which promo tags apply based on current selections ──
-  // Promotions surface as soon as the rep sets a plan + line counts, so the
-  // banner acts as a "what's available" advertisement for everything the
-  // customer could qualify for on this plan — even before specific devices,
-  // trade-ins, or no-trade toggles have been chosen. Per-device discount
-  // dollar amounts that are actually applied to the quote are tallied
-  // separately below in the "Discounts Applied to This Quote" section.
-  //
-  // Per Jeff (2026-05-20): "anytime a promotion is applicable, I want it
-  // to display in that banner — just clicking on the number of lines
-  // should start to trigger any promotions that are applicable."
-  const activeTags = new Set(['always']);
-
-  const isPremiumPlan = (intakeSelectedPlan === 'mobile_plus_promo' || intakeSelectedPlan === 'mobile_plus_std' || intakeSelectedPlan === 'mobile_plus_ie');
-  // Note: the legacy "Unlimited" plan (unlimited_std) is a distinct tier
-  // from "Mobile Select" — only the legacy Unlimited plan qualifies for
-  // the $200/$500 Samsung discounts in PROMO_DEFINITIONS. Mobile Select
-  // customers do NOT get any device promos per Jeff (2026-05-20).
-  const isUnlimitedTierPlan = (intakeSelectedPlan === 'unlimited_std');
-
-  // Count line types from the .df-row scaffolding. rebuildPhoneRows() and
-  // friends create one row per line as soon as the rep picks a count, so
-  // these counts are accurate even before any device model has been chosen.
-  // The model-specific flags (iPad A16, XMC toggles) still require an
-  // actual selection because those promos only apply to that exact pick.
-  let phoneLineCount  = 0;
-  let watchLineCount  = 0;
-  let tabletLineCount = 0;
-  let hasIpadA16      = false;
-  let hasTabA11       = false;
-  let hasWatchXmc     = false;
-  let hasTabletXmc    = false;
-
-  document.querySelectorAll('.df-row').forEach(row => {
-    const type       = row.dataset.type;
-    const deviceName = (row.dataset.deviceName || '').toLowerCase();
-    const xmcEnabled = row.dataset.xmcEnabled === 'true';
-
-    if (type === 'phone')  phoneLineCount++;
-    if (type === 'watch') {
-      watchLineCount++;
-      if (xmcEnabled) hasWatchXmc = true;
-    }
-    if (type === 'tablet') {
-      tabletLineCount++;
-      if (xmcEnabled) hasTabletXmc = true;
-      if (deviceName.includes('ipad (a16)') || deviceName.includes('ipad a16')) hasIpadA16 = true;
-      if (deviceName.includes('galaxy tab a11')) hasTabA11 = true;
-    }
-  });
-
-  // ── Waived activation fee — only when the customer is activating a single
-  // line. We waive the $25 activation fee on the first line; surface it as a
-  // selling point only on single-line quotes (with more lines, bigger promos
-  // lead the conversation).
-  const totalLineCount = phoneLineCount + watchLineCount + tabletLineCount;
-  if (totalLineCount === 1) {
-    activeTags.add('waived_activation_first_line');
-  }
-
-  // ── Phone-line promos: surface every variant the customer could pick on
-  // this plan as soon as a phone line exists. The rep can then steer the
-  // conversation toward whichever combo (TIPS w/ trade vs. no-trade) fits.
-  if (phoneLineCount > 0) {
-    if (isPremiumPlan) {
-      // Re-tagged 2026-09-12: the retired combined A/G/M and non-Samsung cards
-      // were each split into per-brand cards.
-      activeTags.add('tips_apple_1300');     // up to $1,300 off Apple w/ trade (CD871)
-      activeTags.add('tips_gm_830');         // up to $830 off Google/Motorola w/ trade (CD872)
-      activeTags.add('tips_samsung_1200');   // up to $1,200 off Samsung w/ trade (CD865)
-      activeTags.add('samsung_notrade');     // $500 off Samsung, no trade (port req, CD862)
-      activeTags.add('apple_400');           // $400 off Apple, no trade (port req on new line, CD868)
-      activeTags.add('gm_400');              // $400 off Google/Motorola, no trade (port req, CD869)
-      activeTags.add('moto_gstylus_on_us');  // moto g stylus 2026 'On Us' (CD848)
-      activeTags.add('xmc_plus_included');   // XMC Plus included free on Mobile Plus
-    }
-    // Legacy Unlimited-tier Samsung $500/$200 constructs retired (not in DEALS18 cycle).
-    // iPhone 17e specific promos auto-hide via their endDate (2026-05-10).
-    // When that promo cycle is renewed, surface them here under isPremiumPlan.
-  }
-
-  // ── Watch promos: surface as soon as a watch line exists ──
-  // Diamond-only as of 2026-06-06. Platinum was briefly eligible Jun 3–6
-  // via watch_platinum_300; that promo was retired early. Do NOT add a
-  // Platinum branch here.
-  if (watchLineCount > 0) {
-    if (intakeSelectedTier === 'diamond') activeTags.add('watch_diamond_300');
-  }
-
-  // ── Tablet promos: surface as soon as a tablet line exists ──
-  if (tabletLineCount > 0) {
-    if (hasIpadA16) activeTags.add('ipad_a16_50off');    // $250 off iPad A16 over 36-mo DPP
-  }
-
-  // ── Prepaid Mastercard qualification (NEW: flat $200, no stacking) ──
-  // Per the skill matrix (prepaid_mc_200). Replaces the retired
-  // mc_plus_scaled stacking logic ($100 base + $100/DPP, $500 cap).
-  // Rules:
-  //   • QUALIFY: 2+ new lines on the quote AND at least 1 of those is a
-  //     new mobile PHONE line on Mobile Select or Mobile Plus. NOW Mobile
-  //     and legacy Premium Unlimited do NOT qualify as the new mobile line.
-  //   • Second line may be mobile, smartwatch, or tablet on any data plan.
-  //   • PAYOUT: flat $200. Always. No stacking, no per-phone bonus, no cap.
-  //   • BYOD / PIF / DPP devices are all eligible — no device or financing
-  //     requirement. The payout never grows with extra lines.
-  //   • Both lines must be added same day and activated within 90 days.
-  //   • Sales-channel: Retail and Field Sales Event teams only.
-  //     Big South Chicago is a Retail team, so qualifies.
-  let mcTotalLines  = 0;
-  let mcPhoneLines  = 0;
-  {
-    const isSelectOrPlusNewMobilePlan = (
-      intakeSelectedPlan === 'mobile_select_promo' ||
-      intakeSelectedPlan === 'mobile_select_std'   ||
-      intakeSelectedPlan === 'mobile_select_ie'    ||
-      intakeSelectedPlan === 'mobile_plus_promo'   ||
-      intakeSelectedPlan === 'mobile_plus_std'     ||
-      intakeSelectedPlan === 'mobile_plus_ie'
-    );
-    document.querySelectorAll('.df-row').forEach(row => {
-      const t = row.dataset.type;
-      mcTotalLines++;
-      if (t === 'phone') mcPhoneLines++;
-    });
-    // Qualify: 2+ total lines AND at least 1 mobile phone line AND the
-    // intake plan for that mobile line is Mobile Select or Mobile Plus.
-    if (mcTotalLines >= 2 && mcPhoneLines >= 1 && isSelectOrPlusNewMobilePlan) {
-      activeTags.add('prepaid_mc_200');
-    }
-  }
+  // 2026-09-30 (6GQ-26): the old activeTags tally (phone/watch/tablet line counts, iPad A16,
+  // XMC and prepaid-Mastercard flags) was deleted here: it was computed on every call and
+  // never read. The chips come from pgRenderChips below (PROMO_GUIDE). Jeff's rule still
+  // holds (2026-05-20): every promo the quote could qualify for shows as soon as a plan and
+  // lines are picked, before devices; per-device dollar amounts are listed separately below.
 
   // ── Contextual promo guide ───────────────────────────────────────────
   // Replaces the old static text list. Promotions are filtered against the
@@ -15020,22 +15292,27 @@ function buildFeatures(plan) {
   // spells out how the customer qualifies. See PROMO_GUIDE above.
   const pgDeviceNames = [];
   const pgDeviceTypes = [];
+  const pgWatchNames  = [];  // 2026-09-30 (6GQ-01): the Diamond watch chip checks these against its card
   let   pgTradeYes = false, pgTradeNo = false;
   document.querySelectorAll('.df-row').forEach(row => {
     const t = row.dataset.type;
     if (t && pgDeviceTypes.indexOf(t) === -1) pgDeviceTypes.push(t);
     const dn = row.dataset.deviceName || '';
     if (dn && dn !== 'BYOD (Bring Your Own Device)') pgDeviceNames.push(dn);
+    if (t === 'watch' && dn) pgWatchNames.push(dn);
     if (t === 'phone') {
       if (row.dataset.noTrade === 'true') pgTradeNo = true;
       else if (parseFloat(row.dataset.tradeValue) > 0) pgTradeYes = true;
     }
   });
+  // 2026-09-30 (6GQ-09): NOW Mobile mapped to '' (no plan), which skipped every plan check;
+  // it now passes as itself and pgMatches shows it no deals. freeLine: promo pricing only.
   const pgPlan =
       (intakeSelectedPlan || '').indexOf('mobile_plus')   === 0 ? 'mobile_plus'
     : (intakeSelectedPlan || '').indexOf('mobile_select') === 0 ? 'mobile_select'
     : (intakeSelectedPlan || '') === 'unlimited_std'           ? 'premium_unlimited'
     : (intakeSelectedPlan || '').indexOf('premium')      === 0 ? 'premium_unlimited'
+    : (intakeSelectedPlan || '') === 'now_mobile'              ? 'now_mobile'
     : '';
   const promoItems = pgRenderChips({
     lineType:   'new_line',
@@ -15043,6 +15320,8 @@ function buildFeatures(plan) {
     tier:       intakeSelectedTier,
     deviceNames: pgDeviceNames,
     deviceTypes: pgDeviceTypes,
+    watchNames:  pgWatchNames,
+    freeLine:    /_promo$/.test(intakeSelectedPlan || ''),
     tradeState: pgTradeYes ? 'yes' : (pgTradeNo && !pgTradeYes ? 'no' : 'unknown'),
     isNewXmCustomer: true
   });
@@ -15130,10 +15409,13 @@ function updateSavingsBanners(xfinityTotal, compBill) {
   const coreRebundle = parseFloat(document.getElementById('coreRebundleHidden').value) || 0;
   // Core savings only count when BOTH core bills are entered (same rule that
   // shows the Core Services section); one blank field must not add the other.
-  const coreSavings  = (coreCurrent > 0 && coreRebundle > 0) ? Math.max(0, coreCurrent - coreRebundle) : 0;
-    const voiceToXMCost = getVoiceToXMCost();
+  // 2026-09-30 (6GQ-04): a core bill that goes UP was clamped to $0 here, overstating the
+  // total savings (the payload already sent the real, negative core figure). Signed now.
+  const coreSavings  = (coreCurrent > 0 && coreRebundle > 0) ? (coreCurrent - coreRebundle) : 0;
+  // 2026-09-30 (6GQ-25): Voice to XM is already inside xfinityTotal (renderDevicesOnlyQuote
+  // passes it as the plan cost), so it is no longer subtracted a second time here.
 
-  const monthly = (compBill - xfinityTotal) + coreSavings - voiceToXMCost;
+  const monthly = (compBill - xfinityTotal) + coreSavings;
   const yearly  = monthly * 12;
   document.getElementById('monthlySavings').textContent = monthly >= 0 ? `$${monthly.toFixed(0)}` : `-$${Math.abs(monthly).toFixed(0)}`;
   document.getElementById('yearlySavings').textContent  = yearly  >= 0 ? `$${yearly.toFixed(0)}`  : `-$${Math.abs(yearly).toFixed(0)}`;
@@ -15152,6 +15434,8 @@ function updateTotalWithDevices(planMonthly) {
   let hasDevice = false;
   allRows.forEach(row => {
     const type = row.dataset.type;
+    // 2026-09-30 (6GQ-15): phone rows are not on a devices-only quote (same rule as handleSubmit).
+    if (devicesOnlyMode && type === 'phone') return;
     const devicePrice = parseFloat(row.dataset.devicePrice) || 0;
     const promoAmt = parseFloat(row.dataset.promoAmount) || 0;
     const lineFee = type === 'watch' ? 10 : (type === 'tablet' ? 20 : 0);
@@ -15178,7 +15462,10 @@ function updateTotalWithDevices(planMonthly) {
   if (intakeSelectedPlan !== 'now_mobile') totalLineFees = Math.min(totalLineFees, 35);
   deviceTotal += totalLineFees;
 
-  const grandTotal = planMonthly + deviceTotal + getVoiceToXMCost();
+  // 2026-09-30 (6GQ-25): Voice to XM only exists in devices-only mode, where
+  // renderDevicesOnlyQuote already passes its cost in as planMonthly — adding it here
+  // counted it twice ($101.11 for $86.11 of parts).
+  const grandTotal = planMonthly + deviceTotal;
   document.getElementById('xtwd-amount').textContent = `$${grandTotal.toFixed(2)}/mo`;
   document.getElementById('xtwd-sub').textContent = `Plan $${planMonthly}/mo + Devices $${deviceTotal.toFixed(2)}/mo`;
   document.getElementById('xfinityTotalWithDevices').style.display = 'block';
@@ -15192,8 +15479,10 @@ function updateTotalWithDevices(planMonthly) {
   document.getElementById('xfBillSub').textContent = `Plan $${planMonthly}/mo + Devices $${deviceTotal.toFixed(2)}/mo`;
 
   // Update savings banners with full total
+  // 2026-09-30 (6GQ-22): a $0 current bill skipped this, leaving buildDeviceSummary's
+  // figure (no line fees) on screen and in the payload. Always use the full total.
   const compBill = parseFloat(document.getElementById('competitorBillHidden').value) || 0;
-  if (compBill > 0) updateSavingsBanners(grandTotal, compBill);
+  updateSavingsBanners(grandTotal, compBill);
 }
 
 // ── DEVICE FINANCING SUMMARY ──
@@ -15236,6 +15525,8 @@ function buildDeviceSummary(planMonthly, compBill) {
 
   allRows.forEach(row => {
     const type          = row.dataset.type;
+    // 2026-09-30 (6GQ-15): phone rows are not on a devices-only quote.
+    if (devicesOnlyMode && type === 'phone') return;
     const deviceName    = row.dataset.deviceName || '';
     const devicePrice   = parseFloat(row.dataset.devicePrice) || 0;
     const promoAmt      = parseFloat(row.dataset.promoAmount) || 0;
@@ -15250,12 +15541,23 @@ function buildDeviceSummary(planMonthly, compBill) {
     let lineFee = type === 'watch' ? 10 : (type === 'tablet' ? 20 : 0);
     // Line label: watch/tablet use type prefix
     const lineLabel = type === 'phone' ? `Line ${lineNum}` : (type === 'watch' ? `Watch ${lineNum}` : `Tablet ${lineNum}`);
-    const xmcDisplay = xmcEnabled ? (isPremiumPlan ? `<span style="color:var(--xfinity-green);font-weight:600;">✓ Included</span>` : `<span style="color:var(--xfinity-accent);font-weight:600;">$${xmcRate}/mo</span>`) : '—';
+    // 2026-09-30 (6GQ-12): on Mobile Plus XMC is included for every device, but the column
+    // read "—" for rows built after the Plus pill (the default flow) — display only.
+    // A green check, not "✓ Included": the wider text pushed the table past its card on iPad
+    // landscape (660px in a 630-640px card, Monthly Payment clipped). The Mobile Plus card
+    // already says "XMC Plus device protection included".
+    // Devices-only (customer declined mobile): no Plus line, and the math charges $0 XMC for
+    // the hidden Plus pill, so no coverage promise there ("—", as before this summary showed).
+    const xmcDisplay = (isPremiumPlan && !devicesOnlyMode)
+      ? `<span style="color:var(--xfinity-green);font-weight:600;font-size:15px;line-height:1;" role="img" aria-label="Included" title="Included with Mobile Plus">✓</span>`
+      : ((xmcEnabled && !isPremiumPlan) ? `<span style="color:var(--xfinity-accent);font-weight:600;">$${xmcRate}/mo</span>` : '—');
     if (xmcEnabled && !isPremiumPlan) totalXmc += xmcRate;
 
     // Trade-in display
     let tradeDisplay = noTrade ? '<em style="color:var(--text-muted);">None</em>' : (tradeName ? tradeName : '—');
-    if (tradeLabel) tradeDisplay += `<br><span style="font-size:10px;color:var(--xfinity-accent);">${tradeLabel}</span>`;
+    // 2026-09-30 (6GQ-10): the "TIPS Up to $1,300" tag showed on plans/dates where the TIPs
+    // credit is $0; only when the trade-in credit is what was applied.
+    if (tradeLabel && row.dataset.appliedFromTrade === 'true') tradeDisplay += `<br><span style="font-size:10px;color:var(--xfinity-accent);">${tradeLabel}</span>`;
     const conditionDisplay = tradeCondition
       ? `<span style="font-weight:600;color:var(--text-secondary);">${tradeCondition}</span>`
       : '—';
@@ -15291,7 +15593,7 @@ function buildDeviceSummary(planMonthly, compBill) {
     const netPrice = isByod ? 0 : Math.max(0, devicePrice - promoAmt);
     const monthly  = netPrice / 36;
     // Line fees are shown on the LEFT breakdown only — the right Device Financing Summary is financing-only.
-    // XMC is included on Mobile Plus (column shows "✓ Included"), so it is not added to the row there.
+    // XMC is included on Mobile Plus (column shows a green ✓), so it is not added to the row there.
     const totalMonthly = monthly + ((xmcEnabled && !isPremiumPlan) ? xmcRate : 0);
     totalDeviceMonthly += monthly;
 
@@ -15324,11 +15626,21 @@ function buildDeviceSummary(planMonthly, compBill) {
   // The $35 line-fee cap is applied separately in the Line-by-Line Breakdown and Xfinity bill totals.
 
   const grandDeviceTotal = totalDeviceMonthly + totalXmc;
+  // 2026-09-30 (6GQ-02): in devices-only mode this summary is now shown, but the line-by-line
+  // table "on the left" is not, so the note names the watch/tablet line fees itself
+  // (capped as in updateTotalWithDevices) instead of pointing at a hidden table.
+  let feeNote = ' (line fees shown on left)';
+  if (devicesOnlyMode) {
+    let doFees = 0;
+    allRows.forEach(r => { if (r.dataset.type === 'watch') doFees += 10; else if (r.dataset.type === 'tablet') doFees += 20; });
+    if (intakeSelectedPlan !== 'now_mobile') doFees = Math.min(doFees, 35);
+    feeNote = doFees > 0 ? ` · plus $${doFees.toFixed(2)}/mo line fees` : '';
+  }
   totalBar.innerHTML = `
     <span class="dtb-label">Device Financing Total</span>
     <div>
       <span class="dtb-amount">$${grandDeviceTotal.toFixed(2)}/mo</span>
-      <div class="dtb-sub">Device financing${totalXmc > 0 ? ` + $${totalXmc.toFixed(2)} XMC` : ''} · over 36 months (line fees shown on left)</div>
+      <div class="dtb-sub">Device financing${totalXmc > 0 ? ` + $${totalXmc.toFixed(2)} XMC` : ''} · over 36 months${feeNote}</div>
     </div>
   `;
   section.style.display = 'block';
@@ -15361,7 +15673,14 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
   const target = document.getElementById('comparisonScreen');
   // Perf (2026-09-02): the PDF libs are no longer loaded up front (see <head>);
   // fetch them now if the post-load warm-up has not finished yet.
-  if (!window.html2canvas || !window.jspdf) { try { await _loadPdfLibs(); } catch (e) {} }
+  if (!window.html2canvas || !window.jspdf) {
+    // 2026-09-30: the PDF buttons stay disabled while the libraries are fetched (at most 15 s, see
+    // _loadPdfLibs), so a second tap during a slow fetch does not queue a second alert.
+    const waitBtns = [...document.querySelectorAll('.btn-footer-save, .btn-footer-print, .btn-footer-email')].map(b => [b, b.disabled]);
+    waitBtns.forEach(([b]) => { b.disabled = true; });
+    try { await _loadPdfLibs(); } catch (e) {}
+    waitBtns.forEach(([b, was]) => { b.disabled = was; });
+  }
   if (!target || !window.html2canvas || !window.jspdf) {
     alert('PDF library not loaded yet. Please wait a moment and try again.');
     return null;
@@ -15423,11 +15742,31 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
   try {
     const cssW = target.scrollWidth;
     const cssH = target.scrollHeight;
+    // 2026-09-30: a PDF made on a phone was laid out at phone width: 11 pages of a stacked, squeezed
+    // layout (the same quote is 4 pages from an iPad). A screen under 700px wide is now captured at
+    // iPad-portrait width (the clone only; the phone's own screen is not touched). The phone layout
+    // is taller than the iPad one, so capW x cssH over-estimates the canvas and stays under the cap.
+    const capW = cssW < 700 ? 820 : cssW;
 
     // iPad Safari silently fails (or hangs) on canvases above ~16.7M pixels.
     // Cap the render scale so the master canvas always stays under the limit.
     const MAX_CANVAS_AREA = 16777216; // = 4096 × 4096, safe on every iPad
-    const scale = Math.min(2.5, Math.sqrt(MAX_CANVAS_AREA / (cssW * cssH)));
+    const scale = Math.min(2.5, Math.sqrt(MAX_CANVAS_AREA / (capW * cssH)));
+
+    // 2026-09-30: html2canvas's clone re-requests the Google Fonts sheets and waits for the fonts
+    // before drawing, so when that host stalled (store guest Wi-Fi) EVERY Email PDF / Print waited
+    // 40 s and failed. Give fonts still on their way up to 2.5 s; if they have not arrived, a font
+    // sheet that is not loaded is left out of the clone and the PDF uses the fallback font the rep
+    // already sees on screen. With the fonts loaded (the normal case) nothing changes.
+    if (document.fonts && document.fonts.status !== 'loaded') {
+      try { await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 2500))]); } catch (e) {}
+    }
+    const fontsReady = !document.fonts || document.fonts.status === 'loaded';
+    const skipFontSheet = (el) => el.tagName === 'LINK' && /stylesheet/i.test(el.rel || '') && /fonts\.googleapis\.com/.test(el.href || '') &&
+      (!fontsReady || el.media === 'print' || !el.sheet);
+    // 2026-09-30: is the rep showing Year 2 pricing? (read below, in the clone)
+    const yrWrap = document.getElementById('yrToggleWrap');
+    const showingYear2 = window.currentYearView === 2 && !!yrWrap && yrWrap.style.display !== 'none';
 
     const renderPromise = html2canvas(target, {
       scale,
@@ -15436,8 +15775,9 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
       backgroundColor: '#ffffff',
       letterRendering: true,
       logging: false,
-      windowWidth: cssW,
+      windowWidth: capW,
       windowHeight: cssH,
+      ignoreElements: skipFontSheet,
       onclone: (clonedDoc) => {
         // Apply the capture stylesheet to the CLONE only — the live
         // page (and its footer buttons) is never modified.
@@ -15445,6 +15785,13 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
         style.textContent = captureCssText;
         clonedDoc.head.appendChild(style);
         if (clonedDoc.body) clonedDoc.body.style.overflow = 'visible';
+        // 2026-09-30: a Year 2 PDF showed the Year 2 Xfinity bill on a card that did not say so (the
+        // Year 1 / Year 2 toggle and its note are rep-only and never captured). In the clone the
+        // Xfinity card's bill label now reads "Xfinity monthly bill · Year 2 pricing".
+        if (showingYear2) {
+          const y2Lbl = clonedDoc.querySelector('#mobileCompareSection .xf-xf .xf-bill-lbl');
+          if (y2Lbl) { const tag = clonedDoc.createElement('span'); tag.className = 'xf-y2-tag'; tag.textContent = ' · Year 2 pricing'; y2Lbl.appendChild(tag); }
+        }
         // Final values for the flyer's display mirrors, explicit icon colours, and
         // where a page may be cut (never through a text line, card, row or heading).
         try {
@@ -15565,7 +15912,8 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
     };
 
     // Map CSS px to canvas pixels (canvas.width / target.scrollWidth = effective scale)
-    const effScale = canvas.width / target.scrollWidth;
+    // 2026-09-30: the capture width (capW), not the live width: they differ for a PDF made on a phone.
+    const effScale = canvas.width / capW;
     const breakY = breakOffsetCss > 0 ? Math.round(breakOffsetCss * effScale) : -1;
 
     if (pdfLayout && window.xfPaginate) {
@@ -15574,8 +15922,8 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
       // card, table row or heading. Page 1 starts at the very top (hero art);
       // later pages get a small top margin.
       // Layout px (measured in the clone) → canvas px / PDF points.
-      const lScale = canvas.width / (pdfLayout.width || target.scrollWidth);
-      const ptPerCss = pageWidth / (pdfLayout.width || target.scrollWidth);
+      const lScale = canvas.width / (pdfLayout.width || capW);
+      const ptPerCss = pageWidth / (pdfLayout.width || capW);
       const pages = window.xfPaginate(pdfLayout, canvas.height / lScale, pageHeight / ptPerCss, 22 / ptPerCss, 14 / ptPerCss);
       for (const pg of pages) {
         const y0 = Math.max(0, Math.round(pg.from * lScale));
@@ -15601,7 +15949,10 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
     const repName = (document.getElementById('repName').value || 'Quote').trim();
     // "—" is the placeholder for "no name entered", not a name.
     const customerName = (document.getElementById('customerName').textContent || '').trim().replace(/^—$/, '');
-    const datePart = new Date().toISOString().slice(0, 10);
+    // 2026-09-30: the LOCAL date. toISOString() is UTC, so from 7 PM CDT the file was named for
+    // tomorrow while the quote itself says today.
+    const fnNow = new Date();
+    const datePart = fnNow.getFullYear() + '-' + String(fnNow.getMonth() + 1).padStart(2, '0') + '-' + String(fnNow.getDate()).padStart(2, '0');
     const filename = `Xfinity-Quote_${customerName || 'Customer'}_${datePart}.pdf`
       .replace(/[^A-Za-z0-9._-]/g, '_');
 
@@ -15822,12 +16173,29 @@ async function handleSubmit() {
         : 'Please fill in Rep Name and Store Name before submitting.\n\nTap ← Back — they are at the top of the form.');
       return;
     }
+    // 2026-09-30 (6GQ-08): a plan that is not available for this many lines (NOW Mobile over
+    // 5) has no price, yet Submit went through with "$—" savings. Refused like the check above.
+    const unavailEl = document.getElementById('planUnavailable');
+    if (!devicesOnlyMode && unavailEl && unavailEl.style.display !== 'none') {
+      alert((tx('xfPlanNameDisplay') || 'This plan') + ' is not available for ' + (tx('xfLineSummary').toLowerCase() || 'this many lines') + ', so this quote has no price to submit.\n\nTap ← Back and pick another plan or fewer lines.');
+      return;
+    }
     _bfxSubmitting = true;
     if (btn) { btn.innerHTML = '⏳ Saving…'; btn.disabled = true; }
 
     // Devices-only quotes (customer declined mobile) keep the cleared phone rows in
     // the DOM; they are not on the quote and must not be counted (H7/L6).
     const devOnly = (typeof devicesOnlyMode !== 'undefined') && !!devicesOnlyMode;
+
+    // 2026-09-30 (6GQ-13): with the Year 2 view showing, Submit recorded the Year 2 savings
+    // and total as the quote's. Read the Year 1 figures by re-rendering Year 1 and then
+    // Year 2 again in the same task (no paint in between), so the rep's screen is unchanged.
+    let y1 = null;
+    if (!devOnly && typeof currentYearView !== 'undefined' && currentYearView === 2) {
+      currentYearView = 1;
+      try { updateQuote({ keepPdf: true }); y1 = { monthly: tx('monthlySavings'), yearly: tx('yearlySavings'), total: tx('xtwd-amount') }; }
+      finally { currentYearView = 2; updateQuote({ keepPdf: true }); }
+    }
 
     // Gather all device rows for submission.
     const deviceRows = [];
@@ -15859,10 +16227,10 @@ async function handleSubmit() {
     const xvToXm = v2xOpt ? v2xOpt.text.replace(/\s*\(.*\)\s*$/, '').trim() : '';
 
     // In devices-only mode buildComparison hands updateTotalWithDevices() the
-    // Voice-to-XM cost as the "plan" and it then adds that cost again, so the hidden
-    // #xtwd-amount is $15 high (M3). Rebuild the total from its own parts:
-    // devices + Voice-to-XM once. (Still right if that call is ever fixed.)
-    let totalWithDevices = tx('xtwd-amount');
+    // Voice-to-XM cost as the "plan" and it then added that cost again, so the hidden
+    // #xtwd-amount was $15 high (M3; fixed 2026-09-30, 6GQ-25). Rebuild the total from
+    // its own parts: devices + Voice-to-XM once (same figure either way).
+    let totalWithDevices = y1 ? y1.total : tx('xtwd-amount');   // 6GQ-13: Year 1
     if (devOnly) {
       const m = tx('xtwd-sub').match(/Devices \$([\d,.]+)\/mo/);
       const voice = (typeof getVoiceToXMCost === 'function') ? getVoiceToXMCost() : 0;
@@ -15889,8 +16257,8 @@ async function handleSubmit() {
       xfinityPlan:      planName,
       planDiscount:     devOnly ? '' : tx('planDisplayDiscount'),
       // Savings
-      monthlySavings:   tx('monthlySavings'),
-      yearlySavings:    tx('yearlySavings'),
+      monthlySavings:   y1 ? y1.monthly : tx('monthlySavings'),   // 6GQ-13: Year 1
+      yearlySavings:    y1 ? y1.yearly  : tx('yearlySavings'),
       totalWithDevices,
       // Devices
       devices: deviceRows,
@@ -16037,8 +16405,10 @@ function calcCoreSavings() {
   const resultEl  = document.getElementById('coreSavingsResult');
   const amountEl  = document.getElementById('coreSavingsAmount');
 
-  if (current > 0 && rebundle > 0 && savings > 0) {
-    amountEl.textContent = `$${savings.toFixed(2)}/mo`;
+  // 2026-09-30 (6GQ-04): a core bill that goes up is shown as a negative figure (it is
+  // counted in the totals that way) instead of being hidden.
+  if (current > 0 && rebundle > 0 && savings !== 0) {
+    amountEl.textContent = (savings < 0 ? '-$' : '$') + Math.abs(savings).toFixed(2) + '/mo';
     resultEl.style.display = 'flex';
   } else {
     resultEl.style.display = 'none';
@@ -16168,6 +16538,9 @@ function applyInternetEssentialsToggle() {
     // Force-check + disable the discount checkbox so the UI honestly
     // reflects that IE implies standard pricing.
     if (discChk) {
+      // 2026-09-30 (6GQ-06): remember the rep's own "Remove $30" choice so turning IE off
+      // restores it (IE force-checked it and never un-forced it: +$30/mo after IE off).
+      if (!discChk.disabled) discChk.dataset.preIe = discChk.checked ? '1' : '0';
       discChk.checked = true;
       discChk.disabled = true;
       const lbl = discChk.closest('label');
@@ -16176,6 +16549,10 @@ function applyInternetEssentialsToggle() {
   } else {
     // Leaving IE — fall back to standard if the discount checkbox is
     // still checked, otherwise back to the promo variant.
+    if (discChk && discChk.dataset.preIe != null) {   // 6GQ-06: the rep's own choice
+      discChk.checked = discChk.dataset.preIe === '1';
+      delete discChk.dataset.preIe;
+    }
     const stdKey = IE_TO_STD_MAP[intakeSelectedPlan];
     if (stdKey) {
       intakeSelectedPlan = stdKey;
@@ -16219,6 +16596,19 @@ function applyInternetEssentialsToggle() {
     if (discEl) discEl.textContent = planDiscounts[intakeSelectedPlan] || '';
     if (typeof updateQuote === 'function') updateQuote();
   }
+}
+
+// 2026-09-30 (6GQ-10): the trade-in box showed "· TIPS Up to $1,300 · $700" on plans and
+// dates where the TIPs credit is $0 (Mobile Select, NOW, after the window). The TIPs tag and
+// value are shown only when the trade-in credit is what recalcRow applied to the row.
+function tradeInputText(row) {
+  const name = row.dataset.tradeName || '';
+  if (!name) return '';
+  const cond = row.dataset.tradeCondition || '';
+  const applied = row.dataset.appliedFromTrade === 'true';
+  const promoTag = (applied && row.dataset.tradeLabel) ? ` · ${row.dataset.tradeLabel}` : '';
+  const valueTag = (applied && parseFloat(row.dataset.tradeValue) > 0) ? ` · $${row.dataset.tradeValue}` : '';
+  return `${name} — ${cond}${promoTag}${valueTag}`;
 }
 
 function selectIntakePlan(btn) {
@@ -16270,7 +16660,9 @@ function selectIntakePlan(btn) {
       if (ieChk) ieChk.disabled = false;
     }
   }
-  rebuildPhoneRows(); // refresh promos when plan changes
+  // 2026-09-30 (6GQ-05): rebuildPhoneRows() was called here and wiped every picked phone and
+  // trade-in when the rep tapped another plan. The loop below already re-prices each row for
+  // the new plan (recalcRow), so the picks stay.
   updateIntakeSavingsPreview(); // update tally bar live when plan changes
 
 
@@ -16297,7 +16689,8 @@ function selectIntakePlan(btn) {
       // Leaving Mobile Plus: its "included" flag must not survive as a charge.
       // XMC is on only when the (now visible) checkbox is checked.
       row.dataset.xmcEnabled = (xmcChk && xmcChk.checked) ? 'true' : 'false';
-      const rate = getXmcRate(devicePrice);
+      // BYOD / no device yet: $0, the same rule as the device-pick handler (getXmcRate(0) is the $9 tier).
+      const rate = devicePrice > 0 ? getXmcRate(devicePrice) : 0;
       row.dataset.xmcRate = rate.toFixed(2);
       if (xmcLbl && devicePrice > 0) {
         xmcLbl.textContent = 'Add XMC Insurance (' + '$' + rate + '/mo)';
@@ -16306,6 +16699,9 @@ function selectIntakePlan(btn) {
       }
     }
     recalcRow(row); // row monthly reflects the plan's XMC rule
+    // 6GQ-10: a kept trade-in's text follows the new plan (TIPs tag only when it applies).
+    const tradeEl = document.getElementById(rowId + '-trade');
+    if (tradeEl && row.dataset.tradeName && row.dataset.noTrade !== 'true') tradeEl.value = tradeInputText(row);
   });
   updateIntakeSavingsPreview(); // tally after the XMC flags above are settled
 
@@ -16324,6 +16720,7 @@ function selectIntakePlan(btn) {
     document.querySelectorAll('.wt-count-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.val === '0');
     });
+    updateIntakeSavingsPreview(); // the watch/tablet rows just cleared must leave the tally too
   }
 }
 
@@ -16572,23 +16969,33 @@ function makeAutocomplete(inputEl, listEl, datasetOrFn, onSelect, maxInitial) {
 }
 
 // ── PHONE FINANCING ROW ──
+// 2026-09-30 (6GQ-05): changing the count used to rebuild EVERY row, silently wiping the
+// phones, trade-ins and watches already picked (3 -> 4 lines cleared all three phones).
+// Rows 1..min(old, new) are now kept as they are; only the difference is added or removed.
+// A count of 0 still clears everything (resetToIntake relies on that).
+function _resizeDeviceRows(container, type, count, labelText) {
+  const rows = [...container.querySelectorAll(`.df-row[data-type="${type}"]`)];
+  if (count === 0 || rows.length === 0) {
+    container.innerHTML = '';
+    if (count === 0) return;
+    const label = document.createElement('div');
+    label.className = 'df-group-label';
+    label.textContent = labelText;
+    container.appendChild(label);
+  }
+  rows.slice(count).forEach(r => r.remove());
+  for (let i = Math.min(rows.length, count) + 1; i <= count; i++) {
+    container.appendChild(buildDeviceRow(i, type));
+  }
+}
+
 function rebuildPhoneRows() {
   const lines = parseInt(document.getElementById('i_lines').value) || 0;
   const container = document.getElementById('phoneFinancingRows');
-  container.innerHTML = '';
   checkDeviceSectionVisibility();
+  _resizeDeviceRows(container, 'phone', lines, '📱 Phones');
   if (lines === 0) {
     container.innerHTML = '<div class="df-empty">Select number of lines above to add phones.</div>';
-    return;
-  }
-  const label = document.createElement('div');
-  label.className = 'df-group-label';
-  label.textContent = '📱 Phones';
-  container.appendChild(label);
-
-  for (let i = 1; i <= lines; i++) {
-    const row = buildDeviceRow(i, 'phone');
-    container.appendChild(row);
   }
 }
 
@@ -16656,6 +17063,12 @@ function buildDeviceRow(lineNum, type) {
   deviceInput.autocorrect = 'off';
   deviceInput.autocapitalize = 'none';
   deviceInput.spellcheck = false;
+  // 2026-09-30: also as attributes. The properties above do not reach the markup in every browser,
+  // so iOS could still autocorrect or capitalize a model name ("Iphone") while the rep searches.
+  deviceInput.setAttribute('autocomplete', 'off');
+  deviceInput.setAttribute('autocorrect', 'off');
+  deviceInput.setAttribute('autocapitalize', 'none');
+  deviceInput.setAttribute('spellcheck', 'false');
   const deviceList = document.createElement('div');
   deviceList.className = 'df-dropdown-list';
   deviceWrap.appendChild(deviceInput);
@@ -16708,7 +17121,9 @@ function buildDeviceRow(lineNum, type) {
             const newXmcRate = getXmcRate(opt.price);
             row.dataset.xmcRate = newXmcRate.toFixed(2);
             const xmcLbl = document.getElementById(`${rowId}-xmc-lbl`);
-            if (xmcLbl) xmcLbl.textContent = isPremiumPlan ? 'XMC Plus Included' : `Add XMC Insurance ($${newXmcRate}/mo)`;
+            // 2026-09-30 (6GQ-21): the plan NOW, not the one the row was built under.
+            const isPlusNow = /^mobile_plus_(promo|std|ie)$/.test(intakeSelectedPlan);
+            if (xmcLbl) xmcLbl.textContent = isPlusNow ? 'XMC Plus Included' : `Add XMC Insurance ($${newXmcRate}/mo)`;
             recalcRow(row);
           } catch(e) {}
         });
@@ -16728,7 +17143,10 @@ function buildDeviceRow(lineNum, type) {
     // Update XMC checkbox label
     const xmcLbl = document.getElementById(`${rowId}-xmc-lbl`);
     if (xmcLbl) {
-      xmcLbl.textContent = isPremiumPlan ? 'XMC Plus Included'
+      // 2026-09-30 (6GQ-21): read the CURRENT plan — the row may have been built on Plus and
+      // the plan switched to Select since ("XMC Plus Included" beside an unchecked box).
+      const isPlusNow = /^mobile_plus_(promo|std|ie)$/.test(intakeSelectedPlan);
+      xmcLbl.textContent = isPlusNow ? 'XMC Plus Included'
         : (parseFloat(row.dataset.devicePrice) > 0
           ? `Add XMC Insurance ($${xmcRate}/mo)`
           : 'Add XMC Insurance (select device first)');
@@ -16754,15 +17172,13 @@ function buildDeviceRow(lineNum, type) {
         const newBucket = getTipsTradeInsForPurchase(row.dataset.deviceName || '');
         // Rebuild the dropdown options against the new bucket
         makeAutocomplete(tradeInEl, tradeListEl, newBucket, (tradeItem) => {
-          const promoTag = tradeItem.label ? ` · ${tradeItem.label}` : '';
-          const valueTag = tradeItem.value ? ` · $${tradeItem.value}` : '';
-          tradeInEl.value = `${tradeItem.name} — ${tradeItem.condition}${promoTag}${valueTag}`;
           row.dataset.tradeValue     = tradeItem.value;
           row.dataset.tradeName      = tradeItem.name;
           row.dataset.tradeCondition = tradeItem.condition || '';
           row.dataset.tradeLabel     = tradeItem.label || '';
           row.dataset.noTrade        = 'false';
           recalcRow(row);
+          tradeInEl.value = tradeInputText(row);   // 6GQ-10: TIPs tag/value only when applied
         });
         // Re-price an already-selected trade-in against the new bucket.
         const prevTradeName = row.dataset.tradeName || '';
@@ -16770,9 +17186,6 @@ function buildDeviceRow(lineNum, type) {
         if (prevTradeName && prevTradeCond && row.dataset.noTrade !== 'true') {
           const repriced = newBucket.find(r => r.name === prevTradeName && r.condition === prevTradeCond);
           if (repriced) {
-            const promoTag = repriced.label ? ` · ${repriced.label}` : '';
-            const valueTag = repriced.value ? ` · $${repriced.value}` : '';
-            tradeInEl.value = `${repriced.name} — ${repriced.condition}${promoTag}${valueTag}`;
             row.dataset.tradeValue = repriced.value;
             row.dataset.tradeLabel = repriced.label || '';
           } else {
@@ -16785,6 +17198,7 @@ function buildDeviceRow(lineNum, type) {
             row.dataset.tradeLabel     = '';
           }
           recalcRow(row);
+          if (repriced) tradeInEl.value = tradeInputText(row);   // 6GQ-10: after recalcRow decides
         }
       }
     }
@@ -16803,6 +17217,12 @@ function buildDeviceRow(lineNum, type) {
     tradeInput.type = 'text';
     tradeInput.placeholder = 'Search trade-in phones...';
     tradeInput.id = `${rowId}-trade`;
+    // 2026-09-30: the trade-in search had no autocomplete/autocorrect/capitalize/spellcheck settings,
+    // so iOS autocorrected and capitalized what the rep typed. Same attributes as the device search.
+    tradeInput.setAttribute('autocomplete', 'off');
+    tradeInput.setAttribute('autocorrect', 'off');
+    tradeInput.setAttribute('autocapitalize', 'none');
+    tradeInput.setAttribute('spellcheck', 'false');
     const tradeList = document.createElement('div');
     tradeList.className = 'df-dropdown-list';
     tradeAcWrap.appendChild(tradeInput);
@@ -16830,9 +17250,6 @@ function buildDeviceRow(lineNum, type) {
     makeAutocomplete(tradeInput, tradeList, getFilteredTradeIns, (item) => {
       // Any phone from the TIPS list can be traded toward any device.
       // Display label: show the value and label so rep knows which promo is applied.
-      const promoTag = item.label ? ` · ${item.label}` : '';
-      const valueTag = item.value ? ` · $${item.value}` : '';
-      tradeInput.value = `${item.name} — ${item.condition}${promoTag}${valueTag}`;
       row.dataset.tradeValue = item.value;
       row.dataset.tradeName = item.name;
       row.dataset.tradeCondition = item.condition || '';
@@ -16840,6 +17257,8 @@ function buildDeviceRow(lineNum, type) {
       row.dataset.noTrade = 'false';
       noTradeChk.checked = false;
       recalcRow(row);
+      // 2026-09-30 (6GQ-10): the TIPs tag and value only when recalcRow applied the trade credit.
+      tradeInput.value = tradeInputText(row);
     });
 
     // When device changes, update the trade-in field hint
@@ -16857,6 +17276,11 @@ function buildDeviceRow(lineNum, type) {
       if (noTradeChk.checked) {
         tradeInput.value = '';
         row.dataset.tradeValue = '0';
+        // 2026-09-30 (6GQ-11): the old trade's name/condition/label stayed on the row, so the
+        // customer view read "None / TIPS Up to $1,300 / Good" and Zapier got the old trade.
+        row.dataset.tradeName = '';
+        row.dataset.tradeCondition = '';
+        row.dataset.tradeLabel = '';
         tradeInput.disabled = true;
         tradeInput.style.opacity = '0.4';
       } else {
@@ -16935,12 +17359,14 @@ function recalcRow(row) {
   if (devicePrice === 0 && deviceName !== 'BYOD (Bring Your Own Device)') {
     monthlyEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">—</span>';
     row.dataset.promoAmount = '0';
+    row.dataset.appliedFromTrade = 'false';   // 2026-09-30 (6GQ-10): no credit, no TIPs tag
     return;
   }
 
   // BYOD = $0 device cost
   if (deviceName === 'BYOD (Bring Your Own Device)') {
     row.dataset.promoAmount = '0';
+    row.dataset.appliedFromTrade = 'false';   // 2026-09-30 (6GQ-10): no credit, no TIPs tag
     const xmcAdd = (xmcEnabled && !isPremiumPlan) ? xmcRate : 0;
     monthlyEl.innerHTML = `$${xmcAdd.toFixed(2)}/mo${xmcAdd > 0 ? `<span class="df-mo-promo">XMC $${xmcRate}/mo</span>` : '<span style="color:var(--xfinity-green);font-size:10px;display:block;">BYOD — $0.00</span>'}`;
     return;
@@ -17044,7 +17470,9 @@ function recalcRow(row) {
     // $300 off per watch, up to 5 watches per quote. The date gate is on
     // the PROMO_DEFINITIONS entry itself.
     const diamondActive = isPromoActiveByTag('watch_diamond_300');
-    if (intakeSelectedTier === 'diamond' && diamondActive && parseInt(lineNum) <= 5) {
+    // 2026-09-30 (6GQ-01): only watches on the card (DIAMOND_WATCH_MODELS); the Series 12 and
+    // Ultra 4 are not on CD824 and get $0.
+    if (intakeSelectedTier === 'diamond' && diamondActive && parseInt(lineNum) <= 5 && isDiamondWatch(deviceName)) {
       discount = DIAMOND_WATCH_DISCOUNT;
     }
     const netPrice = Math.max(0, devicePrice - discount);
@@ -17072,16 +17500,9 @@ function recalcRow(row) {
 
 function rebuildWatchRows() {
   const container = document.getElementById('watchFinancingRows');
-  container.innerHTML = '';
   checkDeviceSectionVisibility();
-  if (watchCount === 0) return;
-  const label = document.createElement('div');
-  label.className = 'df-group-label';
-  label.textContent = '⌚ Watches (+$10/mo line fee each)';
-  container.appendChild(label);
-  for (let i = 1; i <= watchCount; i++) {
-    container.appendChild(buildDeviceRow(i, 'watch'));
-  }
+  // 2026-09-30 (6GQ-05): keeps the watches already picked (see _resizeDeviceRows).
+  _resizeDeviceRows(container, 'watch', watchCount, '⌚ Watches (+$10/mo line fee each)');
 }
 
 
@@ -17104,11 +17525,21 @@ function updateIntakeSavingsPreview() {
     const coreCurrent  = parseFloat(document.getElementById('i_coreCurrent')?.value)  || 0;
     const coreRebundle = parseFloat(document.getElementById('i_coreRebundle')?.value) || 0;
     // Only when BOTH core bills are entered (matches the customer view).
-    const coreSavings  = (coreCurrent > 0 && coreRebundle > 0) ? Math.max(0, coreCurrent - coreRebundle) : 0;
+    // 2026-09-30 (6GQ-04): signed — a core bill that goes up lowers the total (was clamped to 0).
+    const coreSavings  = (coreCurrent > 0 && coreRebundle > 0) ? (coreCurrent - coreRebundle) : 0;
 
     const hasMobileData = competitorBill > 0 && linesVal > 0;
 
-    if (!hasMobileData && coreSavings <= 0) {
+    // 2026-09-30 (6GQ-07): every exit below writes the tally (a figure or "$—"); several
+    // used to return first and leave the previous figure showing.
+    const setTallyDash = () => {
+      const fssM = document.getElementById('fssMonthly');
+      const fssY = document.getElementById('fssYearly');
+      if (fssM) fssM.textContent = '$\u2014';
+      if (fssY) fssY.textContent = '$\u2014';
+    };
+
+    if (!hasMobileData && coreSavings === 0) {
       panel.style.display = 'none';
       // Reset tally bar to $— but keep it visible
       const fssM = document.getElementById('fssMonthly');
@@ -17121,9 +17552,9 @@ function updateIntakeSavingsPreview() {
   const plan = PLANS[planKey];
   if (!plan && !hasMobileData) {
       // No plan selected and no mobile data — check if core savings alone should show
-      if (coreSavings > 0) {
+      if (coreSavings !== 0) {
         // Show core savings only in tally
-        const fmtMo = v => (v >= 0 ? '+' : '') + '$' + Math.round(v);
+        const fmtMo = v => (v >= 0 ? '+$' : '-$') + Math.round(Math.abs(v)).toLocaleString('en-US');   // $2,033 like the customer view
         document.getElementById('sppMonthly').textContent = fmtMo(coreSavings) + '/mo';
         document.getElementById('sppYearly').textContent = fmtMo(coreSavings * 12) + '/yr';
         const fssM = document.getElementById('fssMonthly');
@@ -17137,14 +17568,18 @@ function updateIntakeSavingsPreview() {
         bd.innerHTML = '';
         const pill = document.createElement('div');
         pill.className = 'spp-item';
-        pill.innerHTML = '🏠 Core Rebundle <span class="spp-val">+$' + Math.round(coreSavings) + '/mo</span>';
+        pill.innerHTML = '🏠 Core Rebundle <span class="spp-val">' + fmtMo(coreSavings) + '/mo</span>';
         bd.appendChild(pill);
         panel.style.display = 'none'; // hide detailed panel, tally bar is enough
         return;
       }
-      panel.style.display = 'none'; return;
+      panel.style.display = 'none'; setTallyDash(); return;
     }
-    if (!plan) { panel.style.display = 'none'; return; }
+    if (!plan) { panel.style.display = 'none'; setTallyDash(); return; }
+
+  // 2026-09-30 (6GQ-08): no price exists for this many lines (NOW Mobile over 5): the plan
+  // counted as $0 and the whole bill showed as savings. Same "$—" as the customer view.
+  if (linesVal > plan.maxLines) { panel.style.display = 'none'; setTallyDash(); return; }
 
   const planMonthly = plan.pricing[linesVal - 1] || 0;
 
@@ -17153,6 +17588,7 @@ function updateIntakeSavingsPreview() {
   let previewLineFees = 0;
   document.querySelectorAll('.df-row').forEach(row => {
     const type = row.dataset.type;
+    if (devicesOnlyMode && type === 'phone') return;   // 2026-09-30 (6GQ-15): not on a devices-only quote
     const devicePrice = parseFloat(row.dataset.devicePrice) || 0;
     const promoAmt = parseFloat(row.dataset.promoAmount) || 0;
     const lineFee = type === 'watch' ? 10 : (type === 'tablet' ? 20 : 0);
@@ -17176,15 +17612,14 @@ function updateIntakeSavingsPreview() {
   const totalMonthly  = mobileSavings + coreSavings;
   const totalYearly   = totalMonthly * 12;
 
-  if (totalMonthly <= 0 && coreSavings <= 0) {
-    panel.style.display = 'none';
-    return;
-  }
+  // 2026-09-30 (6GQ-07): savings of $0 or less used to return here before the tally was
+  // written, freezing it on the last positive figure (e.g. $140 while the quote was -$20).
+  // The negative figure is shown instead, as on the customer view.
 
   panel.style.display = 'none'; // floating tally bar at top handles display
 
   // Update amounts
-  const fmtMo = (v) => v >= 0 ? `$${Math.round(v)}` : `-$${Math.round(Math.abs(v))}`;
+  const fmtMo = (v) => v >= 0 ? `$${Math.round(v).toLocaleString('en-US')}` : `-$${Math.round(Math.abs(v)).toLocaleString('en-US')}`;   // $2,033 like the customer view
   document.getElementById('sppMonthly').textContent = fmtMo(totalMonthly) + '/mo';
   document.getElementById('sppYearly').textContent  = fmtMo(totalYearly) + '/yr';
   // Update the floating tally bar
@@ -17207,7 +17642,7 @@ function updateIntakeSavingsPreview() {
   };
 
   addPill('📱', 'Mobile Savings', mobileSavings);
-  if (coreSavings > 0) addPill('🏠', 'Core Rebundle', coreSavings);
+  if (coreSavings !== 0) addPill('🏠', 'Core Rebundle', coreSavings);
   if (deviceMonthly > 0) addPill('💳', 'Device Financing', -deviceMonthly);
   addPill('🏢', `Competitor Bill`, competitorBill);
     if (isVoiceToXMActive()) addPill('📞', 'Voice to XM', -getVoiceToXMCost());
@@ -17216,16 +17651,9 @@ function updateIntakeSavingsPreview() {
 
 function rebuildTabletRows() {
   const container = document.getElementById('tabletFinancingRows');
-  container.innerHTML = '';
   checkDeviceSectionVisibility();
-  if (tabletCount === 0) return;
-  const label = document.createElement('div');
-  label.className = 'df-group-label';
-  label.textContent = '📱 Tablets (+$20/mo line fee each)';
-  container.appendChild(label);
-  for (let i = 1; i <= tabletCount; i++) {
-    container.appendChild(buildDeviceRow(i, 'tablet'));
-  }
+  // 2026-09-30 (6GQ-05): keeps the tablets already picked (see _resizeDeviceRows).
+  _resizeDeviceRows(container, 'tablet', tabletCount, '📱 Tablets (+$20/mo line fee each)');
 }
 
 // 2026-09-27: Device Financing is always open (no toggle bar), so there is
@@ -17610,6 +18038,12 @@ try {
   } else {
     tierDisplay.textContent = 'None selected';
   }
+  // 2026-09-30: no tier picked -> no Tier chip on the customer view or the PDF (they showed the rep
+  // form's placeholder, "TIER None selected"). The text stays: handleSubmit reads it for the T-Sheet.
+  const tierChip = tierDisplay.closest('.xf-chip-tier');
+  if (tierChip) tierChip.style.display = intakeSelectedTier ? '' : 'none';
+  const dateChip = tierChip && tierChip.parentNode.querySelector('.xf-chip-date');
+  if (dateChip) dateChip.style.gridColumn = intakeSelectedTier ? '' : 'span 2';   // the Date chip takes the freed cell
 
   // Populate header rep info fields
   const repNameVal  = document.getElementById('repName').value.trim() || '—';
@@ -17618,7 +18052,13 @@ try {
   const repPhoneVal = document.getElementById('repPhone').value || '—';
   document.getElementById('hdr-repName').textContent  = repNameVal;
   document.getElementById('hdr-repStore').textContent = repStoreVal;
-  document.getElementById('hdr-repEmail').textContent = repEmailVal;
+  // 2026-09-30: the email may now wrap on the customer view (it was cut off); a <wbr> before the "@"
+  // makes "name" / "@blufoxmobile.com" the place it breaks. Same text (textContent is unchanged).
+  (function (el, v) {
+    const at = v.indexOf('@');
+    if (at > 0) { el.textContent = ''; el.append(v.slice(0, at), document.createElement('wbr'), v.slice(at)); }
+    else el.textContent = v;
+  })(document.getElementById('hdr-repEmail'), String(repEmailVal));
   document.getElementById('hdr-repPhone').textContent = repPhoneVal;
 
   // Competitor display cards
@@ -17650,7 +18090,10 @@ try {
     // Update core services comparison section
   var coreSection = document.getElementById('coreSavingsSection');
   if (coreCurrent > 0 && coreRebundle > 0) {
-    var coreSavings = Math.max(0, coreCurrent - coreRebundle);
+    // 2026-09-30 (6GQ-04): signed. A core bill that goes up showed "Monthly savings $0" here
+    // while the payload sent the real negative figure; the card now shows it (e.g. -$25).
+    var coreSavings = coreCurrent - coreRebundle;
+    var coreSign = coreSavings < 0 ? '-$' : '$';
 
     // Tier rankings for upgrade detection
     var tiers = {
@@ -17691,8 +18134,8 @@ try {
     document.getElementById('coreCurrentTotalAmount').textContent = '$' + coreCurrent.toFixed(2) + '/mo';
     document.getElementById('coreNewBillDisplay').textContent = '$' + coreRebundle.toFixed(2) + '/mo';
     document.getElementById('coreNewBillSub').textContent = 'After rebundle discount';
-    document.getElementById('coreMonthSavingsDisplay').textContent = '$' + coreSavings.toFixed(0);
-    document.getElementById('coreYearSavingsDisplay').textContent = '$' + (coreSavings * 12).toFixed(0);
+    document.getElementById('coreMonthSavingsDisplay').textContent = coreSign + Math.abs(coreSavings).toFixed(0);
+    document.getElementById('coreYearSavingsDisplay').textContent = coreSign + Math.abs(coreSavings * 12).toFixed(0);
 
     coreSection.style.display = 'block';
   } else {
@@ -17754,6 +18197,14 @@ try {
 }
 
 // ── DEVICES-ONLY MODE ──
+// 2026-09-30 (6GQ-17): one tap on "Customer Declines Mobile Offer" (next to Back) wiped
+// the carrier, lines, bill, phones and watches with no way back. The button now asks first;
+// declineMobileOffer itself is unchanged for other callers.
+function confirmDeclineMobileOffer() {
+  if (!confirm('Customer declines the mobile offer?\n\nThis clears the carrier, lines, bill, phones and watches on this quote so you can quote tablets, watches or Voice to XM only.')) return;
+  declineMobileOffer();
+}
+
 function declineMobileOffer() {
   devicesOnlyMode = true;
   // Reset watches to None (watches need a phone line)
@@ -17780,6 +18231,12 @@ function declineMobileOffer() {
       row.dataset.tradeCondition = '';
       row.dataset.tradeLabel = '';
       row.dataset.noTrade = 'false';
+      // 2026-09-30 (6GQ-14): a phone's XMC (e.g. Select + XMC) stayed on the cleared row and
+      // was still added to the devices-only total and Zapier totalWithDevices (+$19).
+      row.dataset.xmcEnabled = 'false';
+      row.dataset.xmcRate = '0';
+      const xmcChk = document.getElementById(row.id + '-xmc');
+      if (xmcChk) xmcChk.checked = false;
       // Clear trade-in input and checkbox
       const tradeInput = document.getElementById(row.id + '-trade');
       if (tradeInput) tradeInput.value = '';
@@ -17794,6 +18251,12 @@ function declineMobileOffer() {
     const hpSelect = document.getElementById('voiceToXMPlan');
     if (hpSelect) hpSelect.value = '';
 
+    // 2026-09-30 (6GQ-16): after a NOW Mobile quote the watches/tablets section (which also
+    // holds Voice to XM) stayed hidden by the NOW pill, and the plan pills are hidden in this
+    // mode — a dead end. Devices-only always offers it.
+    const wtSec = document.getElementById('wt-section');
+    if (wtSec) wtSec.style.display = '';
+
     // Navigate back to intake
   // Hide the red TOTAL CURRENT COST bar
   const ctb = document.getElementById('coreCurrentTotalBar');
@@ -17805,6 +18268,7 @@ function declineMobileOffer() {
 }
 
 function exitDevicesOnlyMode() {
+  const wasDevicesOnly = devicesOnlyMode; // 2026-09-30: see the phone-row note below
   devicesOnlyMode = false;
   document.body.classList.remove('devices-only');
   const banner = document.getElementById('devicesOnlyBanner');
@@ -17812,6 +18276,23 @@ function exitDevicesOnlyMode() {
   // Reset home phone dropdown
     const hpSelect = document.getElementById('voiceToXMPlan');
     if (hpSelect) hpSelect.value = '';
+    // 2026-09-30 (6GQ-05 follow-up): declineMobileOffer only blanks the phone rows' data (their
+    // storage chips, disabled trade box and XMC label stayed). Now that a line pick keeps
+    // existing rows, those stale rows came back after Re-enable, and a stale storage chip
+    // could price a nameless "BYOD" line. Drop them here; the next line pick builds fresh
+    // rows, as it always did (i_lines is empty after a decline). Only when this really
+    // leaves devices-only mode, so a stray call never drops a live quote's phones.
+    if (wasDevicesOnly) {
+      const phoneRowsEl = document.getElementById('phoneFinancingRows');
+      if (phoneRowsEl) phoneRowsEl.innerHTML = '';
+      rebuildPhoneRows();
+    }
+    // 2026-09-30 (6GQ-16): declineMobileOffer re-shows the watches/tablets section; back on a
+    // NOW Mobile quote, re-apply that pill's rule (NOW has no watches or tablets).
+    if (intakeSelectedPlan === 'now_mobile') {
+      const nowPill = document.querySelector('.intake-plan-pill[data-plan="now_mobile"]');
+      if (nowPill) selectIntakePlan(nowPill);
+    }
     setTimeout(updateIntakeSavingsPreview, 50);
 }
 
@@ -18231,10 +18712,15 @@ function updateYrToggleVisibility(planKey) {
           for (var i = 0; i < c.length; i++) if (ok(c[i])) return c[i];
           return -1;
         };
-        var all = [limit];
-        L.blocks.concat(L.lines).forEach(function (iv) { all.push(iv[0] - 1, iv[1] + 1); });
+        var all = [limit], edges = [];
+        L.blocks.concat(L.lines).forEach(function (iv) { all.push(iv[0] - 1, iv[1] + 1); edges.push(iv[0], iv[1]); });
         cut = best(L.preferred, start + avail * 0.78, okAll);                 // 1) a section boundary near the page end
         if (cut < 0) cut = best(all, start + avail * 0.3, okAll);              // 2) between blocks
+        // 2026-09-30: 2b) between two rows. Adjacent table rows touch (one ends where the next begins), so
+        // every candidate above lies 1px inside the neighbouring row: rule 2 could never cut between two
+        // rows and rule 3 cut through them (Grand Total, Plan Total, watch/tablet rows). The rows' exact
+        // edges are tried here, after rule 2, so a page that already broke cleanly breaks where it did.
+        if (cut < 0) cut = best(edges, start + avail * 0.3, okAll);
         if (cut < 0) cut = best(all, start + avail * 0.1, function (y) { return !inside(y, L.lines, 0.5); }); // 3) between text lines
         if (cut < 0) cut = limit;                                             // 4) nothing safe: hard cut
       }
@@ -18375,7 +18861,8 @@ function updateYrToggleVisibility(planKey) {
   // and loads itself) and the print back page are fetched once the page has
   // LOADED, off the critical path, so they are cached before the first Build
   // Comparison / print. Held on window so a pending load is never collected.
-  window.addEventListener('load', function () {
+  // 2026-09-30: after load, or 10 s after DOMContentLoaded when a hung request holds load (__bfxAfterLoad).
+  (window.__bfxAfterLoad || function (f) { window.addEventListener('load', f); })(function () {
     setTimeout(function () {
       try {
         window.__xfArt = ['xf-hero.webp', 'xf-band.webp'].map(function (u) { var i = new Image(); i.src = u; return i; });
@@ -18626,6 +19113,11 @@ function updateYrToggleVisibility(planKey) {
     var now = Date.now();
     load().forEach(function (x) {
       if (inflight[x.id] || (now - (x.ts || 0)) < MAX_AGE_MS) return;
+      // 2026-09-30: age alone moved a quote aside WITHOUT A SINGLE TRY when the iPad had been closed
+      // for a day (a Saturday-night quote, reopened Monday): flush() expires before it sends. Now a
+      // quote that is being sent (lease) or has not been tried in the last 2 minutes gets its try
+      // first; one that has just failed past 24 h is moved aside at the next flush, as before.
+      if ((x.lease || 0) > now || (now - (x.lastTry || 0)) > TICK_MS * 4) return;
       x.deadAt = now; x.lease = 0;
       if (putK(PD + x.id, x)) drop(x.id);
     });
@@ -18792,7 +19284,8 @@ function updateYrToggleVisibility(planKey) {
   function changed() { if (renderQueued) return; renderQueued = true; setTimeout(function () { renderQueued = false; try { render(); } catch (e) {} }, 0); }
 
   // ── triggers ──────────────────────────────────────────────────────────────
-  window.addEventListener('load', function () { setTimeout(flush, 1200); });
+  // 2026-09-30: after load, or 10 s after DOMContentLoaded when a hung request holds load (__bfxAfterLoad).
+  (window.__bfxAfterLoad || function (f) { window.addEventListener('load', f); })(function () { setTimeout(flush, 1200); });
   window.addEventListener('pageshow', function (e) { if (e && e.persisted) flush(); });
   window.addEventListener('online', retryNow);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { flush(); changed(); } });
@@ -19686,4 +20179,216 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     try { window.parent.postMessage({ source: 'ccc-tool', action: a }, '*'); } catch (x) {}
   });
 })();</script>
+<script>/* 2026-09-30 CUSTOMER VIEW TABLES THAT SCROLL SIDEWAYS: marks each table box that has more
+   to the right (.xf-more; the CSS fades its right edge) so a customer on a phone can tell the device
+   table scrolls and "Monthly Payment" is there. Display only. */
+(function () {
+  function upd(w) {
+    // Only a table that hides a real part of itself (over 64px) gets the hint, and it stays while
+    // more than a cell's padding (16px) is still to the right. A few px of overhang is not worth a fade.
+    var over = w.scrollWidth - w.clientWidth;
+    var more = over > 64 && over - w.scrollLeft > 16;
+    if (w.classList.contains('xf-more') !== more) w.classList.toggle('xf-more', more);
+  }
+  function all() { document.querySelectorAll('#comparisonScreen .xf-table-wrap').forEach(upd); }
+  document.addEventListener('scroll', function (e) {
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('xf-table-wrap')) upd(t);
+  }, { capture: true, passive: true });
+  function init() {
+    all();
+    window.addEventListener('resize', all);
+    if (!window.ResizeObserver) return;
+    var ro = new ResizeObserver(function () { all(); });
+    document.querySelectorAll('#comparisonScreen .xf-table-wrap').forEach(function (w) {
+      ro.observe(w);
+      var t = w.querySelector('table');
+      if (t) ro.observe(t);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();</script>
+<script>/* 2026-09-30 OUTBOX MIRROR (audit OUT-06). The outbox above confirms "Submitted" as soon as a quote is saved
+   in this page's localStorage and sends it in the background. Framed in cookcountycooks.com on an iPad, Safari
+   keeps that storage only for the session (the reason rep memory moved to the site on 9/27), so a quote whose
+   first send failed could be lost if the session ended before a retry. While framed, every quote whose send has
+   failed at least once (or that is on the not-sent list) is also kept by the site, which is first-party
+   ({action:'outbox-sync'}); when the sheet opens it asks for them back ({action:'outbox-get'}) and queues any it
+   no longer has. A quote that is sent comes off the site's list at the next sync. A quote on its first try is not
+   copied, so a send cut short by closing the viewer behaves exactly as before. Messages go only to
+   https://cookcountycooks.com, and only its answers are read. */
+(function () {
+  'use strict';
+  var framed = false;
+  try { framed = window.parent !== window; } catch (e) { framed = true; }
+  if (!framed || window.__blufoxMirrorReady || typeof window.__blufoxSubmit !== 'function') return;
+  window.__blufoxMirrorReady = true;
+  var SITE = 'https://cookcountycooks.com';
+  var P = 'blufox_ob3:', PD = 'blufox_ob3dead:';   // the outbox's own keys (queued, and not sent within 24 h)
+  var known = {}, lastSig = '', restored = false;
+  function S() { try { return window.localStorage; } catch (e) { return null; } }
+  function read(prefix) {
+    var s = S(), out = [];
+    if (!s) return out;
+    try {
+      for (var i = 0; i < s.length; i++) {
+        var k = s.key(i);
+        if (k && k.indexOf(prefix) === 0) { try { var x = JSON.parse(s.getItem(k)); if (x && x.id) out.push(x); } catch (e) {} }
+      }
+    } catch (e) {}
+    return out;
+  }
+  function post(msg) { msg.source = 'ccc-tool'; try { window.parent.postMessage(msg, SITE); } catch (e) {} }
+  function slim(x, dead) {
+    return { id: x.id, sid: x.sid || x.id, v: 3, appsUrl: x.appsUrl, appsBody: x.appsBody, zapUrl: x.zapUrl || '',
+             zapBody: x.zapBody || '', zapDone: !!x.zapDone, ts: x.ts || 0, attempts: x.attempts || 0,
+             rekeys: x.rekeys || 0, label: x.label || null, dead: !!dead };
+  }
+  // Tell the site which quotes have failed a send and are still unsent, and which it had that are gone (sent).
+  function sync() {
+    if (!restored) return;
+    var items = [], ids = {}, gone = [];
+    read(P).forEach(function (x) { if ((x.attempts || 0) > 0 && !ids[x.id]) { items.push(slim(x, false)); ids[x.id] = 1; } });
+    read(PD).forEach(function (x) { if (!ids[x.id]) { items.push(slim(x, true)); ids[x.id] = 1; } });
+    for (var id in known) if (!ids[id]) gone.push(id);
+    var sig = items.map(function (x) { return x.id + ':' + x.sid + ':' + (x.dead ? 1 : 0) + ':' + (x.zapDone ? 1 : 0); }).join('|') + '#' + gone.join(',');
+    known = ids;
+    if (sig === lastSig) return;
+    lastSig = sig;
+    post({ action: 'outbox-sync', v: 1, items: items, gone: gone });
+  }
+  // The site's copy: queue every quote this page no longer has, then start syncing.
+  function restore(list) {
+    if (restored) return;
+    restored = true;
+    var s = S(), added = 0, now = Date.now(), have = {};
+    if (s && Array.isArray(list)) {
+      read(P).forEach(function (x) { have[x.id] = 1; });
+      read(PD).forEach(function (x) { have[x.id] = 1; });
+      list.forEach(function (m) {
+        if (!m || typeof m.id !== 'string' || have[m.id] || typeof m.appsUrl !== 'string' || typeof m.appsBody !== 'string') return;
+        var x = { id: m.id, sid: m.sid || m.id, v: 3, appsUrl: m.appsUrl, appsBody: m.appsBody, zapUrl: m.zapUrl || '',
+                  zapBody: m.zapBody || '', zapDone: !!m.zapDone, ts: m.ts || now, attempts: m.attempts || 0,
+                  rekeys: m.rekeys || 0, nextTry: 0, lease: 0, leaseTab: '', label: m.label || null, fromSite: now };
+        var dead = m.dead === true;   // an old one goes back in the queue; the outbox's own rules take it from there
+        if (dead) x.deadAt = now;
+        try { s.setItem((dead ? PD : P) + x.id, JSON.stringify(x)); added++; } catch (e) {}
+      });
+    }
+    sync();
+    if (added) { try { window.__blufoxOutbox.flush(); } catch (e) {} }
+  }
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== SITE || ev.source !== window.parent) return;
+    var d = ev.data;
+    if (!d || typeof d !== 'object' || d.source !== 'ccc-host' || d.type !== 'outbox') return;
+    restore(d.items);
+  });
+  post({ action: 'outbox-get', v: 1 });
+  setTimeout(function () { restore(null); }, 5000);   // an older site that does not answer: just start syncing
+  // Every new quote, and each answer from the Apps Script, updates the site's copy.
+  var submit = window.__blufoxSubmit;
+  window.__blufoxSubmit = function () {
+    var r = submit.apply(this, arguments);
+    try {
+      setTimeout(sync, 0);
+      if (r && r.done && typeof r.done.then === 'function') r.done.then(function () { setTimeout(sync, 50); }, function () {});
+    } catch (e) {}
+    return r;
+  };
+  setInterval(sync, 4000);   // background retries; reading a few keys, and a message only when something changed
+  window.addEventListener('pagehide', sync);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') sync(); });
+})();
+</script>
+<style>/* 2026-09-30 TYPING ON A PHONE OR iPAD (Jeff's iPhone screenshot: the page cut off, the field under
+   the keyboard). (1) iOS zooms the whole page when a field whose text is under 16px takes focus; framed
+   in cookcountycooks.com that zoom took the viewer with it. On touch screens every field is 16px.
+   (2) While a field has focus in a short viewport (the keyboard is up and the site viewer has fitted
+   itself above it), the floating running tally steps out of the way so the field and its label show. */
+@media (hover: none) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]):not([type="color"]):not([type="image"]),
+  select, textarea { font-size: 16px !important; }
+}
+/* iOS / iPadOS Safari only (an iPad with a trackpad or keyboard reports a fine pointer, and still zooms) */
+@supports (-webkit-touch-callout: none) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]):not([type="color"]):not([type="image"]),
+  select, textarea { font-size: 16px !important; }
+}
+html.bfx-kb .savings-tally-bar { transform: translateY(-100%) !important; }
+</style>
+<script>/* 2026-09-30 TYPING, continued. Framed in the cookcountycooks.com viewer, this page tells the viewer when
+   a text field has focus ({source:'ccc-tool', action:'typing', on}); with the keyboard up the viewer then
+   fits itself to the part of the screen the keyboard leaves, and this page scrolls the focused field into
+   that space (below the running tally when it shows). A device / trade-in search box goes to the TOP of the
+   free space, so its suggestion list opens above the keyboard instead of under it — framed, or opened
+   directly on a phone or iPad. Other fields opened directly are left to iOS, which lifts them itself. */
+(function () {
+  var framed = false, coarse = false;
+  try { framed = window.parent !== window; } catch (e) { framed = true; }
+  try { coarse = window.matchMedia('(pointer: coarse)').matches; } catch (e) {}
+  if (!framed && !coarse) return;
+  var root = document.documentElement;
+  var NOTYPE = /^(button|submit|reset|checkbox|radio|range|color|file|image|hidden)$/i;
+  var SHORT_PX = 560, told = null, t1 = 0, t2 = 0;
+  function isField(t) {
+    if (!t || t.nodeType !== 1) return false;
+    if (t.isContentEditable) return true;
+    var n = t.tagName;
+    if (n === 'TEXTAREA' || n === 'SELECT') return true;
+    return n === 'INPUT' && !NOTYPE.test(t.type || 'text');
+  }
+  function needsRoom(el) { return !!(el && el.closest && el.closest('.df-autocomplete-wrap')); }
+  function tell(on) {
+    if (!framed || told === on) return;
+    told = on;
+    try { window.parent.postMessage({ source: 'ccc-tool', action: 'typing', on: on }, '*'); } catch (e) {}
+  }
+  function tallyBottom() {
+    var b = document.getElementById('savingsTallyBar');
+    if (!b || root.classList.contains('bfx-kb')) return 0;
+    var r = b.getBoundingClientRect();
+    return (r.bottom > 0 && r.top < 4) ? r.bottom : 0;
+  }
+  function reveal(el) {
+    if (!el || !el.getBoundingClientRect || !el.getClientRects().length) return;
+    var vv = window.visualViewport;
+    var vTop = (!framed && vv) ? vv.offsetTop : 0;
+    var vH = (!framed && vv) ? vv.height : window.innerHeight;
+    if (framed) { try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) {} }
+    var r = el.getBoundingClientRect();
+    var top = Math.max(vTop, tallyBottom()) + 10, bottom = vTop + vH - 14;
+    if (needsRoom(el)) {
+      var t = top + 20;   // room for the field's own label above it
+      if (r.top < t - 6 || r.top > t + 24) window.scrollBy(0, Math.round(r.top - t));
+      return;
+    }
+    if (!framed) return;
+    // Short (keyboard up): keep the field in the upper part so its label, the next field and any
+    // suggestion list below it show too. Tall: only move it if it is out of sight.
+    var okBottom = vH < SHORT_PX ? top + Math.max(r.height, (bottom - top) * 0.62) : bottom;
+    if (r.top >= top && r.bottom <= okBottom) return;
+    var want = top + Math.max(0, (bottom - top - r.height) * 0.3);
+    window.scrollBy(0, Math.round(r.top - want));
+  }
+  function sync(doReveal) {
+    var el = document.activeElement, typing = isField(el);
+    if (framed) root.classList.toggle('bfx-kb', typing && window.innerHeight < SHORT_PX);
+    tell(typing);
+    if (typing && doReveal) reveal(el);
+  }
+  function later(doReveal) {
+    clearTimeout(t1); clearTimeout(t2);
+    t1 = setTimeout(function () { sync(doReveal); }, 60);
+    t2 = setTimeout(function () { sync(doReveal); }, 420);
+  }
+  document.addEventListener('focusin', function (e) { if (isField(e.target)) later(true); }, true);
+  document.addEventListener('focusout', function () {
+    clearTimeout(t1); clearTimeout(t2);
+    t1 = setTimeout(function () { sync(false); }, 160);
+  }, true);
+  window.addEventListener('resize', function () { if (isField(document.activeElement)) later(true); else sync(false); });
+  window.addEventListener('pagehide', function () { tell(false); });
+})();
+</script>
 </body></html>
