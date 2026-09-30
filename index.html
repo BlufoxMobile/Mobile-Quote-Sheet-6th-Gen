@@ -2,7 +2,41 @@
 <!-- saved from url=(0234)file:///Users/jeffbilbrey/Library/Application%20Support/Claude/local-agent-mode-sessions/ae3e57a8-f0cc-47a2-a4e4-6886200652a5/579f48dc-f179-41c3-a72c-2c9794de09b2/local_a26b5121-618e-498e-a251-070fae98a40d/outputs/digital-t-sheet.html -->
 <html lang="en"><head>
 <!-- Shared store/name/email picker — driven by the Admin Panel Directory. Must load before the legacy inline roster blocks. -->
-<script src="https://blufoxmobile.github.io/Daily-Sales-Report/data/rep-picker.js"></script>
+<!-- Perf (2026-09-29, same as the Upgrade sheet since 9/27): rep-picker.js is fetched WITHOUT blocking the page. As a plain
+     <script src> at the top of <head> it stopped the parser before a single pixel: a slow
+     answer from github.io added its whole delay to the first paint (+3 s measured for a 4 s
+     reply), and a request that hung left the cookcountycooks.com viewer on a blank frame for
+     good. Now the page draws at once and the picker takes over the moment the script lands
+     (normally before the page has finished arriving, so nothing changes). The two older
+     inline pickers (BLUFOX_ROSTER_DIRECTORY_V3 / BLUFOX_REP_EMAIL_DROPDOWN_V2, near the end
+     of the page) are the fallback, exactly as before when rep-picker.js failed to load: they
+     run if it errors, or if it has not arrived 5 s after the page is ready — and then a late
+     rep-picker.js stands down (it checks __BLUFOX_REP_PICKER_V4__), so two pickers never
+     fight over the same fields. Same URL, same shared script. -->
+<script>
+(function () {
+  var SRC = 'https://blufoxmobile.github.io/Daily-Sales-Report/data/rep-picker.js';
+  var WAIT_AFTER_READY_MS = 5000;
+  var st = window.__bfxRepPickerLoad = { state: 'loading' };
+  function useFallback(why) {
+    if (st.state !== 'loading') return;
+    st.state = 'fallback:' + why;
+    window.__BLUFOX_REP_PICKER_V4__ = true;          // a late rep-picker.js now returns at once
+    var run = function () {
+      (window.__bfxLegacyPickers || []).forEach(function (f) { try { f(); } catch (e) {} });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+  }
+  var s = document.createElement('script');
+  s.src = SRC;
+  s.async = true;
+  s.onload = function () { if (st.state === 'loading') st.state = 'loaded'; };
+  s.onerror = function () { useFallback('error'); };
+  (document.head || document.documentElement).appendChild(s);
+  var arm = function () { setTimeout(function () { useFallback('timeout'); }, WAIT_AFTER_READY_MS); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm); else arm();
+})();
+</script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -3317,8 +3351,6 @@
   font-size:clamp(10.5px,1.9cqw,14px);letter-spacing:.22em;text-transform:uppercase;color:var(--xf-gold)}
 #comparisonScreen .xf-sav-eye .xf-ic{font-size:1.25em}
 @container xfsav (max-width:400px){ #comparisonScreen .xf-sav-eye{letter-spacing:.13em;gap:6px} }
-#comparisonScreen .xf-sav-tot{display:none}
-#comparisonScreen .xf-savings.xf-core-in .xf-sav-tot{display:inline}
 #comparisonScreen .xf-sav-num{display:flex;justify-content:center;align-items:flex-start;margin:clamp(4px,1cqw,10px) 0 0;
   font-family:var(--xf-disp);font-weight:900;font-size:clamp(64px,15cqw,136px);line-height:.9;letter-spacing:-.04em;
   color:var(--xf-green-glow);text-shadow:0 0 34px rgba(37,232,138,.38)}
@@ -3362,25 +3394,57 @@
 #comparisonScreen .xf-card{position:relative;display:flex;flex-direction:column;min-width:0;background:var(--xf-white);border-radius:20px;
   border:1.5px solid var(--xf-rowline);box-shadow:var(--xf-sh2);container:xfcard / inline-size;animation:xfUp .55s cubic-bezier(.22,.9,.3,1) both}
 #comparisonScreen .xf-cmp > .xf-card:nth-child(2){animation-delay:.08s}
-/* Savings hero lives with the cards (Jeff, 2026-09-27): stacked under them in portrait,
-   and the THIRD column beside Current Provider + Xfinity Mobile on a landscape iPad so
-   all three boxes fit on one screen. */
+/* Savings hero lives with the cards, DIRECTLY BELOW BOTH of them, in portrait and landscape
+   alike (Jeff, 2026-09-29: "the visual of the side by side comparison is what sells this ...
+   three boxes side by side, it's weird ... directly below both boxes ... I really like the
+   larger letters"). This replaces the 9/27 third-column layout on landscape iPads. */
 #comparisonScreen .xf-cmp-row{position:relative}
 #comparisonScreen .xf-cmp-row > .xf-savings{margin:clamp(14px,2.4cqw,22px) 0 0}
+/* "FIRST YEAR SAVINGS OF  $X" (Jeff, 2026-09-29): the banner under the cards is split along the
+   same line as the cards above it — the phrase, the monthly line and the home-services chip
+   under CURRENT PROVIDER, the big number under the XFINITY MOBILE card — so it reads left to
+   right into the number. Screen only, both orientations, any sheet wide enough for two cards
+   (a phone keeps the stacked hero; the PDF clone keeps its own layout). */
+@container xf (min-width:600px){
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings{padding:clamp(14px,2.4cqw,22px) 0 clamp(16px,2.6cqw,24px)}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"eye num" "line num" "chip num";
+    column-gap:clamp(8px,2.2cqw,22px);row-gap:8px;align-items:center;align-content:center}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-eye{grid-area:eye;justify-self:center;align-self:end;margin:0;padding:0 14px;flex-wrap:wrap;text-align:center;
+    font-size:clamp(13px,2.3cqw,22px);letter-spacing:.14em}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-num{grid-area:num;justify-self:stretch;align-self:stretch;align-items:center;margin:0;padding:0;border:0;
+    border-left:1px solid rgba(255,255,255,.22);font-size:clamp(56px,13.5cqw,124px)}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-line{grid-area:line;justify-self:center;align-self:center;margin:0;padding:0 14px;max-width:none;text-align:center;font-size:clamp(14px,1.9cqw,19px)}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-chip{grid-area:chip;justify-self:center;align-self:start;margin:0 14px;white-space:normal;text-align:left}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings:not(.xf-has-core) .xf-sav-in{grid-template-areas:"eye num" "line num"}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings:not(.xf-has-core) .xf-sav-line{grid-row:auto;align-self:start}
+}
+/* The split on a portrait iPad: each half is ~360px, so the phrase keeps to one line (tighter
+   tracking) and so does the home-services chip. NOTE for anything added here or above: the PDF
+   (html2canvas) copies ::before/::after from the LIVE page, not from the .xf-pdf clone, so the
+   split uses no pseudo-elements — the divider is the number cell's own border. */
+@container xfsav (max-width:899px){
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-eye{white-space:nowrap;letter-spacing:.08em;gap:7px;font-size:clamp(12px,2.1cqw,16px);padding:0 10px}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-line{padding:0 10px}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-chip{white-space:nowrap;font-size:12.5px;padding:6px 12px 6px 10px;margin:0 8px}
+}
+/* LANDSCAPE iPad (screen only; the PDF clone .xf-pdf keeps its own page layout): the two cards
+   side by side and the split savings banner under both (above), sized so cards + banner fit
+   on one screen inside the
+   cookcountycooks.com viewer (sheet viewport ~1133x610 on an 11" iPad in Chrome). The two
+   mobile cards only lose some vertical padding here; nothing else about them changes, and
+   the home-services cards further down are untouched. */
 @media (orientation:landscape) and (min-width:1000px){
-  /* Screen only: the PDF clone (.xf-pdf) keeps the stacked page layout. */
-  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:clamp(10px,1.6cqw,20px);align-items:stretch}
-  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row:has(> .xf-savings.xf-off){grid-template-columns:minmax(0,1fr)}
-  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings{margin:14px 0 0;display:flex;flex-direction:column;justify-content:center;
-    padding:22px 16px 22px;border-radius:22px}
-  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings.xf-off{display:none}
-  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-in{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
-  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-num{font-size:clamp(52px,21cqw,92px);line-height:.95;justify-content:center;
-    margin:0;padding:0;border:0}
-  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-line{font-size:14px;line-height:1.4;max-width:24ch;margin:0 auto;text-align:center;align-self:center}
-  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-eye{font-size:10.5px;letter-spacing:.14em;justify-content:center;flex-wrap:wrap}
-  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-chip{font-size:12px;max-width:100%;white-space:normal;justify-content:center;
-    align-self:center;margin:2px auto 0;text-align:center}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) #mobileCompareSection .xf-card-body{padding:12px clamp(12px,4.6cqw,24px) 10px}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) #mobileCompareSection .xf-carrier{font-size:clamp(17px,7cqw,34px)}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) #mobileCompareSection .xf-rule{margin:10px auto}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) #mobileCompareSection .xf-bill{font-size:clamp(19px,calc(6px + 8.4cqw),44px)}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) #mobileCompareSection .xf-card-foot{min-height:56px;padding-top:7px;padding-bottom:7px}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-sec-cmp .xf-cmp > .xf-vs{top:calc(14px + 48px + 12px + 36px + 26px + 11px - 21px)}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings{margin-top:10px;padding-top:10px;padding-bottom:12px;border-radius:22px}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-num{font-size:clamp(56px,10.6cqw,108px)}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-in{row-gap:5px}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-eye{font-size:clamp(13px,2cqw,20px)}
+  #comparisonScreen .xf-sheet:not(.xf-pdf) .xf-cmp-row > .xf-savings .xf-sav-chip{padding-top:5px;padding-bottom:5px}
 }
 @keyframes xfUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 #comparisonScreen .xf-card-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;min-height:48px;padding:10px 12px;
@@ -4323,12 +4387,13 @@ window.addEventListener('load', function () { setTimeout(function () { _loadPdfL
 
         <span class="xf-vs" aria-hidden="true">VS</span>
       </div>
-      <!-- YEARLY SAVINGS HERO — directly below the side-by-side in portrait; the THIRD box beside
-           Current Provider + Xfinity Mobile on a landscape iPad (Jeff, 2026-09-27). Mirrors only (painted by xfFlyer from the real ids).
+      <!-- YEARLY SAVINGS HERO — directly below BOTH side-by-side cards, portrait and landscape (Jeff,
+           2026-09-29; the 9/27 third column on a landscape iPad is gone). On a landscape iPad it is one
+           wide banner sized so cards + savings fit on one screen. Mirrors only (painted by xfFlyer from the real ids).
            Hidden while savings are not shown (devices-only mode) or are $0 / negative. -->
       <section class="xf-savings xf-off" aria-label="Your savings">
         <div class="xf-sav-in">
-          <div class="xf-sav-eye"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/></svg><span>Your <span class="xf-sav-tot">total </span><span class="xf-sav-yr">first-year</span> savings</span><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/></svg></div>
+          <div class="xf-sav-eye"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/></svg><span><span class="xf-sav-yr">First year</span> savings of</span><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/></svg></div>
           <div class="xf-sav-num xf-money" data-xf-src="yearlySavings" data-xf-count></div>
           <p class="xf-sav-line">That’s <b class="xf-money" data-xf-src="monthlySavings"></b> less every month than you pay today.</p>
           <div class="xf-sav-chip"><svg class="xf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7.5 9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg><span>Includes <b class="xf-money" data-xf-src="coreYearSavingsDisplay"></b> a year on your home services</span></div>
@@ -18031,7 +18096,8 @@ function updateYrToggleVisibility(planKey) {
 
     // Year wording follows #yearlySavingsLabel ("First Year Savings" / "Second Year Savings").
     var lbl = yl ? yl.textContent.trim() : '';
-    var yr = /second/i.test(lbl) ? 'second-year' : /first/i.test(lbl) ? 'first-year' : lbl.replace(/\s*savings\s*$/i, '').toLowerCase();
+    // Hero reads "First year savings of $X" (Jeff, 2026-09-29).
+    var yr = /second/i.test(lbl) ? 'Second year' : /first/i.test(lbl) ? 'First year' : lbl.replace(/\s*savings\s*$/i, '');
     if (hero) {
       var yrEl = hero.querySelector('.xf-sav-yr');
       if (yrEl && yrEl.textContent !== yr) yrEl.textContent = yr;
@@ -18061,7 +18127,7 @@ function updateYrToggleVisibility(planKey) {
         }
       });
       var eye = hero.querySelector('.xf-sav-eye');
-      hero.setAttribute('aria-label', (eye ? (heroOn ? eye.innerText : eye.textContent).replace(/\s+/g, ' ').trim() : 'Your savings') + ': ' + (yp ? '$' + commas(yp.int) + yp.dec : ''));
+      hero.setAttribute('aria-label', (eye ? eye.textContent.replace(/\s+/g, ' ').trim() : 'Your savings') + ' ' + (yp ? '$' + commas(yp.int) + yp.dec : ''));
     }
     wasShown = nowShown;
   }
@@ -18742,7 +18808,10 @@ function updateYrToggleVisibility(planKey) {
 
 <!-- BLUFOX_ROSTER_DIRECTORY_V3 : store + rep dropdowns driven by the FULL store directory. Each store's dropdown lists every rep PLUS that store's Store Manager and ASM, so managers/ASMs can select themselves and submit. Email auto-fills for whoever is picked. -->
 <script>
-(function(){
+/* Perf (2026-09-29): FALLBACK ONLY — registered here, run by the rep-picker loader at the top of
+   <head> if rep-picker.js errors or stalls (it used to run whenever that script had not set the
+   flag first, which with a blocking <script src> meant: whenever it failed to load). */
+(window.__bfxLegacyPickers = window.__bfxLegacyPickers || []).push(function(){
   if (window.__BLUFOX_ROSTER__) return; window.__BLUFOX_ROSTER__ = true;
   var CFG = {"storeId": "storeName", "repId": "repName", "repNameAttr": "rep-name", "fieldSel": ".rep-info-field", "shortStores": false, "lsStore": "bfx_lastStore", "lsRep": "bfx_lastRep", "onStoreChange": null, "onRepChange": null};
   var DIR='https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/store-directory.json';
@@ -18897,12 +18966,13 @@ function updateYrToggleVisibility(planKey) {
   try{ reorder(); }catch(e){}
   function boot(){ try{ reorder(); }catch(e){} setTimeout(go, 250); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
-})();
+});
 </script>
 
 <!-- BLUFOX_REP_EMAIL_DROPDOWN_V2 : store-filtered rep email picker (auto-added) -->
 <script>
-(function(){
+/* Perf (2026-09-29): FALLBACK ONLY — see BLUFOX_ROSTER_DIRECTORY_V3 above. */
+(window.__bfxLegacyPickers = window.__bfxLegacyPickers || []).push(function(){
   if (window.__BLUFOX_REPEMAIL__) return; window.__BLUFOX_REPEMAIL__ = true;
   var CFG = { emailId:'repEmail', storeId:'storeName', fieldSel:'.rep-info-field', domain:'@blufoxmobile.com' };
   var DIR = 'https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/store-directory.json';
@@ -18997,7 +19067,7 @@ function updateYrToggleVisibility(planKey) {
 
   function boot(){ setTimeout(init, 450); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
-})();
+});
 </script>
 
 <script>
@@ -19045,6 +19115,10 @@ var SubTracker = (function () {
 
   var ENABLED       = true;
   var COUNTS_URL    = 'https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/tsheet-counts.json';
+  // 2026-09-29: FALLBACK ONLY, when raw.githubusercontent does not answer. The Pages copy can be
+  // hours behind (see above), and the panel says so: its generated_at drives "Stale" / "may be
+  // behind" / "no data for today yet". A number marked old beats "Offline" and zeros.
+  var COUNTS_URL_PAGES = 'https://blufoxmobile.github.io/Daily-Sales-Report/data/tsheet-counts.json';
   var LIVE_FALLBACK = true;   // manual Refresh only; see note above
   var LIVE_URL      = (typeof APPS_SCRIPT_URL === 'string' && APPS_SCRIPT_URL) ? APPS_SCRIPT_URL : '';
 
@@ -19077,19 +19151,30 @@ var SubTracker = (function () {
      If the file is missing or has no goal for the store, the panel looks
      exactly as it did before. */
   var GOALS_URL = 'https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/target-summary.json';
-  var goals = null, goalsInFlight = null, goalsTried = false;
+  /* 2026-09-29: the Pages copy of the same file is the fallback. When raw.githubusercontent
+     was slow or unreachable from a store iPad the goal lines simply never appeared ("parts
+     missing"). Goals change once a month, so a Pages copy that is a few hours behind is
+     the same numbers. A failed read is tried again after GOALS_RETRY_MS (on the next
+     render or timer tick) instead of waiting for a Refresh tap. */
+  var GOALS_URL_PAGES = 'https://blufoxmobile.github.io/Daily-Sales-Report/data/target-summary.json';
+  var GOALS_RETRY_MS = 60000;
+  var goals = null, goalsInFlight = null, goalsTried = false, goalsFailedAt = 0;
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function loadGoals(force) {
     if (goalsInFlight) return goalsInFlight;
-    if (goalsTried && !force) return Promise.resolve(goals);
+    if (goalsTried && !force && !(goals === null && goalsFailedAt && Date.now() - goalsFailedAt > GOALS_RETRY_MS)) return Promise.resolve(goals);
     goalsTried = true;
-    goalsInFlight = fetchJson(GOALS_URL, COUNTS_TIMEOUT).then(function (j) {
-      goals = (j && j.stores && typeof j.stores === 'object') ? j : goals;
-      goalsInFlight = null; return goals;
-    }, function (e) {
-      console.warn('[SubTracker] goals unavailable:', e && e.message);
-      goalsInFlight = null; return goals;
-    });
+    var okGoals = function (j) { if (!j || !j.stores || typeof j.stores !== 'object') throw new Error('goals file malformed'); return j; };
+    goalsInFlight = fetchJson(GOALS_URL, COUNTS_TIMEOUT).then(okGoals)
+      .catch(function () { return fetchJson(GOALS_URL_PAGES, COUNTS_TIMEOUT).then(okGoals); })
+      .then(function (j) {
+        goals = j; goalsFailedAt = 0;
+        goalsInFlight = null; return goals;
+      }, function (e) {
+        console.warn('[SubTracker] goals unavailable:', e && e.message);
+        goalsFailedAt = Date.now();
+        goalsInFlight = null; return goals;
+      });
     return goalsInFlight;
   }
   function goalFor(store) {
@@ -19258,10 +19343,14 @@ var SubTracker = (function () {
 
     setStatus('loading', 'Loading…');
 
-    inFlight = fetchJson(COUNTS_URL, COUNTS_TIMEOUT)
-      .then(function (json) {
-        if (!json || !json.stores) throw new Error('counts file malformed');
-        return json;
+    var okCounts = function (json) {
+      if (!json || !json.stores) throw new Error('counts file malformed');
+      return json;
+    };
+    inFlight = fetchJson(COUNTS_URL, COUNTS_TIMEOUT).then(okCounts)
+      .catch(function (err) {
+        console.warn('[SubTracker] counts file (raw) unavailable, trying the Pages copy:', err && err.message);
+        return fetchJson(COUNTS_URL_PAGES, COUNTS_TIMEOUT).then(okCounts);
       })
       .catch(function (err) {
         // The counts file is the only automatic source. Falling back to the heavy
@@ -19477,6 +19566,10 @@ var SubTracker = (function () {
     refreshTimer = setInterval(function () {
       if (document.hidden || !selectedStore()) return;
       load(true, false).then(function () { paint(selectedStore()); }).catch(function () {});
+      // Goals that failed to arrive are tried again here (at most once a minute, see loadGoals).
+      if (!goals) loadGoals(false).then(function () {
+        if (goals && data && selectedStore()) { try { paint(selectedStore()); } catch (e) {} }
+      });
     }, REFRESH_MS);
   }
 
