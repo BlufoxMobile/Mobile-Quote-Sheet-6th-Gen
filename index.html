@@ -3923,6 +3923,29 @@ body.devices-only #comparisonScreen .xf-tables{grid-template-columns:minmax(0,1f
   #comparisonScreen .xf-pdf .xf-rule{margin:12px auto}
 }
 #comparisonScreen .xf-pdf .xf-dev-total,#comparisonScreen .xf-pdf .xf-table-wrap,#comparisonScreen .xf-pdf .pg-chip{box-shadow:none}
+/* 2026-09-30 (Jeff: the printout on one sheet, front and back). The PDF is laid out at 1180px (see
+   _buildQuotePdf) and tightened here so a typical quote fits two Letter pages at full size; a bigger
+   quote is then drawn slightly smaller to fit (zoom in _buildQuotePdf). Same content, same order. */
+@container xf (min-width:1000px){
+  #comparisonScreen .xf-pdf .xf-hero{max-height:220px}
+  #comparisonScreen .xf-pdf .xf-wordmark{width:118px;margin-bottom:8px}
+  #comparisonScreen .xf-pdf .xf-hero-h{font-size:42px}
+  #comparisonScreen .xf-pdf .xf-hero-sub{font-size:15px;margin-top:6px}
+  #comparisonScreen .xf-pdf .xf-pbadge{font-size:13px;margin-top:10px;padding:5px 12px 5px 9px}
+  #comparisonScreen .xf-pdf .xf-pbadge .xf-ic{font-size:20px}
+  #comparisonScreen .xf-pdf .xf-sec{padding-top:14px}
+  #comparisonScreen .xf-pdf .xf-sec-head{margin-bottom:6px}
+  #comparisonScreen .xf-pdf .xf-card-body{padding-top:12px;padding-bottom:10px}
+  #comparisonScreen .xf-pdf .xf-rule{margin:8px auto}
+  #comparisonScreen .xf-pdf .xf-savings{margin-top:10px;padding-top:12px;padding-bottom:14px}
+  #comparisonScreen .xf-pdf .xf-sav-num{font-size:72px}
+  #comparisonScreen .xf-pdf .xf-feats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px}
+  #comparisonScreen .xf-pdf .xf-feat{padding:6px 9px;gap:8px}
+  #comparisonScreen .xf-pdf .xf-promo-list-wrap .promo-banner-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  #comparisonScreen .xf-pdf .xf-promo-list-wrap .promo-banner-list > li.pg-chip{padding-top:8px;padding-bottom:8px}
+  #comparisonScreen .xf-pdf .xf-ribbon{margin-top:16px;min-height:64px}
+  #comparisonScreen .xf-pdf .xf-fine{padding-top:8px;padding-bottom:8px}
+}
 
 /* ── Phone: flyer goes edge to edge ── */
 @media screen and (max-width:600px){
@@ -15399,12 +15422,11 @@ function buildFeatures(plan) {
   // Markup restyled 2026-09-24 (customer-view redesign): same content and order,
   // emoji replaced by SVG icons, rep-facing empty state hidden on the customer view.
   const xfI = (n) => (window.xfIcon ? xfIcon(n) : '');
-  const deviceDiscountHtml = deviceDiscountItems.length > 0
-    ? `<div class="xf-disc">
-        <div class="xf-eye xf-disc-head">${xfI('tag')}Discounts applied to this quote</div>
-        <ul class="promo-banner-list">${deviceDiscountItems.join('')}</ul>
-       </div>`
-    : '';
+  // 2026-09-30 (Jeff): the green "Discounts applied to this quote" box is gone, on screen and on paper.
+  // The same per-line discounts are in the Device Financing Summary's "Promo Applied" column, and the
+  // box pushed the printout to a third page. (deviceDiscountItems is still built; nothing shows it.)
+  void deviceDiscountItems;
+  const deviceDiscountHtml = '';
   const hasPromoChips = String(promoItems || '').indexOf('pg-chip') !== -1;
 
   grid.innerHTML = `
@@ -15775,12 +15797,17 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
     // layout (the same quote is 4 pages from an iPad). A screen under 700px wide is now captured at
     // iPad-portrait width (the clone only; the phone's own screen is not touched). The phone layout
     // is taller than the iPad one, so capW x cssH over-estimates the canvas and stays under the cap.
-    const capW = cssW < 700 ? 820 : cssW;
+    // 2026-09-30 (Jeff: "one page, front and back"): every PDF is now laid out at one fixed width,
+    // the landscape-iPad layout (tables side by side), from any device: a phone, an iPad or a wide
+    // Mac window all print the same two pages. (Was: the screen's own width, or 820 on a phone.)
+    const capW = 1180;
+    // The clone may be narrower than a wide screen, so the page can grow taller than cssH there.
+    const capH = cssH * Math.max(1, cssW / capW);
 
     // iPad Safari silently fails (or hangs) on canvases above ~16.7M pixels.
     // Cap the render scale so the master canvas always stays under the limit.
     const MAX_CANVAS_AREA = 16777216; // = 4096 × 4096, safe on every iPad
-    const scale = Math.min(2.5, Math.sqrt(MAX_CANVAS_AREA / (capW * cssH)));
+    const scale = Math.min(2.5, Math.sqrt(MAX_CANVAS_AREA / (capW * capH)));
 
     // 2026-09-30: html2canvas's clone re-requests the Google Fonts sheets and waits for the fonts
     // before drawing, so when that host stalled (store guest Wi-Fi) EVERY Email PDF / Print waited
@@ -15805,7 +15832,7 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
       letterRendering: true,
       logging: false,
       windowWidth: capW,
-      windowHeight: cssH,
+      windowHeight: capH,
       ignoreElements: skipFontSheet,
       onclone: (clonedDoc) => {
         // Apply the capture stylesheet to the CLONE only — the live
@@ -15952,15 +15979,21 @@ async function _buildQuotePdf({ openInNewTab = false, returnBlob = false } = {})
       // later pages get a small top margin.
       // Layout px (measured in the clone) → canvas px / PDF points.
       const lScale = canvas.width / (pdfLayout.width || capW);
-      const ptPerCss = pageWidth / (pdfLayout.width || capW);
-      const pages = window.xfPaginate(pdfLayout, canvas.height / lScale, pageHeight / ptPerCss, 22 / ptPerCss, 14 / ptPerCss);
+      const ptFull = pageWidth / (pdfLayout.width || capW);
+      const totalCss = canvas.height / lScale;
+      const cutAt = (pt) => window.xfPaginate(pdfLayout, totalCss, pageHeight / pt, 22 / pt, 14 / pt);
+      // 2026-09-30 (Jeff): one sheet, front and back. When the quote runs past two pages at full
+      // width, the pages are drawn a little smaller (centred, white side margins) until it fits on two.
+      let zoom = 1, pages = cutAt(ptFull);
+      while (pages.length > 2 && zoom < 2.4) { zoom = Math.round((zoom + 0.02) * 100) / 100; pages = cutAt(ptFull / zoom); }
+      const ptPerCss = ptFull / zoom, imgW = pageWidth / zoom, imgX = (pageWidth - imgW) / 2;
       for (const pg of pages) {
         const y0 = Math.max(0, Math.round(pg.from * lScale));
         const y1 = Math.min(canvas.height, Math.round(pg.to * lScale));
         if (y1 - y0 <= 0) continue;
         if (!isFirstPage) pdf.addPage();
         isFirstPage = false;
-        pdf.addImage(sliceToJpeg(y0, y1 - y0), 'JPEG', 0, pg.topPad * ptPerCss, pageWidth, (y1 - y0) * (pageWidth / canvas.width));
+        pdf.addImage(sliceToJpeg(y0, y1 - y0), 'JPEG', imgX, pg.topPad * ptPerCss, imgW, (y1 - y0) * (imgW / canvas.width));
         await breathe();
       }
     } else if (breakY > 0 && breakY < canvas.height) {
@@ -18235,7 +18268,7 @@ try {
 // the carrier, lines, bill, phones and watches with no way back. The button now asks first;
 // declineMobileOffer itself is unchanged for other callers.
 function confirmDeclineMobileOffer() {
-  if (!confirm('Customer declines the mobile offer?\n\nThis clears the carrier, lines, bill, phones and watches on this quote so you can quote tablets, watches or Voice to XM only.')) return;
+  // 2026-09-30 (Jeff): no "Customer declines the mobile offer?" browser pop-up; the tap declines at once.
   declineMobileOffer();
 }
 
