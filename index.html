@@ -2044,6 +2044,7 @@
     font-weight: 800;
     color: #0f8a3c;   /* the sheet's savings green (.pg-chip-amt) */
   }
+  .core-savings-result.csr-up .csr-amount { color: #c62828; }
   .csr-sub {
     flex-basis: 100%;
     font-size: 12px;
@@ -2472,6 +2473,15 @@
   body.devices-only #sec-financing { display: none !important; }
   body.devices-only .tables-side-by-side-grid { grid-template-columns: 100% !important; }
     body.devices-only #voiceToXMSection { display: block !important; }
+  /* 2026-09-30 (Jeff: customer declines mobile → core savings, watches, tablets and Voice to XM).
+     Voice to XM gets its own full-width row under watches + tablets, as its inline grid-column:1/-1
+     intended. The wrapper is a flex row, so it had become a third narrow column beside them and the
+     count pills clipped "None" on a portrait iPad. */
+  body.devices-only #voiceToXMSection { margin-top: 0 !important; border-top: 1.5px solid var(--border); padding: 16px 12px 8px; align-self: stretch; }
+  @media screen and (min-width: 781px) {
+    body.devices-only .wt-side-by-side { flex-wrap: wrap; }
+    body.devices-only #voiceToXMSection { flex: 1 1 100%; }
+  }
     #homePhoneToXM select { width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
   /* Decline button in comparison footer */
   .btn-footer-decline {
@@ -4415,11 +4425,12 @@ function _loadPdfLibs() {
 
         <!-- Xfinity Voice to XM -->
         <div id="voiceToXMSection" style="grid-column: 1 / -1; margin-top: 1rem; display: none;">
-          <div class="wt-header" style="justify-content:center; gap:0.5rem;">
-            <span style="font-size:1.3rem;">📞</span>
-            <div style="text-align:center;">
-              <div class="wt-title">XFINITY VOICE TO XM</div>
-              <div class="wt-sub">Move home phone to a mobile line</div>
+          <!-- 2026-09-30: same header as Add Watches / Add Tablets (the old .wt-header classes had no styles) -->
+          <div class="wt-standalone-title-row">
+            <span class="wt-standalone-icon">📞</span>
+            <div>
+              <div class="wt-standalone-title">Xfinity Voice to XM</div>
+              <div class="wt-standalone-sub">Move home phone to a mobile line</div>
             </div>
           </div>
           <div style="display:flex; justify-content:center; gap:1rem; padding:0.8rem 1rem;">
@@ -14478,6 +14489,10 @@ function pgIsRepNote(x) { return PG_REP_NOTE.test(x) || PG_REP_CODE.test(x); }
 const PG_CARD_NOTE = /\b(?:cards?|Celestial|Jeff|deal desk)\b|\b(?:the|Upgrade) sheet\b/i;
 const PG_CARD_CODE = /\bCD\d{3}\b|\bDEALS\d+\b/;
 function pgIsCardNote(x) { return PG_CARD_NOTE.test(x) || PG_CARD_CODE.test(x); }
+// A sentence of coaching for the rep ("Quoting $400 here costs the customer $100.", "NEVER quote …",
+// "if the rep starts the buy flow …", "Never surface it to a non-Diamond tier.") or a change-log note
+// ("… deals expired 9/1/26") is left out of the customer's card too.
+const PG_REP_COACH = /\b(?:quot(?:e|es|ed|ing)\b|the rep\b|reps?\b|surface it\b|never assume\b|expired \d+\/\d+)/i;
 // "check CD872 first" -> "check “<that offer's name>” first" when the card is one of this sheet's
 // offers (deal_card in PROMO_GUIDE); other codes are left for the rules below.
 function pgCardName(code) {
@@ -14501,7 +14516,7 @@ function pgCustomerText(x) {
   const parts = t.split(/\.\s+(?=[A-Z])/).map(function (sn) {
     return sn.replace(/\s+—\s+[^—]*$/, function (cl) { if (pgIsCardNote(cl)) { cut = true; return ''; } return cl; });
   });
-  const kept = parts.filter(function (sn) { return sn.trim() && !pgIsCardNote(sn); });
+  const kept = parts.filter(function (sn) { return sn.trim() && !pgIsCardNote(sn) && !PG_REP_COACH.test(sn); });
   if (kept.length < parts.length) cut = true;
   t = kept.join('. ');
   if (cut && t && !/[.!?:]$/.test(t)) t += '.';
@@ -15079,14 +15094,28 @@ function renderDevicesOnlyQuote() {
 
   // (Plan-colour tints removed 2026-09-24: the customer view's styling lives in CSS.)
       // Hide Full Monthly Bill Comparison - not needed in devices-only mode
+      // 2026-09-30: ...except when Voice to XM is all there is (no watch, tablet or core bills): that
+      // quote showed the customer no price at all. The plan card then shows "Home Phone to XM · $X/mo".
       const mobComp = document.getElementById('mobileCompareSection');
-      if (mobComp) mobComp.style.display = 'none';
+      const v2xCoreC = parseFloat((document.getElementById('i_coreCurrent') || {}).value) || 0;
+      const v2xCoreR = parseFloat((document.getElementById('i_coreRebundle') || {}).value) || 0;
+      const v2xOnly = isVoiceToXMActive() && watchCount === 0 && tabletCount === 0 && !(v2xCoreC > 0 && v2xCoreR > 0);
+      if (mobComp) mobComp.style.display = v2xOnly ? '' : 'none';
       document.getElementById('featuresSection').style.display = 'none';
 
       // Build device summary (keeps financing tables at bottom)
       const hpCost = getVoiceToXMCost();
       buildDeviceSummary(hpCost, 0);
       updateTotalWithDevices(hpCost);
+      if (v2xOnly) {   // the plan card's price is the home phone line itself
+        const hpSelV = document.getElementById('voiceToXMPlan');
+        const hpName = hpSelV && hpSelV.value === 'select' ? 'Mobile Select' : 'Mobile Plus';
+        const amt = '$' + hpCost.toFixed(2) + '/mo';
+        document.getElementById('xfBillAmount').textContent = amt;
+        document.getElementById('xfBillSub').textContent = 'Home phone on ' + hpName;
+        document.getElementById('xfTotalAmount').textContent = amt;
+        document.getElementById('xfTotalSub').textContent = 'Home phone on ' + hpName;
+      }
       // 2026-09-30 (6GQ-02): #tablesSideBySide was hidden here, and with it the Device
       // Financing Summary — the only place a devices-only quote without core bills lists its
       // devices, so that customer view (and PDF) showed no device and no price. The lines
@@ -16409,6 +16438,11 @@ function calcCoreSavings() {
   // counted in the totals that way) instead of being hidden.
   if (current > 0 && rebundle > 0 && savings !== 0) {
     amountEl.textContent = (savings < 0 ? '-$' : '$') + Math.abs(savings).toFixed(2) + '/mo';
+    // A bill that goes up is not shown in the savings green: red, and labelled as an increase.
+    resultEl.classList.toggle('csr-up', savings < 0);
+    const lbl = resultEl.querySelector('.csr-label'), sub = resultEl.querySelector('.csr-sub');
+    if (lbl) lbl.textContent = savings < 0 ? 'Core Bill Goes Up' : 'Total Core Savings';
+    if (sub) sub.textContent = savings < 0 ? 'Taken off your total monthly & yearly savings estimate' : 'Added to your total monthly & yearly savings estimate';
     resultEl.style.display = 'flex';
   } else {
     resultEl.style.display = 'none';
