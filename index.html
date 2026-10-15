@@ -3630,6 +3630,8 @@
 #comparisonScreen .xf-them .xf-bill{color:var(--xf-edp)}
 #comparisonScreen .xf-xf .xf-bill{color:var(--xf-price)}
 #comparisonScreen .xf-bill-sub{margin-top:8px;font-size:clamp(10.5px,3.2cqw,12.5px);font-weight:500;color:var(--xf-txt3);line-height:1.35}
+#comparisonScreen .xf-bonus{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:99px;font-size:clamp(11px,3.3cqw,13px);font-weight:800;
+  color:var(--xf-green-ink);background:#EAF8EF;border:1.5px solid #BFE6CC;line-height:1.35}
 #comparisonScreen .xf-unavail{display:flex;align-items:flex-start;gap:8px;margin:0 0 12px;padding:10px 12px;border-radius:12px;text-align:left;
   background:#FFF4E5;border:1.5px solid #F5C77E;color:#7A4100;font-size:12.5px;font-weight:700;line-height:1.35}
 #comparisonScreen .xf-unavail .xf-ic{font-size:16px;margin-top:1px}
@@ -4619,6 +4621,9 @@ function _loadPdfLibs() {
             <div class="xf-bill-lbl">Xfinity monthly bill</div>
             <div class="xf-bill" id="xfBillAmount">$—</div>
             <div class="xf-bill-sub" id="xfBillSub"></div>
+            <!-- 2026-10-15: $200 Visa gift card (visa_gc_200_2lines). A bonus line only — not a bill credit,
+                 never part of a price, total or savings figure. Shown by updateQuote when giftCardQualifies(). -->
+            <div class="xf-bonus" id="xfGiftCardBonus" style="display:none;">+ $200 Visa gift card</div>
           </div>
           <!-- hidden for JS compat -->
           <div class="side-total-bar" id="xfTotalBar" style="display:none;">
@@ -4811,6 +4816,7 @@ let devicesOnlyMode = false; // When true, rep is quoting watches/tablets only (
 // storage: array of { gb, price } — if present, a storage picker appears after device selection
 const PHONES_FOR_SALE = [
   // Apple
+  { name: "Apple iPhone Duo",               price: 1999.99, storage: [ { gb: "256GB", price: 1999.99 }, { gb: "512GB", price: 2199.99 }, { gb: "1TB", price: 2599.99 }, { gb: "2TB", price: 3199.99 } ] },  // pre-order 10/16, available 10/23 (added 2026-10-15)
   { name: "Apple iPhone 18 Pro Max",        price: 1299.99, storage: [ { gb: "256GB", price: 1299.99 }, { gb: "512GB", price: 1499.99 }, { gb: "1TB", price: 1899.99 }, { gb: "2TB", price: 2499.99 } ] },  // pre-order, ships 9/18
   { name: "Apple iPhone 18 Pro",            price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 }, { gb: "512GB", price: 1399.99 }, { gb: "1TB", price: 1799.99 }, { gb: "2TB", price: 2399.99 } ] },  // pre-order, ships 9/18
   { name: "Apple iPhone 17 Pro Max",        price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 }, { gb: "512GB", price: 1399.99 }, { gb: "1TB", price: 1599.99 }, { gb: "2TB", price: 1999.99 } ] },
@@ -4891,6 +4897,9 @@ const PHONES_FOR_SALE = [
 // RETIRED 10/8 and deleted from this table: tips_apple_1300 (CD871) and
 // tips_gm_830 (CD872). The Pixel 11 series, razr – 2026 and razr fold now
 // route to tips_agm_930. Galaxy A57 has NO TIPs bucket.
+// 2026-10-15 add-on: a THIRD bucket, tips_duo_1000 (iPhone Duo, new lines,
+// 10/16–11/10), is DERIVED from tips_agm_930 just below this table — same
+// 139 trade-ins and tier assignments, ladder 1000/700/600/500/450.
 // ═══════════════════════════════════════════════════════════════
 const TIPS_PROMOS = {
   "tips_agm_930": {
@@ -9936,6 +9945,38 @@ const TIPS_PROMOS = {
     ]
   }
 };
+// ── iPhone Duo TIPs bucket — 2026-10-15 add-on (PROVISIONAL) ────
+// "TIPs — Up to $1,000 off iPhone Duo (new lines)", 10/16 → 11/10/26.
+// Celestial had not posted a Duo card or trade-in list on 10/15 (DEALS18 /
+// DEALS94 checked). Per Jeff: use the current $930 A/G/M trade-in table
+// (tips_agm_930, DEALS94-100926-01) with the top tier raised to $1,000.
+// The rows are DERIVED, not typed: every tips_agm_930 row (139 trade-ins,
+// the same accepted conditions, the same tier) re-priced through the Duo
+// ladder 1000/700/600/500/450, floor $450. Mobile Plus / Premium Unlimited,
+// trade-in + 36-mo DPP, no port, 21-day Assurant clock, capped at retail,
+// not combinable with other device offers. The Duo has NO new-line no-trade
+// deal (not on CD881) and is NOT on CD885 — this is its only path.
+TIPS_PROMOS.tips_duo_1000 = (function (base) {
+  const ladder = { 1: 1000, 2: 700, 3: 600, 4: 500, 5: 450 };
+  return {
+    promo_tag:   'tips_duo_1000',
+    promo_title: 'Up to $1,000 off iPhone Duo',
+    max_value:   1000,
+    timing:      { start: '2026-10-16', end: '2026-11-10' },
+    line_type:   'new_line',
+    deal_card:   null,          // not yet posted on Celestial (10/15)
+    source_pdf:  null,
+    provisional: 'Celestial trade-in list not yet posted 10/15; values per Jeff = $930 list with $1,000 top tier',
+    tiers_from:  base.promo_tag,
+    eligible_new_phones:     ['iPhone Duo'],
+    applies_to_new_purchase: ['iPhone Duo'],
+    delivery:    base.delivery,
+    tier_ladder: ladder,
+    floor_value: 450,
+    device_count: base.device_count,
+    trade_ins:   base.trade_ins.map(r => ({ model: r.model, condition: r.condition, tier: r.tier, value: ladder[r.tier] })),
+  };
+})(TIPS_PROMOS.tips_agm_930);
 // ── PER-DEAL ELIGIBLE-PHONE GATING ──────────────────────────────
 // Jeff, 2026-09-12: "gate them, no deal means $0." A phone that is not on a
 // card's list gets NOTHING from that card: no TIPS bucket, no trade-in rows,
@@ -9974,6 +10015,7 @@ function canonDevice(name) {
 const DEAL_ELIGIBLE_PHONES = {
   tips_agm_930:      TIPS_PROMOS.tips_agm_930.eligible_new_phones,       // CD885 — 18: 9 iPhones, 7 Pixels, razr 2026, razr fold
   tips_samsung_1200: TIPS_PROMOS.tips_samsung_1200.eligible_new_phones,  // CD865 — 10 (NO Galaxy A57)
+  tips_duo_1000:     TIPS_PROMOS.tips_duo_1000.eligible_new_phones,      // 2026-10-15 — the iPhone Duo only (provisional, no card yet)
   flat_agm_400:      TIPS_PROMOS.tips_agm_930.eligible_new_phones        // CD881 — 24: the CD885 18 plus
                        .concat(["moto g stylus – 2025", "edge – 2025",  //   the moto g family and the edges
                                 "moto g – 2026", "moto g play – 2026",
@@ -9994,13 +10036,15 @@ function isDeviceOnDeal(tag, deviceName) {
 
 // Which TIPS promo applies for the new phone being purchased?
 // Routing is keyed on the NEW phone bought, never on the trade-in device.
-// The two card lists are disjoint, so a phone lands in at most one bucket:
+// The card lists are disjoint, so a phone lands in at most one bucket:
 //   • on the CD885 list (Apple / Google / Motorola) → tips_agm_930      (up to $930)
 //   • on the CD865 list (Samsung, NOT the A57)      → tips_samsung_1200 (up to $1,200)
+//   • the iPhone Duo (2026-10-15, provisional)      → tips_duo_1000     (up to $1,000, from 10/16)
 //   • anything else                                 → null (no bucket, no trade-in rows, $0)
 function getTipsPromoForNewPhone(deviceName) {
   if (isDeviceOnDeal('tips_samsung_1200', deviceName)) return TIPS_PROMOS.tips_samsung_1200;
   if (isDeviceOnDeal('tips_agm_930', deviceName))      return TIPS_PROMOS.tips_agm_930;
+  if (isDeviceOnDeal('tips_duo_1000', deviceName))     return TIPS_PROMOS.tips_duo_1000;
   return null;
 }
 
@@ -10244,10 +10288,15 @@ const PROMO_MATRIX = {
       "NEW tablet deal: $300 off Galaxy Tab S12+ (256GB) on a new tablet line, 10/8\u201310/20 (CD877).",
       "Unchanged: Diamond $299.99 smartwatch to 10/30, waived activation to 10/30, free line always on.",
       "No device deal this cycle is valid on Mobile Select or NOW Mobile."
+    ],
+    "whats_new_2026_10_15": [
+      "Apple iPhone Duo added to the catalog (256GB $1,999.99 / 512GB $2,199.99 / 1TB $2,599.99 / 2TB $3,199.99; XMC $19). Pre-order 10/16, available 10/23.",
+      "tips_duo_1000 \u2014 up to $1,000 off the iPhone Duo on a new line with a trade-in, 10/16\u201311/10. provisional \u2014 Celestial trade-in list not yet posted 10/15; values per Jeff = $930 list with $1,000 top tier. The Duo is NOT on CD885 or CD881, so it has no other new-line deal.",
+      "visa_gc_200_2lines \u2014 $200 Virtual Visa gift card for 2+ new phone lines the same day (at least one on DPP), 10/16\u201311/2. Value-add, not a bill credit; stacks with First Line Free and every device deal. Watches/tablets do not count; NOW Mobile not eligible (plan eligibility not yet on Celestial)."
     ]
   },
   "sheet_routing": {
-    "mobile_6th_gen": "NEW-LINE promotions only. 8 active: tips_agm_930, tips_samsung_1200, flat_agm_400, flat_samsung_500, smartwatch_300_diamond (DIAMOND, new watch line, on both sheets), tablet_tab_s12plus_300 (new tablet line, on both sheets), waived_activation, free_line.",
+    "mobile_6th_gen": "NEW-LINE promotions only. 8 active from 10/9, plus 2 from 10/16 (tips_duo_1000, visa_gc_200_2lines \u2014 both provisional): tips_agm_930, tips_samsung_1200, flat_agm_400, flat_samsung_500, smartwatch_300_diamond (DIAMOND, new watch line, on both sheets), tablet_tab_s12plus_300 (new tablet line, on both sheets), waived_activation, free_line.",
     "upgrade": "Existing-line upgrade promotions, built from the Upgrade-Quote-Sheet repo: tips_agm_500_upg, tips_samsung_700_upg, flat_agm_200_upg, flat_samsung_300_upg, anytime_agm_200, anytime_samsung_300, plus the watch and tablet deals.",
     "diamond_split": "smartwatch_300_diamond needs a NEW watch line, so it renders on this sheet AND on the Upgrade sheet whenever a watch line is on the quote."
   },
@@ -10436,6 +10485,86 @@ const PROMO_MATRIX = {
       "category": "trade_in_tips",
       "active": true,
       "values_in": "TIPS_PROMOS.tips_samsung_1200 (generated from tips-tables-2026-10-09.json)"
+    },
+    {
+      "tag": "tips_duo_1000",
+      "deal_card": null,
+      "marketing_name": "TIPs \u2014 Up to $1,000 off iPhone Duo (new lines)",
+      "sheet": "mobile_6th_gen",
+      "line_type": "new_line",
+      "device_brands": [
+        "Apple"
+      ],
+      "device_scope": "Apple iPhone Duo (256GB, 512GB, 1TB, 2TB)",
+      "plan_eligibility": "plus_or_premium_unl",
+      "trade_in": {
+        "required": true,
+        "bucket": "tips_duo_1000"
+      },
+      "port": {
+        "required": false
+      },
+      "offer": {
+        "savings": "up to $1,000 off",
+        "mechanism": "36-month trade-in DPP bill credits"
+      },
+      "dates": {
+        "start": "2026-10-16",
+        "end": "2026-11-10"
+      },
+      "display_when": {
+        "line_type": "new_line",
+        "device_type": "phone",
+        "brands": [
+          "Apple"
+        ],
+        "plans": [
+          "mobile_plus",
+          "premium_unlimited"
+        ],
+        "trade_in": "required",
+        "diamond_only": false,
+        "eligible_list": "tips_duo_1000",
+        "require_listed_device": true
+      },
+      "summary": {
+        "hook": "Trade in almost any phone and get up to $1,000 off the new iPhone Duo on a new line.",
+        "qualify": [
+          "Activate a NEW line on Mobile Plus or Premium Unlimited (Unlimited Premium Flex / Pro on Comcast Business Mobile). Existing-line upgrades are NOT eligible.",
+          "Buy the iPhone Duo (256GB, 512GB, 1TB or 2TB) on a 36-month Device Payment Plan.",
+          "Trade in a qualifying device \u2014 139 phones across Apple, Google, Motorola, OnePlus and Samsung. Good, Fair and Poor are accepted (the original Motorola RAZR is Poor only, the Galaxy S8 Good only).",
+          "No number transfer required \u2014 this deal does NOT need a port-in."
+        ],
+        "steps": [
+          "Activate the new Mobile Plus or Premium Unlimited line.",
+          "Add the iPhone Duo to the cart on a 36-month DPP.",
+          "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
+        ],
+        "deadlines": [
+          "Trade-in must reach Assurant within 21 DAYS of the order ship date or the credits are gone.",
+          "Pre-orders open 10/16; the iPhone Duo is available 10/23.",
+          "Offer ends 11/10/26."
+        ],
+        "watchouts": [
+          "Mobile Plus or Premium Unlimited only. No device deal works on Mobile Select or NOW Mobile.",
+          "The iPhone Duo has no no-trade deal on a new line \u2014 without a qualifying trade-in there is no device discount.",
+          "Not combinable with other device offers on the same line.",
+          "Credit is spread over 36 monthly bill credits. Cancel the line or pay the phone off early and the remaining credits are forfeited.",
+          "The credit can never exceed the retail price of the phone being bought.",
+          "PROVISIONAL: Celestial had not posted the iPhone Duo trade-in list on 10/15. Values per Jeff = the $930 A/G/M trade-in list with the top tier raised to $1,000."
+        ],
+        "credit_amount": "Trade-in tiers: up to $1,000 / $700 / $600 / $500 / $450 by device and condition. Floor $450."
+      },
+      "mobile_service": [
+        "XM",
+        "CBM"
+      ],
+      "diamond_only": false,
+      "category": "trade_in_tips",
+      "active": true,
+      "provisional": "provisional \u2014 Celestial trade-in list not yet posted 10/15; values per Jeff = $930 list with $1,000 top tier",
+      "source": "Xfinity iPhone Duo promo slide + regional email 'SET for Success \u2013 October 2026' (10/15). Celestial DEALS18 / DEALS94 / CD889\u2013CD902 checked 10/15: no Duo card or trade-in list yet.",
+      "values_in": "TIPS_PROMOS.tips_duo_1000 (derived at load from TIPS_PROMOS.tips_agm_930: same 139 trade-ins and tiers, ladder 1000/700/600/500/450, floor 450)"
     },
     {
       "tag": "flat_agm_400",
@@ -10738,6 +10867,81 @@ const PROMO_MATRIX = {
       "additional_sheets": [
         "upgrade"
       ]
+    },
+    {
+      "tag": "visa_gc_200_2lines",
+      "deal_card": null,
+      "marketing_name": "$200 Virtual Visa gift card \u2014 add 2+ new phone lines",
+      "sheet": "mobile_6th_gen",
+      "line_type": "new_line",
+      "device_brands": [],
+      "device_scope": "Any new phone line (bring your own or new); at least one new phone on a 36-month Device Payment Plan. Smartwatch and tablet lines do not count.",
+      "plan_eligibility": "any_mobile_plan",
+      "trade_in": {
+        "required": false
+      },
+      "port": {
+        "required": false
+      },
+      "offer": {
+        "savings": "$200 Visa gift card",
+        "mechanism": "virtual Visa gift card, fulfilled automatically \u2014 not a bill credit"
+      },
+      "dates": {
+        "start": "2026-10-16",
+        "end": "2026-11-02"
+      },
+      "display_when": {
+        "line_type": "new_line",
+        "device_type": "phone",
+        "plans": [
+          "mobile_select",
+          "mobile_plus",
+          "premium_unlimited"
+        ],
+        "trade_in": "not_required",
+        "diamond_only": false,
+        "gift_card_rule": "visa_gc_200_2lines"
+      },
+      "summary": {
+        "hook": "Add 2 or more new phone lines on the same day in a retail store and get a $200 Virtual Visa gift card \u2014 on top of First Line Free and the device deals.",
+        "qualify": [
+          "Add at least 2 NEW phone lines on the same day, in a retail store.",
+          "At least one of those lines must have a new phone on a 36-month Device Payment Plan.",
+          "Xfinity Mobile plans qualify: Mobile Select, Mobile Plus or Premium Unlimited.",
+          "Smartwatch and tablet lines do not count toward the 2 lines."
+        ],
+        "steps": [
+          "Activate the new phone lines in the same visit.",
+          "Put at least one new phone on a 36-month Device Payment Plan.",
+          "The $200 Virtual Visa gift card is fulfilled automatically \u2014 nothing to redeem in store."
+        ],
+        "deadlines": [
+          "All the new lines must be added on the same day, in a retail store.",
+          "Offer runs 10/16 \u2013 11/2/26."
+        ],
+        "watchouts": [
+          "Watches and tablets do not count \u2014 2 phone lines minimum.",
+          "Bring-your-own phones count as lines, but at least one line needs a new phone on a Device Payment Plan.",
+          "It is a gift card, not a bill credit: monthly prices and savings do not change.",
+          "Stacks with First Line Free and with the device deals.",
+          "NOW Mobile is a separate prepaid brand and is not eligible.",
+          "Source: regional SET for Success email (10/15). Not yet posted on Celestial \u2014 plan eligibility per Jeff (Xfinity Mobile plans only; watches and tablets excluded)."
+        ],
+        "credit_amount": "$200 Virtual Visa gift card, fulfilled automatically. Not a bill credit."
+      },
+      "mobile_service": [
+        "XM"
+      ],
+      "diamond_only": false,
+      "category": "value_add",
+      "active": true,
+      "reward_usd": 200,
+      "bill_credit": false,
+      "qualification": "2+ new PHONE lines on the quote (watch and tablet lines never count) AND at least one phone line is a purchased device on DPP (not all BYOD). Xfinity Mobile plans (Select / Plus / Premium); NOT NOW Mobile. Same day, retail store. Stacks with every device deal and First Line Free.",
+      "effect_on_quote": "None \u2014 a separate '+ $200 Visa gift card' bonus line on the customer view; monthly prices, totals and savings unchanged.",
+      "provisional": "Plan eligibility not yet on Celestial (10/15) \u2014 per Jeff: Xfinity Mobile plans only, watches/tablets excluded.",
+      "source": "Regional email 'SET for Success \u2013 October 2026' (10/15)."
     },
     {
       "tag": "waived_activation",
@@ -11281,6 +11485,81 @@ const PROMO_GUIDE = [
   "diamond_only": false
  },
  {
+  "tag": "tips_duo_1000",
+  "deal_card": null,
+  "marketing_name": "TIPs \u2014 Up to $1,000 off iPhone Duo (new lines)",
+  "sheet": "mobile_6th_gen",
+  "line_type": "new_line",
+  "device_brands": [
+   "Apple"
+  ],
+  "device_scope": "Apple iPhone Duo (256GB, 512GB, 1TB, 2TB)",
+  "plan_eligibility": "plus_or_premium_unl",
+  "trade_in": {
+   "required": true,
+   "bucket": "tips_duo_1000"
+  },
+  "port": {
+   "required": false
+  },
+  "offer": {
+   "savings": "up to $1,000 off",
+   "mechanism": "36-month trade-in DPP bill credits"
+  },
+  "dates": {
+   "start": "2026-10-16",
+   "end": "2026-11-10"
+  },
+  "display_when": {
+   "line_type": "new_line",
+   "device_type": "phone",
+   "brands": [
+    "Apple"
+   ],
+   "plans": [
+    "mobile_plus",
+    "premium_unlimited"
+   ],
+   "trade_in": "required",
+   "diamond_only": false,
+   "eligible_list": "tips_duo_1000",
+   "require_listed_device": true
+  },
+  "summary": {
+   "hook": "Trade in almost any phone and get up to $1,000 off the new iPhone Duo on a new line.",
+   "qualify": [
+    "Activate a NEW line on Mobile Plus or Premium Unlimited (Unlimited Premium Flex / Pro on Comcast Business Mobile). Existing-line upgrades are NOT eligible.",
+    "Buy the iPhone Duo (256GB, 512GB, 1TB or 2TB) on a 36-month Device Payment Plan.",
+    "Trade in a qualifying device \u2014 139 phones across Apple, Google, Motorola, OnePlus and Samsung. Good, Fair and Poor are accepted (the original Motorola RAZR is Poor only, the Galaxy S8 Good only).",
+    "No number transfer required \u2014 this deal does NOT need a port-in."
+   ],
+   "steps": [
+    "Activate the new Mobile Plus or Premium Unlimited line.",
+    "Add the iPhone Duo to the cart on a 36-month DPP.",
+    "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
+   ],
+   "deadlines": [
+    "Trade-in must reach Assurant within 21 DAYS of the order ship date or the credits are gone.",
+    "Pre-orders open 10/16; the iPhone Duo is available 10/23.",
+    "Offer ends 11/10/26."
+   ],
+   "watchouts": [
+    "Mobile Plus or Premium Unlimited only. No device deal works on Mobile Select or NOW Mobile.",
+    "The iPhone Duo has no no-trade deal on a new line \u2014 without a qualifying trade-in there is no device discount.",
+    "Not combinable with other device offers on the same line.",
+    "Credit is spread over 36 monthly bill credits. Cancel the line or pay the phone off early and the remaining credits are forfeited.",
+    "The credit can never exceed the retail price of the phone being bought.",
+    "PROVISIONAL: Celestial had not posted the iPhone Duo trade-in list on 10/15. Values per Jeff = the $930 A/G/M trade-in list with the top tier raised to $1,000."
+   ],
+   "credit_amount": "Trade-in tiers: up to $1,000 / $700 / $600 / $500 / $450 by device and condition. Floor $450."
+  },
+  "mobile_service": [
+   "XM",
+   "CBM"
+  ],
+  "diamond_only": false
+ },
+ {
   "tag": "flat_agm_400",
   "deal_card": "CD881",
   "marketing_name": "$400 off select Apple, Google and Motorola devices (no trade-in)",
@@ -11575,6 +11854,73 @@ const PROMO_GUIDE = [
   ]
  },
  {
+  "tag": "visa_gc_200_2lines",
+  "deal_card": null,
+  "marketing_name": "$200 Virtual Visa gift card \u2014 add 2+ new phone lines",
+  "sheet": "mobile_6th_gen",
+  "line_type": "new_line",
+  "device_brands": [],
+  "device_scope": "Any new phone line (bring your own or new); at least one new phone on a 36-month Device Payment Plan. Smartwatch and tablet lines do not count.",
+  "plan_eligibility": "any_mobile_plan",
+  "trade_in": {
+   "required": false
+  },
+  "port": {
+   "required": false
+  },
+  "offer": {
+   "savings": "$200 Visa gift card",
+   "mechanism": "virtual Visa gift card, fulfilled automatically \u2014 not a bill credit"
+  },
+  "dates": {
+   "start": "2026-10-16",
+   "end": "2026-11-02"
+  },
+  "display_when": {
+   "line_type": "new_line",
+   "device_type": "phone",
+   "plans": [
+    "mobile_select",
+    "mobile_plus",
+    "premium_unlimited"
+   ],
+   "trade_in": "not_required",
+   "diamond_only": false,
+   "gift_card_rule": "visa_gc_200_2lines"
+  },
+  "summary": {
+   "hook": "Add 2 or more new phone lines on the same day in a retail store and get a $200 Virtual Visa gift card \u2014 on top of First Line Free and the device deals.",
+   "qualify": [
+    "Add at least 2 NEW phone lines on the same day, in a retail store.",
+    "At least one of those lines must have a new phone on a 36-month Device Payment Plan.",
+    "Xfinity Mobile plans qualify: Mobile Select, Mobile Plus or Premium Unlimited.",
+    "Smartwatch and tablet lines do not count toward the 2 lines."
+   ],
+   "steps": [
+    "Activate the new phone lines in the same visit.",
+    "Put at least one new phone on a 36-month Device Payment Plan.",
+    "The $200 Virtual Visa gift card is fulfilled automatically \u2014 nothing to redeem in store."
+   ],
+   "deadlines": [
+    "All the new lines must be added on the same day, in a retail store.",
+    "Offer runs 10/16 \u2013 11/2/26."
+   ],
+   "watchouts": [
+    "Watches and tablets do not count \u2014 2 phone lines minimum.",
+    "Bring-your-own phones count as lines, but at least one line needs a new phone on a Device Payment Plan.",
+    "It is a gift card, not a bill credit: monthly prices and savings do not change.",
+    "Stacks with First Line Free and with the device deals.",
+    "NOW Mobile is a separate prepaid brand and is not eligible.",
+    "Source: regional SET for Success email (10/15). Not yet posted on Celestial \u2014 plan eligibility per Jeff (Xfinity Mobile plans only; watches and tablets excluded)."
+   ],
+   "credit_amount": "$200 Virtual Visa gift card, fulfilled automatically. Not a bill credit."
+  },
+  "mobile_service": [
+   "XM"
+  ],
+  "diamond_only": false
+ },
+ {
   "tag": "waived_activation",
   "deal_card": "CD790",
   "marketing_name": "One-time waived Xfinity Mobile line activation fee",
@@ -11787,6 +12133,15 @@ function pgMatches(p, ctx) {
     }
   }
 
+  // 2026-10-15: a deal for ONE phone (the iPhone Duo) shows only once that phone is on the
+  // quote — never before a device is picked, never for another iPhone.
+  if (w.require_listed_device && w.eligible_list &&
+      !(ctx.deviceNames || []).some(n => isDeviceOnDeal(w.eligible_list, n))) return false;
+
+  // 2026-10-15: the $200 Visa gift card shows only when the quote qualifies (giftCardQualifies:
+  // 2+ phone lines, at least one financed; watches and tablets never count).
+  if (w.gift_card_rule && !ctx.giftCardQualified) return false;
+
   // 8. Trade-in
   if (w.trade_in === 'required' && ctx.tradeState === 'no') return false;
 
@@ -11829,6 +12184,9 @@ function pgRenderChips(ctx) {
       ? '<span class="pg-badge pg-badge-diamond">DIAMOND</span>' : '';
     const ends  = pgEndLabel(p);
     const urg   = ends ? '<span class="pg-badge pg-badge-ends">Ends ' + ends + '</span>' : '';
+    // 2026-10-15: a provisional note (e.g. the gift card's plan eligibility) — on screen only, never printed.
+    const prov  = p.provisional_badge
+      ? '<span class="pg-badge pg-badge-port no-print">' + pgEsc(p.provisional_badge) + '</span>' : '';
     return '<li class="pg-chip" tabindex="0" role="button"' +
            ' onclick="pgOpen(\'' + p.tag + '\')"' +
            ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();pgOpen(\'' + p.tag + '\');}">' +
@@ -11836,7 +12194,7 @@ function pgRenderChips(ctx) {
              '<span class="pg-chip-name">' + pgEsc(p.marketing_name) + '</span>' +
              (amt ? '<span class="pg-chip-amt">' + pgEsc(amt) + '</span>' : '') +
            '</span>' +
-           '<span class="pg-chip-tags">' + dia + trade + port + urg + '</span>' +
+           '<span class="pg-chip-tags">' + dia + trade + port + urg + prov + '</span>' +
            '<span class="pg-chip-cue">How to qualify ›</span>' +
            '</li>';
   }).join('');
@@ -11878,7 +12236,9 @@ function pgIsRepNote(x) { return PG_REP_NOTE.test(x) || PG_REP_CODE.test(x); }
 // legal disclaimer still says 9/10/26").
 const PG_CARD_NOTE = /\b(?:cards?|Celestial|Jeff|deal desk)\b|\b(?:the|Upgrade) sheet\b/i;
 const PG_CARD_CODE = /\bCD\d{3}\b|\bDEALS\d+\b/;
-function pgIsCardNote(x) { return PG_CARD_NOTE.test(x) || PG_CARD_CODE.test(x); }
+// 2026-10-15: "gift card" (the $200 Visa offer) is not a deal card; it is set aside before the test.
+function pgNoGiftCard(x) { return String(x == null ? '' : x).replace(/\bgift cards?\b/gi, 'gift'); }
+function pgIsCardNote(x) { x = pgNoGiftCard(x); return PG_CARD_NOTE.test(x) || PG_CARD_CODE.test(x); }
 // A sentence of coaching for the rep ("Quoting $400 here costs the customer $100.", "NEVER quote …",
 // "if the rep starts the buy flow …", "Never surface it to a non-Diamond tier.") or a change-log note
 // ("… deals expired 9/1/26") is left out of the customer's card too.
@@ -11895,7 +12255,7 @@ function pgCustomerText(x) {
   // Asides: "(Jeff, 2026-09-28)", "(CD824, 9/18)", "(DEALS18 modified 9/11)" go; one that also
   // carries money keeps it without the card code: "(CD871, up to $1,300)" -> "(up to $1,300)".
   t = t.replace(/\s*\(([^()]*)\)/g, function (m, inner) {
-    if (/\b(?:Celestial|Jeff|cards?)\b/i.test(inner)) return '';
+    if (/\b(?:Celestial|Jeff|cards?)\b/i.test(pgNoGiftCard(inner))) return '';
     if (!PG_CARD_CODE.test(inner)) return m;
     const rest = inner.replace(/\b(?:CD\d{3}|DEALS\d+)\b[,;:]?\s*/g, '').trim();
     return /\$/.test(rest) ? ' (' + rest + ')' : '';
@@ -12090,6 +12450,22 @@ const PROMO_DEFINITIONS = [
     startDate: '2026-08-26',
     endDate:   '2026-11-10',
   },
+  // ── 2026-10-15 add-on: TIPs up to $1,000 off the iPhone Duo — new line, no port (provisional;
+  //    the money gate is TIPS_PROMOS.tips_duo_1000.timing, this entry mirrors it) ──
+  {
+    tag:       'tips_duo_1000',
+    text:      '📱 TIPS Trade-In: Up to $1,000 off the iPhone Duo w/ Mobile Plus or Premium Unlimited — new line only, no porting.',
+    startDate: '2026-10-16',
+    endDate:   '2026-11-10',
+  },
+  // ── 2026-10-15 add-on: $200 Virtual Visa gift card — 2+ new PHONE lines same day, ≥1 on DPP.
+  //    Value-add, NOT a bill credit: never touches a price or a total (giftCardQualifies) ──
+  {
+    tag:       'visa_gc_200_2lines',
+    text:      '🎁 $200 Virtual Visa gift card — 2+ new phone lines the same day in a retail store, at least one on a Device Payment Plan. Fulfilled automatically; stacks with First Line Free. Watches/tablets do not count.',
+    startDate: '2026-10-16',
+    endDate:   '2026-11-02',
+  },
   // ── $400 off Apple / Google / Motorola, no trade — PORT REQUIRED (CD881) ──
   {
     tag:       'flat_agm_400',
@@ -12154,6 +12530,33 @@ function isTipsWindowOpen(promo) {
 function isPromoActiveByTag(tag) {
   const promo = PROMO_DEFINITIONS.find(p => p.tag === tag);
   return promo ? isPromoActive(promo) : false;
+}
+
+// 2026-10-15: $200 Virtual Visa gift card (visa_gc_200_2lines, 10/16–11/2) — "2+ new mobile
+// lines on the same day in a retail store; at least one line on a Device Payment Plan; stacks with
+// First Line Free." Jeff: watches and tablets do NOT count. So it qualifies when the quote has
+//   • 2 or more PHONE lines (watch / tablet rows are never counted), and
+//   • at least one of them is a purchased phone on DPP (not every line BYOD), and
+//   • an Xfinity Mobile plan (Select / Plus, incl. the IE and standard-price variants) — NOT NOW
+//     Mobile, a separate prepaid brand (plan eligibility not yet on Celestial; per Jeff).
+// It is a value-add only: nothing here feeds a price, a total or a savings figure.
+function giftCardQualifies() {
+  if (devicesOnlyMode) return false;
+  if (!isPromoActiveByTag('visa_gc_200_2lines')) return false;
+  if (!/^mobile_(plus|select)_(promo|std|ie)$/.test(intakeSelectedPlan || '')) return false;
+  let phoneLines = 0, financedPhones = 0;
+  document.querySelectorAll('.df-row').forEach(row => {
+    if (row.dataset.type !== 'phone') return;
+    phoneLines++;
+    const dn = row.dataset.deviceName || '';
+    if (dn && dn !== 'BYOD (Bring Your Own Device)' && (parseFloat(row.dataset.devicePrice) || 0) > 0) financedPhones++;
+  });
+  return phoneLines >= 2 && financedPhones >= 1;
+}
+// Customer view: the separate "+ $200 Visa gift card" bonus line under the Xfinity bill.
+function syncGiftCardBonus(on) {
+  const el = document.getElementById('xfGiftCardBonus');
+  if (el) el.style.display = on ? '' : 'none';
 }
 
 // Returns the current tablet promo discount (in dollars) for a given device.
@@ -12345,6 +12748,7 @@ function updateQuote(opts) {
   // figures (6GQ-13); the quote on screen does not change then, so the PDF stays valid.
   if (!(opts && opts.keepPdf)) _invalidateEmailPdf(); // the quote on screen is about to change
   updateYrToggleVisibility(planKey);
+  syncGiftCardBonus(false);   // 2026-10-15: shown again at the end of the full-quote path when it qualifies
 
   // ── DEVICES-ONLY MODE: skip plan comparison, show devices on Xfinity side ──
   if (devicesOnlyMode) {
@@ -12428,6 +12832,8 @@ function updateQuote(opts) {
     document.querySelectorAll('.savings-card-stacked').forEach(el => el.style.display = '');
   buildDeviceSummary(activePrice, compBill);
   updateTotalWithDevices(activePrice);
+  // 2026-10-15: "+ $200 Visa gift card" — a separate bonus line; nothing above reads it.
+  syncGiftCardBonus(giftCardQualifies());
 }
 
 // Render the comparison screen for Devices-Only Mode (customer declined the mobile offer).
@@ -12722,6 +13128,7 @@ function buildFeatures(plan) {
     watchNames:  pgWatchNames,
     tabletNames: pgTabletNames,
     freeLine:    /_promo$/.test(intakeSelectedPlan || ''),
+    giftCardQualified: giftCardQualifies(),   // 2026-10-15: $200 Visa gift card
     tradeState: pgTradeYes ? 'yes' : (pgTradeNo && !pgTradeYes ? 'no' : 'unknown'),
     isNewXmCustomer: true
   });
